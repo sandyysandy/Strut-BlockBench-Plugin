@@ -3,7 +3,7 @@
  * one to a bone's geometry, the per-bone choice of how shapes are made from the model, and a spring's per-axis limits. No Blockbench globals
  */
 import { AutoBone, AutoMode, ColliderSpec } from './autoColliders';
-import { chainNameOf, Doc } from './edit';
+import { chainNameOf, Doc, fleshEntryName } from './edit';
 import { add, length, normalize, qfromEulerDegrees, qrotate, scale, sub, V3 } from './math';
 
 export type Shape = ColliderSpec['shape'];
@@ -240,12 +240,20 @@ export interface BoneFilter {
 }
 
 /** Where the part holding {@code bone} is written: a spring bone's entry or its chain's */
-function partEntry(doc: Doc, bone: string): { group: 'bones' | 'chains'; name: string } | null {
+function partEntry(doc: Doc, bone: string): { group: 'bones' | 'chains' | 'cloth' | 'flesh' | 'soft'; name: string } | null {
     if (doc.bones?.[bone]) return { group: 'bones', name: bone };
 
     const chain = chainNameOf(doc, bone);
 
-    return chain !== null ? { group: 'chains', name: chain } : null;
+    if (chain !== null) return { group: 'chains', name: chain };
+
+    if (doc.cloth?.[bone]) return { group: 'cloth', name: bone };
+
+    const flesh = fleshEntryName(doc, bone);
+
+    if (flesh === null) return null;
+
+    return { group: doc.flesh?.[flesh] ? 'flesh' : 'soft', name: flesh };
 }
 
 export function boneFilterOf(doc: Doc, bone: string): BoneFilter {

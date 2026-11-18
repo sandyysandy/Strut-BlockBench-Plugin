@@ -6703,7 +6703,7 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
 /***/ ((module) => {
 
 "use strict";
-module.exports = /*#__PURE__*/JSON.parse('{"name":"strut_toolkit","version":"1.0.0","private":true,"description":"Strut Toolkit","main":"index.js","scripts":{"prebuild":"npm run test","build":"npm run build:only","build:only":"webpack && npm run update_manifest","update_manifest":"node scripts/updateManifest.mjs","start":"webpack --watch --mode=development","lint":"eslint .","lint:fix":"eslint --fix .","tsc":"tsc --noEmit","pretest":"npm run lint && npm run tsc","test":"npm run test:only","test:only":"jest"},"author":"Eliot Lash, Tslat, Gecko, McHorse","license":"MIT","blockbenchConfig":{"title":"Strut Toolkit","author":"sandyymandy; based on work by Eliot Lash, Tslat, Gecko, McHorse","icon":"icon.png","description":"Blockbench tools for Strut: export and import .strutmodel and .strutanim, meshes and armatures, controller-based animation with easings, Molang and event markers, and the Strut Physics tab.","has_changelog":true,"min_version":"5.1.0","variant":"both","website":"https://github.com/sandyymandy/Strut-BlockBench-Plugin","repository":"https://github.com/sandyymandy/Strut-BlockBench-Plugin","bug_tracker":"https://github.com/sandyymandy/Strut-BlockBench-Plugin/issues"},"sideEffects":["./index.js"],"devDependencies":{"@types/jest":"^29.5.4","@types/lodash":"^4.14.197","@typescript-eslint/eslint-plugin":"^6.5.0","@typescript-eslint/parser":"^6.5.0","blockbench-types":"^5.1.0","css-loader":"^6.7.1","eol":"0.9.1","eslint":"^7.7.0","indent-string":"^5.0.0","jest":"^29.6.4","to-string-loader":"^1.2.0","ts-jest":"^29.1.1","ts-loader":"^9.4.4","tsx":"^4.23.15","typescript":"^5.9.3","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"lodash":"^4.17.21","semver":"7.3.2"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"strut_toolkit","version":"1.1.0","private":true,"description":"Strut Toolkit","main":"index.js","scripts":{"prebuild":"npm run test","build":"npm run build:only","build:only":"webpack && npm run update_manifest","update_manifest":"node scripts/updateManifest.mjs","start":"webpack --watch --mode=development","lint":"eslint .","lint:fix":"eslint --fix .","tsc":"tsc --noEmit","pretest":"npm run lint && npm run tsc","test":"npm run test:only","test:only":"jest"},"author":"Eliot Lash, Tslat, Gecko, McHorse","license":"MIT","blockbenchConfig":{"title":"Strut Toolkit","author":"sandyymandy; based on work by Eliot Lash, Tslat, Gecko, McHorse","icon":"icon.png","description":"Blockbench tools for Strut: export and import .strutmodel and .strutanim, meshes and armatures, controller-based animation with easings, Molang and event markers, and the Strut Physics tab.","has_changelog":true,"min_version":"5.1.0","variant":"both","website":"https://github.com/sandyymandy/Strut-BlockBench-Plugin","repository":"https://github.com/sandyymandy/Strut-BlockBench-Plugin","bug_tracker":"https://github.com/sandyymandy/Strut-BlockBench-Plugin/issues"},"sideEffects":["./index.js"],"devDependencies":{"@types/jest":"^29.5.4","@types/lodash":"^4.14.197","@typescript-eslint/eslint-plugin":"^6.5.0","@typescript-eslint/parser":"^6.5.0","blockbench-types":"^5.1.0","css-loader":"^6.7.1","eol":"0.9.1","eslint":"^7.7.0","indent-string":"^5.0.0","jest":"^29.6.4","to-string-loader":"^1.2.0","ts-jest":"^29.1.1","ts-loader":"^9.4.4","tsx":"^4.23.15","typescript":"^5.9.3","webpack":"^5.88.2","webpack-cli":"^5.1.4"},"dependencies":{"lodash":"^4.17.21","semver":"7.3.2"}}');
 
 /***/ }),
 
@@ -10797,7 +10797,7 @@ function resolveCloth(entry, flesh) {
     const p = {
         stiffness: flesh ? 0.95 : 0.9, bend: flesh ? 0 : 0.15, damping: flesh ? 3 : 0.6, inertia: flesh ? 0.9 : 0.6, gravity: flesh ? 2 : 9.8, radius: 0.02,
         pinHeight: flesh ? 0 : 0.1, anchor: flesh ? 12 : 0, weight: 1, collidesWith: flesh ? ['other', 'players', 'mobs', 'world'] : ['body', 'world'], friction: 0.3,
-        iterations: flesh ? 4 : 6, maxParticles: 600, volume: flesh ? 0.6 : 0, softCenter: null, softRadius: 0, carry: [], mesh: -1, bone: String((_a = entry.bone) !== null && _a !== void 0 ? _a : ''),
+        iterations: flesh ? 4 : 6, maxParticles: 2000, volume: flesh ? 0.6 : 0, softCenter: null, softRadius: 0, carry: [], mesh: -1, bone: String((_a = entry.bone) !== null && _a !== void 0 ? _a : ''),
     };
     Object.assign(p, (_b = presets[entry.preset]) !== null && _b !== void 0 ? _b : {});
     if (typeof entry.mesh === 'number')
@@ -11544,11 +11544,18 @@ function setSpringLimits(doc, bone, limits) {
 }
 /** Where the part holding {@code bone} is written: a spring bone's entry or its chain's */
 function partEntry(doc, bone) {
-    var _a;
+    var _a, _b, _c;
     if ((_a = doc.bones) === null || _a === void 0 ? void 0 : _a[bone])
         return { group: 'bones', name: bone };
     const chain = (0,_edit__WEBPACK_IMPORTED_MODULE_1__.chainNameOf)(doc, bone);
-    return chain !== null ? { group: 'chains', name: chain } : null;
+    if (chain !== null)
+        return { group: 'chains', name: chain };
+    if ((_b = doc.cloth) === null || _b === void 0 ? void 0 : _b[bone])
+        return { group: 'cloth', name: bone };
+    const flesh = (0,_edit__WEBPACK_IMPORTED_MODULE_1__.fleshEntryName)(doc, bone);
+    if (flesh === null)
+        return null;
+    return { group: ((_c = doc.flesh) === null || _c === void 0 ? void 0 : _c[flesh]) ? 'flesh' : 'soft', name: flesh };
 }
 function boneFilterOf(doc, bone) {
     const at = partEntry(doc, bone);
@@ -11603,7 +11610,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CHAIN_PRESETS: () => (/* binding */ CHAIN_PRESETS),
 /* harmony export */   CLOTH_PRESETS: () => (/* binding */ CLOTH_PRESETS),
-/* harmony export */   FLESH_PRESETS: () => (/* binding */ FLESH_PRESETS),
+/* harmony export */   FLESH_PRESETS: () => (/* reexport safe */ _flesh__WEBPACK_IMPORTED_MODULE_0__.FLESH_PRESETS),
 /* harmony export */   PHYSICS_SECTION: () => (/* binding */ PHYSICS_SECTION),
 /* harmony export */   SPRING_PRESETS: () => (/* binding */ SPRING_PRESETS),
 /* harmony export */   checkPhysics: () => (/* binding */ checkPhysics),
@@ -11611,18 +11618,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   encodePhysicsSection: () => (/* binding */ encodePhysicsSection),
 /* harmony export */   starterPhysics: () => (/* binding */ starterPhysics)
 /* harmony export */ });
+/* harmony import */ var _flesh__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./flesh */ "./ts/physics/flesh.ts");
 /**
  * The physics description a model carries: JSON text, the same text the game's {@code PhysicsConfig} reads from the {@code strut_physics:physics} extension
  * section of a {@code .strutmodel} or from a sidecar file. This file checks it (mirroring the Java parser's keys, so a typo is found in the editor and not in
  * the game log) and turns it into the section payload. No Blockbench globals
  */
+
 /** The extension section the game looks for */
 const PHYSICS_SECTION = 'strut_physics:physics';
 const SPRING_PRESETS = ['jiggle-soft', 'jiggle-firm', 'hair', 'tail', 'ear', 'soft-bone'];
 const CHAIN_PRESETS = ['hair', 'tail', 'ear'];
 const CLOTH_PRESETS = ['cloth', 'cloth-silk', 'cloth-stiff'];
-const FLESH_PRESETS = ['flesh-soft', 'flesh-firm', 'jelly'];
-const TOP_KEYS = ['defaults', 'bones', 'version', 'chains', 'cloth', 'flesh', 'colliders', 'autoColliders', 'ragdoll'];
+
+const TOP_KEYS = ['defaults', 'bones', 'version', 'chains', 'cloth', 'flesh', 'soft', 'colliders', 'autoColliders', 'ragdoll'];
 const BONE_KEYS = ['preset', 'frequency', 'damping', 'inertia', 'gravity', 'rotate', 'translate', 'tip', 'length', 'limit', 'maxTranslate', 'translateScale',
     'weight', 'collidesWith', 'radius', 'squish', 'collideBones', 'ignoreBones'];
 const CHAIN_KEYS = ['bones', 'preset', 'frequency', 'damping', 'inertia', 'gravity', 'radius', 'maxAngle', 'tipLength', 'weight', 'friction', 'collidesWith', 'collideBones', 'ignoreBones'];
@@ -11662,7 +11671,10 @@ function checkPhysics(text, boneNames) {
     const bones = isObject(document.bones) ? document.bones : {};
     const chains = isObject(document.chains) ? document.chains : {};
     const cloth = isObject(document.cloth) ? document.cloth : {};
-    const flesh = isObject(document.flesh) ? document.flesh : {};
+    // "soft" is the old name of the flesh section, and still read by the game, with a warning
+    const flesh = Object.assign(Object.assign({}, (isObject(document.soft) ? document.soft : {})), (isObject(document.flesh) ? document.flesh : {}));
+    if (isObject(document.soft))
+        warnings.push('the "soft" section is now called "flesh"; it is read as flesh');
     const colliders = Array.isArray(document.colliders) ? document.colliders : [];
     if (document.bones !== undefined && !isObject(document.bones))
         warnings.push('"bones" must be an object of bone name to settings');
@@ -11715,7 +11727,6 @@ function checkPhysics(text, boneNames) {
     }
     const soft = [
         ...Object.entries(cloth).map(([name, value]) => [name, value, 'cloth', CLOTH_PRESETS]),
-        ...Object.entries(flesh).map(([name, value]) => [name, value, 'flesh', FLESH_PRESETS]),
     ];
     for (const [name, value, kind, presets] of soft) {
         const where = `${kind} "${name}"`;
@@ -11733,6 +11744,19 @@ function checkPhysics(text, boneNames) {
         }
         if (value.preset !== undefined && !presets.includes(value.preset))
             warnings.push(`${where}: unknown ${kind} preset "${value.preset}" (known: ${presets.join(', ')})`);
+    }
+    for (const [name, value] of Object.entries(flesh)) {
+        const where = `flesh "${name}"`;
+        if (!isObject(value)) {
+            warnings.push(`${where} must be an object`);
+            continue;
+        }
+        const own = Array.isArray(value.bones) ? value.bones.map(String) : typeof value.bone === 'string' ? [value.bone] : [];
+        if (own.length === 0 || own.length > 2)
+            warnings.push(`${where}: needs "bones", one bone or a left and right pair`);
+        own.forEach(b => known(b, where));
+        // the same reading the game does: unknown keys and presets, and the keys of the old per-vertex flesh, are named
+        (0,_flesh__WEBPACK_IMPORTED_MODULE_0__.resolveFlesh)(value, warnings, where);
     }
     colliders.forEach((c, i) => {
         const where = `collider #${i}`;
@@ -11784,6 +11808,255 @@ function starterPhysics(boneNames) {
 
 /***/ }),
 
+/***/ "./ts/physics/cubeMesh.ts":
+/*!********************************!*\
+  !*** ./ts/physics/cubeMesh.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CELL: () => (/* binding */ CELL),
+/* harmony export */   MOST: () => (/* binding */ MOST),
+/* harmony export */   cubeGrid: () => (/* binding */ cubeGrid),
+/* harmony export */   cubeRest: () => (/* binding */ cubeRest)
+/* harmony export */ });
+/** About how wide one quad of a cut face is, in model units */
+const CELL = 1.25;
+/** The most quads along one edge of a face */
+const MOST = 6;
+function sub3(a, b) {
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+function cross(a, b) {
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}
+function cuts(a, b) {
+    const length = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    return Math.max(1, Math.min(MOST, Math.round(length / CELL)));
+}
+/**
+ * The cube between from and to (model units, relative to its origin), each face cut into a grid. A flat cube (a plane: the game keeps both of its faces, one for
+ * each side) is one grid here, drawn from both sides; null for a cube with no extent at all
+ */
+function cubeGrid(from, to) {
+    const flatAxes = [0, 1, 2].filter(a => from[a] === to[a]).length;
+    if (flatAxes > 1)
+        return null;
+    const [x0, y0, z0] = from;
+    const [x1, y1, z1] = to;
+    const faces = [
+        [[x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0]],
+        [[x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1]],
+        [[x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0]],
+        [[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]],
+        [[x0, y1, z0], [x0, y1, z1], [x1, y1, z1], [x1, y1, z0]],
+        [[x0, y0, z1], [x0, y0, z0], [x1, y0, z0], [x1, y0, z1]],
+    ];
+    const local = [];
+    const out = [];
+    const sides = [];
+    const st = [];
+    const corners = faces.map(() => null);
+    let haveFlat = false;
+    for (let side = 0; side < faces.length; side++) {
+        const c = faces[side];
+        if (flatAxes === 1) {
+            const area = Math.hypot(...cross(sub3(c[2], c[0]), sub3(c[3], c[1])));
+            // the edges of a plane have no area, and its two faces lie on each other
+            if (area < 1e-9 || haveFlat)
+                continue;
+            haveFlat = true;
+        }
+        corners[side] = c;
+        const across = cuts(c[0], c[1]);
+        const down = cuts(c[0], c[3]);
+        const base = local.length;
+        const at = (i, j) => base + j * (across + 1) + i;
+        for (let j = 0; j <= down; j++) {
+            for (let i = 0; i <= across; i++) {
+                const s = i / across;
+                const t = j / down;
+                const w = [(1 - s) * (1 - t), s * (1 - t), s * t, (1 - s) * t];
+                local.push([0, 1, 2].map(a => w[0] * c[0][a] + w[1] * c[1][a] + w[2] * c[2][a] + w[3] * c[3][a]));
+                st.push([s, t]);
+            }
+        }
+        for (let j = 0; j < down; j++) {
+            for (let i = 0; i < across; i++) {
+                out.push([at(i, j), at(i + 1, j), at(i + 1, j + 1), at(i, j + 1)]);
+                sides.push(side);
+            }
+        }
+    }
+    return { local, faces: out, sides, st, corners };
+}
+/** The grid's vertices in the bone's space, blocks: turned by the cube's rotation (degrees, about its origin, Z then Y then X) and moved to its origin */
+function cubeRest(local, origin, rotation, unit = 16) {
+    const [rx, ry, rz] = rotation.map(d => d * Math.PI / 180);
+    const [sx, cx] = [Math.sin(rx), Math.cos(rx)];
+    const [sy, cy] = [Math.sin(ry), Math.cos(ry)];
+    const [sz, cz] = [Math.sin(rz), Math.cos(rz)];
+    return local.map(([x, y, z]) => {
+        // the matrix of three.js's 'ZYX' Euler: Rz * Ry * Rx
+        const px = cz * cy * x + (cz * sy * sx - sz * cx) * y + (cz * sy * cx + sz * sx) * z;
+        const py = sz * cy * x + (sz * sy * sx + cz * cx) * y + (sz * sy * cx - cz * sx) * z;
+        const pz = -sy * x + cy * sx * y + cy * cx * z;
+        return [(px + origin[0]) / unit, (py + origin[1]) / unit, (pz + origin[2]) / unit];
+    });
+}
+
+
+/***/ }),
+
+/***/ "./ts/physics/display.ts":
+/*!*******************************!*\
+  !*** ./ts/physics/display.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cubeDisplay: () => (/* binding */ cubeDisplay),
+/* harmony export */   groupsByPlace: () => (/* binding */ groupsByPlace),
+/* harmony export */   matchFace: () => (/* binding */ matchFace),
+/* harmony export */   smoothNormals: () => (/* binding */ smoothNormals)
+/* harmony export */ });
+/**
+ * The face of the scene's cube (four vertices each, {@code positions} three numbers a vertex) that lies on the four corners, and for each corner the vertex of that
+ * face it is: the face with the least total distance to them
+ */
+function matchFace(corners, positions) {
+    const faces = Math.floor(positions.length / 12);
+    let best = { face: 0, verts: [0, 1, 2, 3], cost: Infinity };
+    for (let face = 0; face < faces; face++) {
+        const verts = [];
+        let cost = 0;
+        for (const corner of corners) {
+            let nearest = face * 4;
+            let distance = Infinity;
+            for (let k = 0; k < 4; k++) {
+                const v = face * 4 + k;
+                const d = (positions[v * 3] - corner[0]) ** 2 + (positions[v * 3 + 1] - corner[1]) ** 2 + (positions[v * 3 + 2] - corner[2]) ** 2;
+                if (d < distance) {
+                    distance = d;
+                    nearest = v;
+                }
+            }
+            verts.push(nearest);
+            cost += distance;
+        }
+        if (cost < best.cost)
+            best = { face, verts, cost };
+    }
+    return { face: best.face, verts: best.verts };
+}
+/**
+ * The texture coordinates, triangles and material groups of a cube's grid. {@code positions} and {@code uvs} are the scene's own geometry of the cube, in its
+ * own space (relative to the cube's origin); {@code shown(face)} says whether that face of the cube has a texture (a face without one is not drawn)
+ */
+function cubeDisplay(grid, positions, uvs, shown) {
+    const uv = new Float32Array(grid.local.length * 2);
+    const index = [];
+    const groups = [];
+    const faceOfSide = [];
+    const vertsOfSide = [];
+    grid.corners.forEach((corners, side) => {
+        if (!corners)
+            return;
+        const match = matchFace(corners, positions);
+        faceOfSide[side] = match.face;
+        vertsOfSide[side] = match.verts;
+    });
+    // each vertex belongs to one face: the one whose quads use it
+    const sideOfVertex = new Array(grid.local.length).fill(-1);
+    grid.faces.forEach((quad, q) => quad.forEach(v => { sideOfVertex[v] = grid.sides[q]; }));
+    grid.local.forEach((_, i) => {
+        const side = sideOfVertex[i];
+        const verts = vertsOfSide[side];
+        if (side < 0 || !verts)
+            return;
+        const [s, t] = grid.st[i];
+        const w = [(1 - s) * (1 - t), s * (1 - t), s * t, (1 - s) * t];
+        for (let a = 0; a < 2; a++) {
+            let value = 0;
+            for (let k = 0; k < 4; k++)
+                value += w[k] * uvs[verts[k] * 2 + a];
+            uv[i * 2 + a] = value;
+        }
+    });
+    let current = -1;
+    grid.faces.forEach((quad, q) => {
+        const side = grid.sides[q];
+        const face = faceOfSide[side];
+        if (face === undefined || !shown(face))
+            return;
+        if (side !== current) {
+            groups.push({ start: index.length, count: 0, face });
+            current = side;
+        }
+        index.push(quad[0], quad[1], quad[2], quad[0], quad[2], quad[3]);
+        groups[groups.length - 1].count += 6;
+    });
+    return { uv, index, groups };
+}
+/**
+ * Normals for the triangles, smoothed over the vertices that are one point of the surface ({@code groupOf}: the same number for vertices that coincide, as they
+ * do where a texture seam repeats a vertex): the area-weighted mean of the faces around each point
+ */
+function smoothNormals(positions, index, groupOf) {
+    var _a;
+    const out = new Float32Array(positions.length);
+    const sums = new Map();
+    for (let i = 0; i + 2 < index.length; i += 3) {
+        const a = index[i];
+        const b = index[i + 1];
+        const c = index[i + 2];
+        const ux = positions[b * 3] - positions[a * 3];
+        const uy = positions[b * 3 + 1] - positions[a * 3 + 1];
+        const uz = positions[b * 3 + 2] - positions[a * 3 + 2];
+        const vx = positions[c * 3] - positions[a * 3];
+        const vy = positions[c * 3 + 1] - positions[a * 3 + 1];
+        const vz = positions[c * 3 + 2] - positions[a * 3 + 2];
+        const n = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
+        for (const vertex of [a, b, c]) {
+            const key = groupOf[vertex];
+            const sum = (_a = sums.get(key)) !== null && _a !== void 0 ? _a : [0, 0, 0];
+            sum[0] += n[0];
+            sum[1] += n[1];
+            sum[2] += n[2];
+            sums.set(key, sum);
+        }
+    }
+    for (let v = 0; v < positions.length / 3; v++) {
+        const sum = sums.get(groupOf[v]);
+        if (!sum)
+            continue;
+        const length = Math.hypot(sum[0], sum[1], sum[2]) || 1;
+        out[v * 3] = sum[0] / length;
+        out[v * 3 + 1] = sum[1] / length;
+        out[v * 3 + 2] = sum[2] / length;
+    }
+    return out;
+}
+/** The same number for the vertices at the same place: what {@link smoothNormals} groups by */
+function groupsByPlace(points) {
+    const seen = new Map();
+    return points.map(p => {
+        const key = `${Math.round(p[0] * 1e4)},${Math.round(p[1] * 1e4)},${Math.round(p[2] * 1e4)}`;
+        const id = seen.get(key);
+        if (id !== undefined)
+            return id;
+        seen.set(key, seen.size);
+        return seen.size - 1;
+    });
+}
+
+
+/***/ }),
+
 /***/ "./ts/physics/edit.ts":
 /*!****************************!*\
   !*** ./ts/physics/edit.ts ***!
@@ -11794,6 +12067,9 @@ function starterPhysics(boneNames) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   CHAIN_DEFAULTS: () => (/* binding */ CHAIN_DEFAULTS),
+/* harmony export */   FLESH_EXTRA: () => (/* binding */ FLESH_EXTRA),
+/* harmony export */   FLESH_LOOKS: () => (/* binding */ FLESH_LOOKS),
+/* harmony export */   FLESH_PRESET_NAMES: () => (/* binding */ FLESH_PRESET_NAMES),
 /* harmony export */   LOOKS: () => (/* binding */ LOOKS),
 /* harmony export */   MAX_HERTZ: () => (/* binding */ MAX_HERTZ),
 /* harmony export */   MIN_HERTZ: () => (/* binding */ MIN_HERTZ),
@@ -11802,11 +12078,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SPRING_DEFAULTS: () => (/* binding */ SPRING_DEFAULTS),
 /* harmony export */   addCollider: () => (/* binding */ addCollider),
 /* harmony export */   autoCollidersOf: () => (/* binding */ autoCollidersOf),
+/* harmony export */   axisName: () => (/* binding */ axisName),
 /* harmony export */   bounceFromDamping: () => (/* binding */ bounceFromDamping),
 /* harmony export */   chainControls: () => (/* binding */ chainControls),
 /* harmony export */   chainFrom: () => (/* binding */ chainFrom),
 /* harmony export */   chainNameOf: () => (/* binding */ chainNameOf),
 /* harmony export */   dampingFromBounce: () => (/* binding */ dampingFromBounce),
+/* harmony export */   fleshControls: () => (/* binding */ fleshControls),
+/* harmony export */   fleshEntryName: () => (/* binding */ fleshEntryName),
+/* harmony export */   fleshLook: () => (/* binding */ fleshLook),
 /* harmony export */   hertzFromStiffness: () => (/* binding */ hertzFromStiffness),
 /* harmony export */   kindOf: () => (/* binding */ kindOf),
 /* harmony export */   readDoc: () => (/* binding */ readDoc),
@@ -11814,6 +12094,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   removePart: () => (/* binding */ removePart),
 /* harmony export */   setAutoColliders: () => (/* binding */ setAutoColliders),
 /* harmony export */   setChain: () => (/* binding */ setChain),
+/* harmony export */   setFlesh: () => (/* binding */ setFlesh),
+/* harmony export */   setFleshBones: () => (/* binding */ setFleshBones),
 /* harmony export */   setSoft: () => (/* binding */ setSoft),
 /* harmony export */   setSpring: () => (/* binding */ setSpring),
 /* harmony export */   softControls: () => (/* binding */ softControls),
@@ -11826,11 +12108,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./config */ "./ts/physics/config.ts");
 /* harmony import */ var _cloth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cloth */ "./ts/physics/cloth.ts");
+/* harmony import */ var _flesh__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./flesh */ "./ts/physics/flesh.ts");
 /**
  * Editing a model's physics through plain controls instead of typing JSON: turns the document into friendly numbers (a stiffness and a bounciness from 0 to 1
  * instead of hertz and a damping ratio) and back, and adds, changes and removes springs, chains and colliders in it. The document stays the same JSON the game
  * reads; anything this does not know about is kept. No Blockbench globals
  */
+
 
 
 const MIN_HERTZ = 0.6;
@@ -11877,7 +12161,7 @@ function kindOf(doc, bone) {
         return 'chain';
     if (doc.cloth && doc.cloth[bone])
         return 'cloth';
-    return doc.flesh && doc.flesh[bone] ? 'flesh' : 'none';
+    return fleshEntryName(doc, bone) !== null ? 'flesh' : 'none';
 }
 function chainNameOf(doc, bone) {
     var _a;
@@ -11963,7 +12247,18 @@ function removePart(doc, bone) {
         next.chains = Object.assign({}, next.chains);
         delete next.chains[chain];
     }
-    for (const section of ['cloth', 'flesh']) {
+    const flesh = fleshEntryName(doc, bone);
+    if (flesh !== null) {
+        for (const section of ['flesh', 'soft']) {
+            if (next[section] && next[section][flesh]) {
+                next[section] = Object.assign({}, next[section]);
+                delete next[section][flesh];
+                if (Object.keys(next[section]).length === 0)
+                    delete next[section];
+            }
+        }
+    }
+    for (const section of ['cloth']) {
         if (next[section] && next[section][bone]) {
             next[section] = Object.assign({}, next[section]);
             delete next[section][bone];
@@ -12027,17 +12322,17 @@ function removeColliders(doc, bone) {
 }
 /** A one-line description of what the document holds, for the panel header */
 function summarise(doc) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     const bones = Object.keys((_a = doc.bones) !== null && _a !== void 0 ? _a : {}).length;
     const chains = Object.keys((_b = doc.chains) !== null && _b !== void 0 ? _b : {}).length;
     const colliders = ((_c = doc.colliders) !== null && _c !== void 0 ? _c : []).length;
-    const soft = Object.keys((_d = doc.cloth) !== null && _d !== void 0 ? _d : {}).length + Object.keys((_e = doc.flesh) !== null && _e !== void 0 ? _e : {}).length;
+    const soft = Object.keys((_d = doc.cloth) !== null && _d !== void 0 ? _d : {}).length + Object.keys((_e = doc.flesh) !== null && _e !== void 0 ? _e : {}).length + Object.keys((_f = doc.soft) !== null && _f !== void 0 ? _f : {}).length;
     return `${bones} spring bone${bones === 1 ? '' : 's'}, ${chains} chain${chains === 1 ? '' : 's'}, ${soft > 0 ? `${soft} cloth or flesh, ` : ''}${colliders} collider${colliders === 1 ? '' : 's'}`;
 }
 function softControls(doc, bone, kind) {
     var _a, _b, _c;
-    const entry = ((_b = (_a = (kind === 'cloth' ? doc.cloth : doc.flesh)) === null || _a === void 0 ? void 0 : _a[bone]) !== null && _b !== void 0 ? _b : { bone });
-    const p = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.resolveCloth)(entry, kind === 'flesh');
+    const entry = ((_b = (_a = doc[kind]) === null || _a === void 0 ? void 0 : _a[bone]) !== null && _b !== void 0 ? _b : { bone });
+    const p = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.resolveCloth)(entry, false);
     return {
         stiffness: p.stiffness, bend: p.bend, damping: p.damping, inertia: p.inertia, gravity: p.gravity, radius: p.radius, pinHeight: p.pinHeight, anchor: p.anchor,
         weight: p.weight, friction: p.friction, volume: p.volume, softCenter: (_c = p.softCenter) !== null && _c !== void 0 ? _c : [0, 0, 0], softRadius: p.softRadius, iterations: p.iterations,
@@ -12045,14 +12340,11 @@ function softControls(doc, bone, kind) {
         collideOthers: p.collidesWith.includes('other') || p.collidesWith.includes('players'), carry: [...p.carry],
     };
 }
-/** Ready-made looks for cloth and flesh, one click each; they set the controls, which then stay editable */
+/** Ready-made looks for cloth, one click each; they set the controls, which then stay editable */
 const SOFT_LOOKS = {
     cloth: { label: 'Cloth', kind: 'cloth', preset: 'cloth' },
     'cloth-silk': { label: 'Silk', kind: 'cloth', preset: 'cloth-silk' },
     'cloth-stiff': { label: 'Stiff cloth', kind: 'cloth', preset: 'cloth-stiff' },
-    'flesh-soft': { label: 'Soft flesh', kind: 'flesh', preset: 'flesh-soft' },
-    'flesh-firm': { label: 'Firm flesh', kind: 'flesh', preset: 'flesh-firm' },
-    jelly: { label: 'Jelly', kind: 'flesh', preset: 'jelly' },
 };
 /** The controls a look means for a bone: the kind's defaults with the preset's numbers over them */
 function softLook(look, bone) {
@@ -12060,11 +12352,11 @@ function softLook(look, bone) {
     return softControls({ [l.kind]: { [bone]: { bone, preset: l.preset } } }, bone, l.kind);
 }
 /** The preset values, for tests and the panel's hints */
-const SOFT_PRESETS = { cloth: _cloth__WEBPACK_IMPORTED_MODULE_1__.CLOTH_PRESET_VALUES, flesh: _cloth__WEBPACK_IMPORTED_MODULE_1__.FLESH_PRESET_VALUES };
-/** Makes {@code bone} cloth or flesh with these controls (keys the entry already had that the controls do not cover, such as {@code mesh}, are kept) */
+const SOFT_PRESETS = { cloth: _cloth__WEBPACK_IMPORTED_MODULE_1__.CLOTH_PRESET_VALUES };
+/** Makes {@code bone} cloth with these controls (keys the entry already had that the controls do not cover, such as {@code mesh}, are kept) */
 function setSoft(doc, bone, kind, c) {
     var _a, _b;
-    const other = kind === 'cloth' ? 'flesh' : 'cloth';
+    const other = 'flesh';
     const next = Object.assign(Object.assign({}, doc), { [kind]: Object.assign({}, ((_a = doc[kind]) !== null && _a !== void 0 ? _a : {})) });
     const old = ((_b = next[kind][bone]) !== null && _b !== void 0 ? _b : {});
     const layers = [];
@@ -12077,10 +12369,7 @@ function setSoft(doc, bone, kind, c) {
     const rest = Object.assign({}, old);
     delete rest.preset;
     const entry = Object.assign(Object.assign({}, rest), { bone, stiffness: round(c.stiffness), bend: round(c.bend), damping: round(c.damping, 2), inertia: round(c.inertia), gravity: round(c.gravity, 2), radius: round(c.radius), anchor: round(c.anchor, 2), weight: round(c.weight), friction: round(c.friction), iterations: Math.round(c.iterations), collidesWith: layers });
-    if (kind === 'cloth')
-        entry.pinHeight = round(c.pinHeight);
-    else
-        entry.volume = round(c.volume);
+    entry.pinHeight = round(c.pinHeight);
     if (c.softRadius > 0) {
         entry.softRadius = round(c.softRadius);
         entry.softCenter = c.softCenter.map(v => round(v));
@@ -12101,6 +12390,2210 @@ function setSoft(doc, bone, kind, c) {
             delete next[other];
     }
     return next;
+}
+/** The numbers of a flesh the panel has beyond the main ones, by the key they are written under (flat), and the group and name they may also be found under */
+const FLESH_EXTRA = [
+    { key: 'reach' }, { key: 'lumpShare', group: 'lump', inner: 'share' }, { key: 'sideStiffness', group: 'lump', inner: 'side' }, { key: 'stiffen', group: 'lump', inner: 'stiffen' },
+    { key: 'anchorFrom', group: 'anchor', inner: 'from' }, { key: 'anchorHold', group: 'anchor', inner: 'hold' }, { key: 'anchorFull', group: 'anchor', inner: 'full' },
+    { key: 'shapeSoftness' }, { key: 'shape', group: 'node', inner: 'shape' }, { key: 'link', group: 'node', inner: 'link' }, { key: 'gravity', group: 'node', inner: 'gravity' },
+    { key: 'squeezeIn', group: 'squeeze', inner: 'in' }, { key: 'squeezeOut', group: 'squeeze', inner: 'out' }, { key: 'squeezeStiffness', group: 'squeeze', inner: 'k' },
+    { key: 'rim', group: 'squeeze', inner: 'rim' }, { key: 'rise', group: 'step', inner: 'rise' }, { key: 'sway', group: 'step', inner: 'sway' }, { key: 'turn' },
+    { key: 'dressedStiffness', group: 'dressed', inner: 'stiff' }, { key: 'dressedLimit', group: 'dressed', inner: 'limit' }, { key: 'dressedCouple', group: 'dressed', inner: 'couple' },
+];
+/** An axis as the file writes it: "+z", "-y", or "auto" when it is not one of the six */
+function axisName(v) {
+    if (!v)
+        return 'auto';
+    for (let a = 0; a < 3; a++) {
+        if (Math.abs(Math.abs(v[a]) - 1) < 1e-6 && v.every((x, i) => i === a || Math.abs(x) < 1e-6))
+            return `${v[a] < 0 ? '-' : '+'}${'xyz'[a]}`;
+    }
+    return 'auto';
+}
+/** The name of the flesh entry that has {@code bone} as its bone (or one of its pair), or null; an entry named for the bone comes first */
+function fleshEntryName(doc, bone) {
+    var _a, _b;
+    const all = Object.assign(Object.assign({}, ((_a = doc.soft) !== null && _a !== void 0 ? _a : {})), ((_b = doc.flesh) !== null && _b !== void 0 ? _b : {}));
+    if (all[bone] && typeof all[bone] === 'object')
+        return bone;
+    for (const [name, entry] of Object.entries(all)) {
+        const e = entry;
+        if (e && (e.bone === bone || (Array.isArray(e.bones) && e.bones.map(String).includes(bone))))
+            return name;
+    }
+    return null;
+}
+const FLESH_LOOKS = {
+    pouch: 'Pouch', seat: 'Seat', belly: 'Belly', thigh: 'Thigh', jelly: 'Jelly', 'flesh-soft': 'Soft flesh', 'flesh-firm': 'Firm flesh',
+};
+function fleshControls(doc, bone) {
+    var _a, _b;
+    const name = fleshEntryName(doc, bone);
+    const entry = (name ? Object.assign(Object.assign({}, ((_a = doc.soft) !== null && _a !== void 0 ? _a : {})), ((_b = doc.flesh) !== null && _b !== void 0 ? _b : {}))[name] : { bone });
+    // read without the meat's own scaling of the damping, so the sliders show what the file says
+    return fleshControlsOf((0,_flesh__WEBPACK_IMPORTED_MODULE_2__.resolveFlesh)(Object.assign({ bone }, entry), [], 'flesh', false), typeof entry.preset === 'string' ? entry.preset : 'pouch');
+}
+/** The controls for a resolved flesh */
+function fleshControlsOf(p, preset) {
+    var _a, _b;
+    return {
+        preset, softness: p.softness, limit: p.limit, firmness: p.firmness, meat: p.meat, bulge: p.bulge, volume: p.volume,
+        weight: p.weight, lumpDamping: p.lumpDamping, nodeDamping: p.nodeDamping, inertia: p.inertia, rigid: p.rigid, softCenter: (_a = p.softCenter) !== null && _a !== void 0 ? _a : [0, 0, 0],
+        softRadius: p.softRadius, carry: [...p.carry], collideBody: p.collidesWith.includes('body'), collideWorld: p.collidesWith.includes('world'),
+        collideOthers: p.collidesWith.includes('other') || p.collidesWith.includes('players'),
+        bones: [...p.bones], nestedSoft: p.nestedSoft, pivotMode: p.pivot ? 'custom' : p.bonePivot ? 'bone' : 'auto', pivot: (_b = p.pivot) !== null && _b !== void 0 ? _b : [0, 0, 0], tip: axisName(p.tip), up: axisName(p.up),
+        presses: [...p.presses], reach: p.reach, lumpShare: p.lumpShare, sideStiffness: p.sideStiffness, stiffen: p.stiffen, anchorFrom: p.anchorFrom, anchorHold: p.anchorHold,
+        anchorFull: p.anchorFull, shapeSoftness: p.shapeSoftness, shape: p.shape, link: p.link, gravity: p.gravity, squeezeIn: p.squeezeIn, squeezeOut: p.squeezeOut,
+        squeezeStiffness: p.squeezeStiffness, rim: p.rim, rise: p.rise, sway: p.sway, turn: p.turn, dressedStiffness: p.dressedStiffness, dressedLimit: p.dressedLimit,
+        dressedCouple: p.dressedCouple,
+    };
+}
+/** The controls a look means for a bone: the preset's numbers over the defaults */
+function fleshLook(look, bone) {
+    return fleshControls({ flesh: { [bone]: { bone, preset: look } } }, bone);
+}
+/** Makes {@code bone} flesh with these controls (keys the entry already had that the controls do not cover, such as a pair of bones or the tip axis, are kept) */
+function setFlesh(doc, bone, c) {
+    var _a, _b, _c, _d, _e;
+    const name = (_a = fleshEntryName(doc, bone)) !== null && _a !== void 0 ? _a : bone;
+    const next = Object.assign(Object.assign({}, doc), { flesh: Object.assign({}, ((_b = doc.flesh) !== null && _b !== void 0 ? _b : {})) });
+    const old = ((_e = Object.assign(Object.assign({}, ((_c = doc.soft) !== null && _c !== void 0 ? _c : {})), ((_d = doc.flesh) !== null && _d !== void 0 ? _d : {}))[name]) !== null && _e !== void 0 ? _e : {});
+    const layers = [];
+    if (c.collideBody)
+        layers.push('body');
+    if (c.collideWorld)
+        layers.push('world');
+    if (c.collideOthers)
+        layers.push('other', 'players', 'mobs');
+    const rest = Object.assign({}, old);
+    // the keys of the old per-vertex flesh mean nothing now, and these are written as the cage's own
+    for (const key of ['stiffness', 'bend', 'damping', 'gravity', 'radius', 'anchor', 'friction', 'iterations', 'maxParticles', 'pinHeight', 'mesh']) {
+        if (typeof rest[key] !== 'object')
+            delete rest[key];
+    }
+    delete rest.inertia;
+    delete rest.lumpDamping;
+    delete rest.nodeDamping;
+    const entry = Object.assign(Object.assign(Object.assign({}, rest), (old.bones ? {} : { bone })), { preset: c.preset, softness: round(c.softness), limit: round(c.limit, 3), firmness: round(c.firmness), meat: round(c.meat), bulge: round(c.bulge), volume: round(c.volume), weight: round(c.weight), rigid: round(c.rigid), lump: Object.assign(Object.assign({}, (typeof old.lump === 'object' ? old.lump : {})), { damping: round(c.lumpDamping, 3), inertia: round(c.inertia) }), node: Object.assign(Object.assign({}, (typeof old.node === 'object' ? old.node : {})), { damping: round(c.nodeDamping, 3) }), collidesWith: layers });
+    if (c.softRadius > 0) {
+        entry.softRadius = round(c.softRadius);
+        entry.softCenter = c.softCenter.map(v => round(v));
+    }
+    else {
+        delete entry.softRadius;
+        delete entry.softCenter;
+    }
+    if (c.carry.length > 0)
+        entry.carry = [...c.carry];
+    else
+        delete entry.carry;
+    // what the panel has beyond the main numbers is written only when it differs from the look, so the file stays short and a look still means something
+    const base = fleshControlsOf((0,_flesh__WEBPACK_IMPORTED_MODULE_2__.resolveFlesh)({ bone, preset: c.preset }, [], 'flesh', false), c.preset);
+    for (const { key, group, inner } of FLESH_EXTRA) {
+        const grouped = group ? entry[group] : undefined;
+        if (group && inner && grouped && typeof grouped === 'object' && !Array.isArray(grouped)) {
+            entry[group] = Object.assign({}, grouped);
+            delete entry[group][inner];
+            if (Object.keys(entry[group]).length === 0)
+                delete entry[group];
+        }
+        const value = c[key];
+        if (Math.abs(value - base[key]) > 1e-5)
+            entry[key] = round(value, 4);
+        else
+            delete entry[key];
+    }
+    if (c.tip !== 'auto')
+        entry.tip = c.tip;
+    else
+        delete entry.tip;
+    if (c.up !== 'auto')
+        entry.up = c.up;
+    else
+        delete entry.up;
+    if (c.pivotMode === 'custom')
+        entry.pivot = c.pivot.map(v => round(v));
+    else if (c.pivotMode === 'auto')
+        entry.pivot = 'auto';
+    else
+        delete entry.pivot;
+    if (c.nestedSoft)
+        entry.nested = 'soft';
+    else
+        delete entry.nested;
+    if (c.presses.join('|') !== base.presses.join('|'))
+        entry.presses = [...c.presses];
+    else
+        delete entry.presses;
+    next.flesh[name] = entry;
+    // the old name of the section is read as this one: the entry is not kept twice
+    if (next.soft) {
+        next.soft = Object.assign({}, next.soft);
+        delete next.soft[name];
+        if (Object.keys(next.soft).length === 0)
+            delete next.soft;
+    }
+    if (next.cloth) {
+        next.cloth = Object.assign({}, next.cloth);
+        delete next.cloth[bone];
+        if (Object.keys(next.cloth).length === 0)
+            delete next.cloth;
+    }
+    return next;
+}
+/** The presets a flesh may name, for the panel */
+const FLESH_PRESET_NAMES = Object.keys(_flesh__WEBPACK_IMPORTED_MODULE_2__.FLESH_PRESETS);
+/** Names the bones of a flesh: one bone, or two (a pair that presses on each other). The rest of the entry stays */
+function setFleshBones(doc, bone, bones) {
+    var _a;
+    const name = fleshEntryName(doc, bone);
+    if (name === null || bones.length === 0)
+        return doc;
+    const section = ((_a = doc.flesh) === null || _a === void 0 ? void 0 : _a[name]) ? 'flesh' : 'soft';
+    const entry = Object.assign({}, doc[section][name]);
+    if (bones.length > 1) {
+        entry.bones = bones.slice(0, 2);
+        delete entry.bone;
+    }
+    else {
+        entry.bone = bones[0];
+        delete entry.bones;
+    }
+    return Object.assign(Object.assign({}, doc), { [section]: Object.assign(Object.assign({}, doc[section]), { [name]: entry }) });
+}
+
+
+/***/ }),
+
+/***/ "./ts/physics/flesh.ts":
+/*!*****************************!*\
+  !*** ./ts/physics/flesh.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CENTRE: () => (/* binding */ CENTRE),
+/* harmony export */   FLESH_KEYS: () => (/* binding */ FLESH_KEYS),
+/* harmony export */   FLESH_PRESETS: () => (/* binding */ FLESH_PRESETS),
+/* harmony export */   FleshCage: () => (/* binding */ FleshCage),
+/* harmony export */   FleshGeometry: () => (/* binding */ FleshGeometry),
+/* harmony export */   FleshRegion: () => (/* binding */ FleshRegion),
+/* harmony export */   FleshSkin: () => (/* binding */ FleshSkin),
+/* harmony export */   NODES: () => (/* binding */ NODES),
+/* harmony export */   OLD_FLESH_KEYS: () => (/* binding */ OLD_FLESH_KEYS),
+/* harmony export */   STEP: () => (/* binding */ STEP),
+/* harmony export */   SURFACE: () => (/* binding */ SURFACE),
+/* harmony export */   fleshStep: () => (/* binding */ fleshStep),
+/* harmony export */   oscillate: () => (/* binding */ oscillate),
+/* harmony export */   pairPlane: () => (/* binding */ pairPlane),
+/* harmony export */   pairStep: () => (/* binding */ pairStep),
+/* harmony export */   parseAxis: () => (/* binding */ parseAxis),
+/* harmony export */   resolveFlesh: () => (/* binding */ resolveFlesh)
+/* harmony export */ });
+/* harmony import */ var _solvers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./solvers */ "./ts/physics/solvers.ts");
+
+const f = Math.fround;
+const STEP = 1 / 60;
+const OMEGA_MAX = 18 * Math.PI;
+const HELD = 0.95;
+const ACCELERATION_CAP = 80;
+const SQUEEZE_MAX = 0.09375;
+/** How far outside a pressing shape a node counts as touching it, blocks */
+const PRESS_SKIN = 0.005;
+/** The presets, as the game reads them: what each changes from the defaults */
+const FLESH_PRESETS = {
+    pouch: {},
+    seat: { anchorFrom: 0.55, reach: 0.8, shapeSoftness: 0.75, firmness: 1.1547, volume: 0.4, rim: 0.3 },
+    belly: { anchorFrom: 0.55, limit: 0.1, firmness: 1.3, volume: 0.3, rigid: 0.5, rim: 0, rise: 0.03 },
+    thigh: { anchorFrom: 0.5, limit: 0.08, firmness: 1.5, volume: 0.2, rigid: 0.3, rim: 0, rise: 0.02 },
+    'flesh-soft': { softness: 1.3, volume: 0.6 },
+    'flesh-firm': { softness: 0.7, firmness: 1.4, limit: 0.1, volume: 0.4 },
+    jelly: { limit: 0.25, firmness: 0.8, lumpDamping: 0.12, nodeDamping: 0.2, volume: 0.8, meat: 0 },
+};
+/** The keys of the old per-vertex flesh that mean nothing to the cage */
+const OLD_FLESH_KEYS = ['stiffness', 'bend', 'damping', 'inertia', 'gravity', 'anchor', 'radius', 'friction', 'iterations', 'maxParticles', 'pinHeight', 'mesh'];
+const GROUPS = {
+    anchor: { from: 'anchorFrom', hold: 'anchorHold', full: 'anchorFull', depth: 'depth' },
+    lump: { damping: 'lumpDamping', inertia: 'inertia', inert: 'inertia', share: 'lumpShare', side: 'sideStiffness', stiffen: 'stiffen' },
+    node: { damping: 'nodeDamping', shape: 'shape', link: 'link', gravity: 'gravity' },
+    squeeze: { in: 'squeezeIn', out: 'squeezeOut', k: 'squeezeStiffness', rim: 'rim' },
+    step: { rise: 'rise', sway: 'sway' },
+    dressed: { stiff: 'dressedStiffness', limit: 'dressedLimit', couple: 'dressedCouple' },
+};
+/** Every key a flesh entry may have, flat or grouped, for the checker */
+const FLESH_KEYS = ['bones', 'bone', 'preset', 'collideBones', 'ignoreBones', 'softness', 'shapeSoftness', 'limit', 'reach', 'tip', 'up', 'anchorFrom', 'anchorHold',
+    'anchorFull', 'depth', 'lumpDamping', 'inertia', 'lumpShare', 'sideStiffness', 'stiffen', 'firmness', 'nodeDamping', 'shape', 'link', 'gravity', 'squeezeIn', 'squeezeOut',
+    'squeezeStiffness', 'rim', 'volume', 'pivot', 'meat', 'bulge', 'rigid', 'rise', 'sway', 'turn', 'dressedStiffness', 'dressedLimit', 'dressedCouple', 'weight',
+    'softCenter', 'softRadius', 'carry', 'nested', 'collidesWith', 'presses', ...Object.keys(GROUPS)];
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+/** {@code "auto"} (null), {@code "+z"}, {@code "-y"} and the like, or {@code [x, y, z]} */
+function parseAxis(value) {
+    if (Array.isArray(value))
+        return [f(Number(value[0])), f(Number(value[1])), f(Number(value[2]))];
+    const text = String(value).trim().toLowerCase();
+    if (text === 'auto')
+        return null;
+    if (text.length !== 2 || (text[0] !== '+' && text[0] !== '-') || 'xyz'.indexOf(text[1]) < 0)
+        throw new Error(`not an axis: ${text} (auto, +x, -x, +y, -y, +z, -z)`);
+    const out = [0, 0, 0];
+    out['xyz'.indexOf(text[1])] = text[0] === '-' ? -1 : 1;
+    return out;
+}
+/** What a flesh entry means, the way the game reads it: defaults, then the preset, then the entry's own keys (grouped ones flattened), then meat. {@code warnings} gets what was wrong */
+function resolveFlesh(entry, warnings = [], where = 'flesh', applyMeat = true) {
+    const bones = Array.isArray(entry.bones) ? entry.bones.map(String) : entry.bone !== undefined ? [String(entry.bone)] : [];
+    const presetName = typeof entry.preset === 'string' ? entry.preset : 'pouch';
+    const merged = {};
+    if (FLESH_PRESETS[presetName])
+        Object.assign(merged, FLESH_PRESETS[presetName]);
+    else
+        warnings.push(`${where}: unknown soft preset "${presetName}" (known: ${Object.keys(FLESH_PRESETS).join(', ')})`);
+    const old = [];
+    for (const [key, value] of Object.entries(entry)) {
+        if (OLD_FLESH_KEYS.includes(key) && !(typeof value === 'object' && value !== null && !Array.isArray(value))) {
+            old.push(key);
+            continue;
+        }
+        const group = GROUPS[key];
+        if (!group || typeof value !== 'object' || value === null || Array.isArray(value)) {
+            merged[key] = value;
+            continue;
+        }
+        for (const [inner, v] of Object.entries(value)) {
+            if (group[inner] === undefined)
+                warnings.push(`${where}: unknown key "${key}.${inner}"`);
+            else
+                merged[group[inner]] = v;
+        }
+    }
+    const p = {
+        bones, softness: 1, shapeSoftness: NaN, limit: 0.15625, reach: 1, tip: null, up: null, anchorFrom: 0.65, anchorHold: 0.75, anchorFull: 0.9, depthFrom: 0.35, depthTo: 0.75,
+        lumpDamping: 0.18, inertia: 1.3, lumpShare: 0.7, sideStiffness: 2, stiffen: 0.8, firmness: 1, nodeDamping: 0.3, shape: 0.12, link: 0.08, gravity: 0.00272,
+        squeezeIn: 0.8, squeezeOut: 5, squeezeStiffness: 2.5, rim: 0.7, volume: 0.6, bulge: 0.6, rigid: 1, rise: 0.05, sway: 0.2, turn: 1,
+        dressedStiffness: 1.5, dressedLimit: 0.8, dressedCouple: 0.25, collidesWith: ['body', 'other', 'players', 'mobs', 'world'],
+        presses: ['steve*', 'arm*', 'lowerArm*', 'forearm*', 'hand*'], weight: 1, softCenter: null, softRadius: 0, carry: [], meat: 0.5, bonePivot: true, pivot: null, nestedSoft: false,
+    };
+    for (const [key, v] of Object.entries(merged)) {
+        try {
+            switch (key) {
+                case 'bones':
+                case 'bone':
+                case 'preset':
+                case 'collideBones':
+                case 'ignoreBones': break;
+                case 'softness':
+                    p.softness = f(Math.max(0.1, Number(v)));
+                    break;
+                case 'shapeSoftness':
+                    p.shapeSoftness = f(Math.max(0.1, Number(v)));
+                    break;
+                case 'limit':
+                    p.limit = f(Math.max(0, Number(v)));
+                    break;
+                case 'reach':
+                    p.reach = f(clamp01(Number(v)));
+                    break;
+                case 'tip':
+                    p.tip = parseAxis(v);
+                    break;
+                case 'up':
+                    p.up = parseAxis(v);
+                    break;
+                case 'anchorFrom':
+                    p.anchorFrom = f(clamp01(Number(v)));
+                    break;
+                case 'anchorHold':
+                    p.anchorHold = f(clamp01(Number(v)));
+                    break;
+                case 'anchorFull':
+                    p.anchorFull = f(clamp01(Number(v)));
+                    break;
+                case 'depth':
+                    p.depthFrom = f(clamp01(Number(v[0])));
+                    p.depthTo = f(clamp01(Number(v[1])));
+                    break;
+                case 'lumpDamping':
+                    p.lumpDamping = f(Math.max(0, Number(v)));
+                    break;
+                case 'inertia':
+                    p.inertia = f(Math.max(0, Number(v)));
+                    break;
+                case 'lumpShare':
+                    p.lumpShare = f(clamp01(Number(v)));
+                    break;
+                case 'sideStiffness':
+                    p.sideStiffness = f(Math.max(0.1, Number(v)));
+                    break;
+                case 'stiffen':
+                    p.stiffen = f(Math.max(0.05, Number(v)));
+                    break;
+                case 'firmness':
+                    p.firmness = f(Math.max(0.05, Number(v)));
+                    break;
+                case 'nodeDamping':
+                    p.nodeDamping = f(Math.max(0, Number(v)));
+                    break;
+                case 'shape':
+                    p.shape = f(clamp01(Number(v)));
+                    break;
+                case 'link':
+                    p.link = f(clamp01(Number(v)));
+                    break;
+                case 'gravity':
+                    p.gravity = f(Number(v));
+                    break;
+                case 'squeezeIn':
+                    p.squeezeIn = f(Math.max(0.01, Number(v)));
+                    break;
+                case 'squeezeOut':
+                    p.squeezeOut = f(Math.max(0.01, Number(v)));
+                    break;
+                case 'squeezeStiffness':
+                    p.squeezeStiffness = f(Math.max(0, Number(v)));
+                    break;
+                case 'rim':
+                    p.rim = f(Math.max(0, Number(v)));
+                    break;
+                case 'volume':
+                    p.volume = f(Math.max(0, Number(v)));
+                    break;
+                case 'pivot':
+                    if (Array.isArray(v)) {
+                        p.pivot = parseAxis(v);
+                    }
+                    else {
+                        const text = String(v).trim().toLowerCase();
+                        if (text !== 'bone' && text !== 'auto')
+                            throw new Error(`not a pivot: ${text} (bone, auto, or [x, y, z])`);
+                        p.bonePivot = text === 'bone';
+                    }
+                    break;
+                case 'meat':
+                    p.meat = f(Math.max(0, Math.min(2, Number(v))));
+                    break;
+                case 'bulge':
+                    p.bulge = f(Math.max(0, Number(v)));
+                    break;
+                case 'rigid':
+                    p.rigid = f(Math.max(0, Number(v)));
+                    break;
+                case 'rise':
+                    p.rise = f(Math.max(0, Number(v)));
+                    break;
+                case 'sway':
+                    p.sway = f(Math.max(0, Number(v)));
+                    break;
+                case 'turn':
+                    p.turn = f(Math.max(0, Number(v)));
+                    break;
+                case 'dressedStiffness':
+                    p.dressedStiffness = f(Math.max(0.1, Number(v)));
+                    break;
+                case 'dressedLimit':
+                    p.dressedLimit = f(clamp01(Number(v)));
+                    break;
+                case 'dressedCouple':
+                    p.dressedCouple = f(clamp01(Number(v)));
+                    break;
+                case 'weight':
+                    p.weight = f(clamp01(Number(v)));
+                    break;
+                case 'softCenter':
+                    p.softCenter = [f(Number(v[0])), f(Number(v[1])), f(Number(v[2]))];
+                    break;
+                case 'softRadius':
+                    p.softRadius = f(Math.max(0, Number(v)));
+                    break;
+                case 'carry':
+                    p.carry = v.map(String);
+                    break;
+                case 'nested': {
+                    const text = String(v).trim().toLowerCase();
+                    if (text !== 'soft' && text !== 'rigid')
+                        throw new Error(`not a choice: ${text} (soft or rigid)`);
+                    p.nestedSoft = text === 'soft';
+                    break;
+                }
+                case 'collidesWith':
+                    p.collidesWith = v.map(String);
+                    break;
+                case 'presses':
+                    p.presses = v.map(String);
+                    break;
+                default: warnings.push(`${where}: unknown key "${key}"`);
+            }
+        }
+        catch (e) {
+            warnings.push(`${where}: "${key}" has a value that cannot be read (${e.message})`);
+        }
+    }
+    if (Number.isNaN(p.shapeSoftness))
+        p.shapeSoftness = p.softness;
+    // meat: heavier, so a swing dies away sooner and sags more (the editor reads the numbers without it, so it does not count twice)
+    if (applyMeat) {
+        p.lumpDamping = f(p.lumpDamping * f(1 + f(0.8 * p.meat)));
+        p.nodeDamping = f(p.nodeDamping * f(1 + f(0.8 * p.meat)));
+        p.gravity = f(p.gravity * f(1 + f(0.5 * p.meat)));
+    }
+    if (old.length > 0)
+        warnings.push(`${where}: ${old.join(', ')} were for the old per-vertex flesh and do nothing now; the cage moves it (see softness, limit, firmness, lump, node)`);
+    return p;
+}
+// ---------------- the cage's shape ----------------
+const SURFACE = 162;
+const NODES = SURFACE + 1;
+const CENTRE = SURFACE;
+const CELLS = 12;
+const LOOKUP_REACH = 0.58;
+const unit = (x, y, z) => {
+    const l = Math.sqrt(x * x + y * y + z * z);
+    return [x / l, y / l, z / l];
+};
+class FleshGeometry {
+    static get() {
+        if (!FleshGeometry.instance)
+            FleshGeometry.instance = new FleshGeometry();
+        return FleshGeometry.instance;
+    }
+    constructor() {
+        this.dir = new Float64Array(SURFACE * 3);
+        this.neighbours = [];
+        const points = [];
+        const t = (1 + Math.sqrt(5)) / 2;
+        const base = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0], [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t], [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]];
+        for (const p of base)
+            points.push(unit(p[0], p[1], p[2]));
+        let faces = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2],
+            [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+        for (let level = 0; level < 2; level++) {
+            const middles = new Map();
+            const middle = (p, q) => {
+                const key = Math.min(p, q) * 100000 + Math.max(p, q);
+                const known = middles.get(key);
+                if (known !== undefined)
+                    return known;
+                const a = points[p];
+                const b = points[q];
+                points.push(unit(a[0] + b[0], a[1] + b[1], a[2] + b[2]));
+                middles.set(key, points.length - 1);
+                return points.length - 1;
+            };
+            const split = [];
+            for (const face of faces) {
+                const ab = middle(face[0], face[1]);
+                const bc = middle(face[1], face[2]);
+                const ca = middle(face[2], face[0]);
+                split.push([face[0], ab, ca], [face[1], bc, ab], [face[2], ca, bc], [ab, bc, ca]);
+            }
+            faces = split;
+        }
+        for (let i = 0; i < SURFACE; i++)
+            for (let a = 0; a < 3; a++)
+                this.dir[i * 3 + a] = points[i][a];
+        this.faces = [];
+        for (const face of faces) {
+            const a = points[face[0]];
+            const b = points[face[1]];
+            const c = points[face[2]];
+            const nx = (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]);
+            const ny = (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]);
+            const nz = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+            const outward = nx * (a[0] + b[0] + c[0]) + ny * (a[1] + b[1] + c[1]) + nz * (a[2] + b[2] + c[2]) > 0;
+            this.faces.push(face[0], outward ? face[1] : face[2], outward ? face[2] : face[1]);
+        }
+        const seen = new Set();
+        const a = [];
+        const b = [];
+        const around = [];
+        for (let i = 0; i < SURFACE; i++)
+            around.push([]);
+        for (const face of faces) {
+            for (let e = 0; e < 3; e++) {
+                const p = face[e];
+                const q = face[(e + 1) % 3];
+                const key = Math.min(p, q) * 100000 + Math.max(p, q);
+                if (seen.has(key))
+                    continue;
+                seen.add(key);
+                a.push(p);
+                b.push(q);
+                around[p].push(q);
+                around[q].push(p);
+            }
+        }
+        for (let i = 0; i < SURFACE; i++) {
+            a.push(CENTRE);
+            b.push(i);
+        }
+        this.linkA = a;
+        this.linkB = b;
+        this.neighbours = around;
+        this.cells = [];
+        const reach = Math.cos(LOOKUP_REACH);
+        for (let face = 0; face < 6; face++) {
+            for (let u = 0; u < CELLS; u++) {
+                for (let v = 0; v < CELLS; v++) {
+                    const middle = cellDirection(face, (u + 0.5) / CELLS * 2 - 1, (v + 0.5) / CELLS * 2 - 1);
+                    const near = [];
+                    for (let i = 0; i < SURFACE; i++) {
+                        if (middle[0] * this.dir[i * 3] + middle[1] * this.dir[i * 3 + 1] + middle[2] * this.dir[i * 3 + 2] >= reach)
+                            near.push(i);
+                    }
+                    this.cells[(face * CELLS + u) * CELLS + v] = near;
+                }
+            }
+        }
+    }
+    /** The surface nodes near the direction (x, y, z), which need not be unit */
+    near(x, y, z) {
+        const ax = Math.abs(x);
+        const ay = Math.abs(y);
+        const az = Math.abs(z);
+        let face;
+        let u;
+        let v;
+        if (ax >= ay && ax >= az) {
+            face = x > 0 ? 0 : 1;
+            u = y / ax;
+            v = z / ax;
+        }
+        else if (ay >= az) {
+            face = y > 0 ? 2 : 3;
+            u = x / ay;
+            v = z / ay;
+        }
+        else {
+            face = z > 0 ? 4 : 5;
+            u = x / az;
+            v = y / az;
+        }
+        if (Number.isNaN(u) || Number.isNaN(v))
+            return this.cells[0];
+        const cu = Math.max(0, Math.min(CELLS - 1, Math.trunc((u + 1) * 0.5 * CELLS)));
+        const cv = Math.max(0, Math.min(CELLS - 1, Math.trunc((v + 1) * 0.5 * CELLS)));
+        return this.cells[(face * CELLS + cu) * CELLS + cv];
+    }
+    /** The unit normal at each surface node of a cage whose nodes are at {@code points}: the faces around it, each by its area */
+    normals(points, out) {
+        out.fill(0, 0, SURFACE * 3);
+        for (let fi = 0; fi < this.faces.length; fi += 3) {
+            const a = this.faces[fi] * 3;
+            const b = this.faces[fi + 1] * 3;
+            const c = this.faces[fi + 2] * 3;
+            const ux = points[b] - points[a];
+            const uy = points[b + 1] - points[a + 1];
+            const uz = points[b + 2] - points[a + 2];
+            const vx = points[c] - points[a];
+            const vy = points[c + 1] - points[a + 1];
+            const vz = points[c + 2] - points[a + 2];
+            const nx = uy * vz - uz * vy;
+            const ny = uz * vx - ux * vz;
+            const nz = ux * vy - uy * vx;
+            for (let corner = 0; corner < 3; corner++) {
+                const at = this.faces[fi + corner] * 3;
+                out[at] += nx;
+                out[at + 1] += ny;
+                out[at + 2] += nz;
+            }
+        }
+        for (let i = 0; i < SURFACE; i++) {
+            const length = Math.sqrt(out[i * 3] * out[i * 3] + out[i * 3 + 1] * out[i * 3 + 1] + out[i * 3 + 2] * out[i * 3 + 2]);
+            if (length > 1e-18) {
+                out[i * 3] /= length;
+                out[i * 3 + 1] /= length;
+                out[i * 3 + 2] /= length;
+            }
+        }
+    }
+}
+FleshGeometry.instance = null;
+function cellDirection(face, u, v) {
+    switch (face) {
+        case 0: return unit(1, u, v);
+        case 1: return unit(-1, u, v);
+        case 2: return unit(u, 1, v);
+        case 3: return unit(u, -1, v);
+        case 4: return unit(u, v, 1);
+        default: return unit(u, v, -1);
+    }
+}
+const smoothstep = (from, to, x) => {
+    const t = Math.max(0, Math.min(1, (x - from) / Math.max(1e-9, to - from)));
+    return t * t * (3 - 2 * t);
+};
+// ---------------- the cage fitted to a mesh ----------------
+const KERNEL = Math.cos(0.42);
+const MOST_NODES = 6;
+const FIT = Math.cos(0.3);
+class FleshCage {
+    /**
+     * Fits a cage to {@code points}, the vertices of the region's meshes in its own frame, blocks
+     *
+     * @param toModel The region's frame in the model's space at rest (what says which way is out from the body): the identity when the frame is the model's
+     */
+    constructor(points, p, toModel = v => v, upInModel = [0, 1, 0]) {
+        var _a;
+        this.centre = [0, 0, 0];
+        this.half = [0, 0, 0];
+        this.radius = new Float64Array(SURFACE);
+        this.rest = new Float64Array(NODES * 3);
+        this.restNormals = new Float64Array(SURFACE * 3);
+        this.anchor = new Float64Array(NODES);
+        this.tip = [0, 0, 1];
+        this.up = [0, 1, 0];
+        this.pivot = [0, 0, 0];
+        this.length = 0;
+        this.limit = 0;
+        const geometry = FleshGeometry.get();
+        const n = points.length;
+        for (let a = 0; a < 3; a++) {
+            const axis = points.map(q => q[a]).sort((x, y) => x - y);
+            const lo = axis[Math.min(n - 1, Math.floor(0.03 * (n - 1)))];
+            const hi = axis[Math.min(n - 1, Math.ceil(0.97 * (n - 1)))];
+            this.centre[a] = (lo + hi) * 0.5;
+            this.half[a] = Math.max(1 / 320, (hi - lo) * 0.5);
+        }
+        let reached = new Array(SURFACE).fill(false);
+        for (const q of points) {
+            const qx = (q[0] - this.centre[0]) / this.half[0];
+            const qy = (q[1] - this.centre[1]) / this.half[1];
+            const qz = (q[2] - this.centre[2]) / this.half[2];
+            const l = Math.sqrt(qx * qx + qy * qy + qz * qz);
+            if (l < 1e-9)
+                continue;
+            for (const i of geometry.near(qx, qy, qz)) {
+                if ((qx * geometry.dir[i * 3] + qy * geometry.dir[i * 3 + 1] + qz * geometry.dir[i * 3 + 2]) / l >= FIT) {
+                    this.radius[i] = reached[i] ? Math.max(this.radius[i], l) : l;
+                    reached[i] = true;
+                }
+            }
+        }
+        for (let pass = 0; pass < 8; pass++) {
+            const next = reached.slice();
+            for (let i = 0; i < SURFACE; i++) {
+                if (reached[i])
+                    continue;
+                let sum = 0;
+                let count = 0;
+                for (const j of geometry.neighbours[i]) {
+                    if (reached[j]) {
+                        sum += this.radius[j];
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    this.radius[i] = sum / count;
+                    next[i] = true;
+                }
+            }
+            reached = next;
+        }
+        for (let i = 0; i < SURFACE; i++)
+            if (!reached[i])
+                this.radius[i] = 1;
+        const smooth = new Float64Array(SURFACE);
+        for (let i = 0; i < SURFACE; i++) {
+            let sum = 0;
+            for (const j of geometry.neighbours[i])
+                sum += this.radius[j];
+            smooth[i] = Math.max(0.25, Math.min(1.8, this.radius[i] * 0.7 + sum / geometry.neighbours[i].length * 0.3));
+        }
+        this.radius.set(smooth);
+        for (let i = 0; i < SURFACE; i++) {
+            for (let a = 0; a < 3; a++)
+                this.rest[i * 3 + a] = this.centre[a] + this.half[a] * geometry.dir[i * 3 + a] * this.radius[i];
+        }
+        for (let a = 0; a < 3; a++)
+            this.rest[CENTRE * 3 + a] = this.centre[a];
+        geometry.normals(this.rest, this.restNormals);
+        this.chooseAxes(p.tip, p.up, toModel, upInModel);
+        let front = -Number.MAX_VALUE;
+        let back = Number.MAX_VALUE;
+        for (let i = 0; i < NODES; i++) {
+            const along = this.along(i);
+            front = Math.max(front, along);
+            back = Math.min(back, along);
+        }
+        this.length = Math.max(1 / 320, front - back);
+        for (let a = 0; a < 3; a++)
+            this.pivot[a] = this.centre[a] + this.tip[a] * back;
+        const from = p.anchorFrom;
+        const full = Math.max(from + f(0.05), p.anchorFull);
+        for (let i = 0; i < NODES; i++) {
+            const depth = (front - this.along(i)) / this.length;
+            let upward = 0;
+            if (i < SURFACE)
+                upward = geometry.dir[i * 3] * this.up[0] + geometry.dir[i * 3 + 1] * this.up[1] + geometry.dir[i * 3 + 2] * this.up[2];
+            const hold = p.anchorHold * smoothstep(from, full, Math.abs(upward)) * smoothstep(p.depthFrom, p.depthTo, depth);
+            this.anchor[i] = Math.max(depth * depth, hold);
+            if (p.softRadius > 0) {
+                const zone = (_a = p.softCenter) !== null && _a !== void 0 ? _a : [f(this.centre[0]), f(this.centre[1]), f(this.centre[2])];
+                const dx = this.rest[i * 3] - zone[0];
+                const dy = this.rest[i * 3 + 1] - zone[1];
+                const dz = this.rest[i * 3 + 2] - zone[2];
+                const t = Math.min(1, Math.sqrt(dx * dx + dy * dy + dz * dz) / p.softRadius);
+                this.anchor[i] = Math.max(this.anchor[i], t * t * (3 - 2 * t));
+            }
+        }
+        const diagonal = Math.sqrt(this.half[0] * this.half[0] + this.half[1] * this.half[1] + this.half[2] * this.half[2]);
+        this.limit = Math.min(diagonal, p.limit) * p.reach;
+        // the swing turns about the bone's own pivot, unless it is far from the flesh
+        if (p.pivot) {
+            this.pivot[0] = p.pivot[0];
+            this.pivot[1] = p.pivot[1];
+            this.pivot[2] = p.pivot[2];
+        }
+    }
+    along(i) {
+        return (this.rest[i * 3] - this.centre[0]) * this.tip[0] + (this.rest[i * 3 + 1] - this.centre[1]) * this.tip[1] + (this.rest[i * 3 + 2] - this.centre[2]) * this.tip[2];
+    }
+    /** The tip is the end of the region farthest out from the middle of the body, unless named; up is the model's up, unless named */
+    chooseAxes(tipAxis, upAxis, toModel, upInModel) {
+        if (tipAxis) {
+            this.tip = setUnit(tipAxis[0], tipAxis[1], tipAxis[2]);
+        }
+        else {
+            const middle = toModel([this.centre[0], this.centre[1], this.centre[2]]);
+            let best = -Number.MAX_VALUE;
+            for (let a = 0; a < 3; a++) {
+                for (let sign = -1; sign <= 1; sign += 2) {
+                    const at = [this.centre[0], this.centre[1], this.centre[2]];
+                    at[a] += sign * this.half[a];
+                    const end = toModel(at);
+                    const out = Math.hypot(end[0], end[2]) - Math.hypot(middle[0], middle[2]);
+                    if (out > best) {
+                        best = out;
+                        this.tip = setUnit(a === 0 ? sign : 0, a === 1 ? sign : 0, a === 2 ? sign : 0);
+                    }
+                }
+            }
+        }
+        this.up = upAxis ? setUnit(upAxis[0], upAxis[1], upAxis[2]) : setUnit(upInModel[0], upInModel[1], upInModel[2]);
+    }
+    /** How each of {@code points} (in the region's frame) follows the cage: the surface nodes about its direction, each by how near, and how much it moves with the centre */
+    bind(points) {
+        const geometry = FleshGeometry.get();
+        const out = { start: [], node: [], weight: [], surface: [], softness: [] };
+        for (let k = 0; k < points.length; k++) {
+            const qx = (points[k][0] - this.centre[0]) / this.half[0];
+            const qy = (points[k][1] - this.centre[1]) / this.half[1];
+            const qz = (points[k][2] - this.centre[2]) / this.half[2];
+            const s = Math.sqrt(qx * qx + qy * qy + qz * qz);
+            out.start[k] = out.node.length;
+            if (s < 1e-9) {
+                out.surface[k] = 0;
+                out.softness[k] = 1 - this.anchor[CENTRE];
+                continue;
+            }
+            let sum = 0;
+            let reach = 0;
+            let soft = 0;
+            const from = out.node.length;
+            for (const i of geometry.near(qx, qy, qz)) {
+                const d = (qx * geometry.dir[i * 3] + qy * geometry.dir[i * 3 + 1] + qz * geometry.dir[i * 3 + 2]) / s;
+                if (d <= KERNEL)
+                    continue;
+                let kernel = (d - KERNEL) / (1 - KERNEL);
+                kernel *= kernel;
+                out.node.push(i);
+                out.weight.push(f(kernel));
+                sum += kernel;
+                reach += kernel * this.radius[i];
+                soft += kernel * (1 - this.anchor[i]);
+            }
+            if (sum <= 0) {
+                let nearest = 0;
+                let best = -2;
+                for (let i = 0; i < SURFACE; i++) {
+                    const d = qx * geometry.dir[i * 3] + qy * geometry.dir[i * 3 + 1] + qz * geometry.dir[i * 3 + 2];
+                    if (d > best) {
+                        best = d;
+                        nearest = i;
+                    }
+                }
+                out.node.push(nearest);
+                out.weight.push(1);
+                sum = 1;
+                reach = this.radius[nearest];
+                soft = 1 - this.anchor[nearest];
+            }
+            while (out.node.length - from > MOST_NODES) {
+                let weakest = from;
+                for (let j = from + 1; j < out.node.length; j++)
+                    if (out.weight[j] < out.weight[weakest])
+                        weakest = j;
+                const node = out.node[weakest];
+                const w = out.weight[weakest];
+                sum -= w;
+                reach -= w * this.radius[node];
+                soft -= w * (1 - this.anchor[node]);
+                out.node.splice(weakest, 1);
+                out.weight.splice(weakest, 1);
+            }
+            for (let j = from; j < out.node.length; j++)
+                out.weight[j] = f(out.weight[j] / sum);
+            const t = Math.min(1, s / Math.max(1e-6, reach / sum));
+            out.surface[k] = f(t);
+            out.softness[k] = f(t * soft / sum + (1 - t) * (1 - this.anchor[CENTRE]));
+        }
+        out.start[points.length] = out.node.length;
+        return out;
+    }
+}
+function setUnit(x, y, z) {
+    const l = Math.sqrt(x * x + y * y + z * z);
+    return l < 1e-9 ? [0, 1, 0] : [x / l, y / l, z / l];
+}
+// ---------------- the exact damped spring ----------------
+/** Steps one axis by {@code dt}: {@code s[0]} the position and {@code s[1]} the velocity, both replaced (the game's Oscillator) */
+function oscillate(s, a, omega, zeta, dt) {
+    const x = s[0];
+    const v = s[1];
+    if (omega < 1e-6) {
+        s[0] = x + v * dt + 0.5 * a * dt * dt;
+        s[1] = v + a * dt;
+        return;
+    }
+    const rest = a / (omega * omega);
+    const y = x - rest;
+    if (zeta < 1 - 1e-6) {
+        const wd = omega * Math.sqrt(1 - zeta * zeta);
+        const decay = Math.exp(-zeta * omega * dt);
+        const cos = Math.cos(wd * dt);
+        const sin = Math.sin(wd * dt);
+        const b = (v + zeta * omega * y) / wd;
+        s[0] = decay * (y * cos + b * sin) + rest;
+        s[1] = decay * ((b * wd - zeta * omega * y) * cos - (y * wd + zeta * omega * b) * sin);
+    }
+    else if (zeta <= 1 + 1e-6) {
+        const decay = Math.exp(-omega * dt);
+        const b = v + omega * y;
+        s[0] = (y + b * dt) * decay + rest;
+        s[1] = (b - omega * (y + b * dt)) * decay;
+    }
+    else {
+        const root = omega * Math.sqrt(zeta * zeta - 1);
+        const r1 = -zeta * omega + root;
+        const r2 = -zeta * omega - root;
+        const c2 = (v - r1 * y) / (r2 - r1);
+        const c1 = y - c2;
+        const e1 = Math.exp(r1 * dt);
+        const e2 = Math.exp(r2 * dt);
+        s[0] = c1 * e1 + c2 * e2 + rest;
+        s[1] = c1 * r1 * e1 + c2 * r2 * e2;
+    }
+}
+// ---------------- the solver ----------------
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const square = (v) => v * v;
+/** Rounds half to even, as Java's Math.rint does */
+function rint(v) {
+    const r = Math.round(v);
+    return Math.abs(v % 1) === 0.5 && r % 2 !== 0 ? r - 1 : r;
+}
+function normalise(v) {
+    const length = Math.sqrt(dot3(v, v));
+    if (length < 1e-9)
+        return false;
+    for (let i = 0; i < 3; i++)
+        v[i] /= length;
+    return true;
+}
+function perpendicular(u, out) {
+    const x = Math.abs(u[0]) < 0.9;
+    out[0] = x ? 1 : 0;
+    out[1] = 0;
+    out[2] = x ? 0 : 1;
+    const along = dot3(out, u);
+    for (let k = 0; k < 3; k++)
+        out[k] -= along * u[k];
+    normalise(out);
+}
+function softClamp(v, reach, out) {
+    const length = Math.sqrt(dot3(v, v));
+    if (length < 1e-12 || reach <= 0) {
+        for (let i = 0; i < 3; i++)
+            out[i] = v[i];
+        return;
+    }
+    const k = reach * Math.tanh(length / reach) / length;
+    for (let i = 0; i < 3; i++)
+        out[i] = v[i] * k;
+}
+function determinant(r) {
+    return r[0] * (r[4] * r[8] - r[5] * r[7]) - r[1] * (r[3] * r[8] - r[5] * r[6]) + r[2] * (r[3] * r[7] - r[4] * r[6]);
+}
+/** The rotation part of a 3 by 3 matrix (row major) into {@code r}, by averaging it with its inverse transpose until it settles; false when it has none */
+function polar(m, r) {
+    let scaleOf = 0;
+    for (const v of m)
+        scaleOf = Math.max(scaleOf, Math.abs(v));
+    if (scaleOf < 1e-12)
+        return false;
+    for (let i = 0; i < 9; i++)
+        r[i] = m[i] / scaleOf;
+    const next = new Array(9).fill(0);
+    for (let iteration = 0; iteration < 12; iteration++) {
+        const det = determinant(r);
+        if (!(det > 1e-12))
+            return false;
+        next[0] = (r[4] * r[8] - r[5] * r[7]) / det;
+        next[1] = (r[5] * r[6] - r[3] * r[8]) / det;
+        next[2] = (r[3] * r[7] - r[4] * r[6]) / det;
+        next[3] = (r[2] * r[7] - r[1] * r[8]) / det;
+        next[4] = (r[0] * r[8] - r[2] * r[6]) / det;
+        next[5] = (r[1] * r[6] - r[0] * r[7]) / det;
+        next[6] = (r[1] * r[5] - r[2] * r[4]) / det;
+        next[7] = (r[2] * r[3] - r[0] * r[5]) / det;
+        next[8] = (r[0] * r[4] - r[1] * r[3]) / det;
+        for (let i = 0; i < 9; i++)
+            r[i] = (r[i] + next[i]) * 0.5;
+    }
+    return true;
+}
+/** One region's state: the nodes, the lump, and what the last steps measured (world blocks) */
+class FleshRegion {
+    constructor(cage) {
+        this.cage = cage;
+        this.x = new Float64Array(NODES * 3);
+        this.target = new Float64Array(NODES * 3);
+        this.targetBefore = new Float64Array(NODES * 3);
+        this.ownBefore = new Float64Array(NODES * 3);
+        this.shift = new Float64Array(NODES * 3);
+        this.acceleration = new Float64Array(NODES * 3);
+        this.lagVelocity = new Float64Array(NODES * 3);
+        this.displacement = new Float64Array(NODES * 3);
+        this.displacementBefore = new Float64Array(NODES * 3);
+        this.contact = new Float64Array(NODES);
+        this.lump = [0, 0, 0];
+        this.lumpVelocity = [0, 0, 0];
+        this.lumpShown = [0, 0, 0];
+        this.lumpShownBefore = [0, 0, 0];
+        this.lumpOmega = 0;
+        this.initialised = false;
+        this.up = [0, 1, 0];
+        this.tipDirection = [0, 0, 1];
+        this.entityX = 0;
+        this.entityY = 0;
+        this.entityZ = 0;
+        this.softness = 1;
+        this.sizeScale = 1;
+        this.dressed = false;
+        this.legSpeed = 0;
+        this.legPosition = 0;
+        this.animatedHeight = 0;
+        this.heading = 0;
+        this.headingRate = 0;
+        this.headingAcceleration = 0;
+        this.headingKnown = false;
+        this.rise = [0, 0, 0];
+        this.riseAcceleration = 0;
+        this.sway = [0, 0, 0];
+        this.swayAcceleration = 0;
+        this.heightMean = 0;
+        this.heightSwing = 0;
+        this.heightKnown = false;
+        this.linksStale = true;
+        this.planePoint = [0, 0, 0];
+        this.planeNormal = [0, 0, 0];
+        this.planeAllow = 0;
+        this.squeeze = 0;
+        this.paired = false;
+        this.inward = [0, 0, 0];
+        this.force = [0, 0, 0];
+        this.inAxis = [0, 0, 0];
+        this.side = [0, 0, 0];
+        this.result = [0, 0, 0];
+        this.velocity = [0, 0, 0];
+        this.linkLength = new Array(FleshGeometry.get().linkA.length).fill(0);
+    }
+    /** Snaps every node to its target with no motion: the next step starts from rest */
+    reset() {
+        this.initialised = false;
+    }
+    limit(p) {
+        return this.cage.limit * (this.dressed ? p.dressedLimit : 1);
+    }
+    /** Measures the body's acceleration at each node from how its target moved, the turn, and the walk */
+    begin(h) {
+        const n = NODES;
+        this.displacementBefore.set(this.displacement);
+        this.lumpShownBefore[0] = this.lumpShown[0];
+        this.lumpShownBefore[1] = this.lumpShown[1];
+        this.lumpShownBefore[2] = this.lumpShown[2];
+        if (!this.initialised) {
+            this.x.set(this.target);
+            this.targetBefore.set(this.target);
+            this.ownBefore.fill(0);
+            this.acceleration.fill(0);
+            this.lagVelocity.fill(0);
+            this.displacement.fill(0);
+            this.displacementBefore.fill(0);
+            this.lump.fill(0);
+            this.lumpVelocity.fill(0);
+            this.lumpShown.fill(0);
+            this.lumpShownBefore.fill(0);
+            this.rise.fill(0);
+            this.sway.fill(0);
+            this.riseAcceleration = 0;
+            this.swayAcceleration = 0;
+            this.headingKnown = false;
+            this.heightKnown = false;
+            this.initialised = true;
+        }
+        const smooth = 1 - Math.pow(0.5, h / 0.04);
+        for (let i = 0; i < n * 3; i++) {
+            const own = this.target[i] - this.targetBefore[i];
+            const a = (own - this.ownBefore[i]) / (h * h);
+            this.shift[i] = own;
+            this.ownBefore[i] = own;
+            this.acceleration[i] += (a - this.acceleration[i]) * smooth;
+            this.targetBefore[i] = this.target[i];
+        }
+        for (let i = 0; i < n; i++) {
+            const ax = this.acceleration[i * 3];
+            const ay = this.acceleration[i * 3 + 1];
+            const az = this.acceleration[i * 3 + 2];
+            const length = Math.sqrt(ax * ax + ay * ay + az * az);
+            if (length > ACCELERATION_CAP) {
+                const k = ACCELERATION_CAP / length;
+                this.acceleration[i * 3] *= k;
+                this.acceleration[i * 3 + 1] *= k;
+                this.acceleration[i * 3 + 2] *= k;
+            }
+        }
+        const heading = Math.atan2(this.tipDirection[0], this.tipDirection[2]);
+        const turnSmooth = 1 - Math.pow(0.5, h / 0.06);
+        if (this.headingKnown) {
+            let change = heading - this.heading;
+            change -= Math.floor((change + Math.PI) / (2 * Math.PI)) * 2 * Math.PI;
+            const before = this.headingRate;
+            this.headingRate += (change / h - this.headingRate) * turnSmooth;
+            this.headingAcceleration += ((this.headingRate - before) / h - this.headingAcceleration) * turnSmooth;
+        }
+        else {
+            this.headingRate = 0;
+            this.headingAcceleration = 0;
+        }
+        this.heading = heading;
+        this.headingKnown = true;
+        const settle = 1 - Math.pow(0.5, h / 0.5);
+        if (!this.heightKnown) {
+            this.heightMean = this.animatedHeight;
+            this.heightSwing = 0;
+            this.heightKnown = true;
+        }
+        this.heightMean += (this.animatedHeight - this.heightMean) * settle;
+        this.heightSwing += (Math.abs(this.animatedHeight - this.heightMean) - this.heightSwing) * settle;
+    }
+    /** The rise and the sway of a walk at the legs' place, faded where the animation bobs the region itself */
+    gait(p, h) {
+        const own = smoothstep(0.0125, 0.03, this.heightSwing);
+        const speed = Math.max(0, Math.min(1, this.legSpeed));
+        const rise = (1 - own) * p.rise * speed * (1 - Math.cos(1.3324 * this.legPosition)) / 2;
+        const sway = (1 - own) * p.sway * speed * Math.sin(0.6662 * this.legPosition);
+        const smooth = 1 - Math.pow(0.5, h / 0.04);
+        this.rise[2] = this.rise[1];
+        this.rise[1] = this.rise[0];
+        this.rise[0] = rise;
+        this.sway[2] = this.sway[1];
+        this.sway[1] = this.sway[0];
+        this.sway[0] = sway;
+        this.riseAcceleration += ((this.rise[0] - 2 * this.rise[1] + this.rise[2]) / (h * h) - this.riseAcceleration) * smooth;
+        this.swayAcceleration += ((this.sway[0] - 2 * this.sway[1] + this.sway[2]) / (h * h) - this.swayAcceleration) * smooth;
+    }
+    reachPast(points) {
+        let most = -Number.MAX_VALUE;
+        for (let i = 0; i < SURFACE; i++) {
+            const along = (points[i * 3] - this.planePoint[0]) * this.planeNormal[0] + (points[i * 3 + 1] - this.planePoint[1]) * this.planeNormal[1]
+                + (points[i * 3 + 2] - this.planePoint[2]) * this.planeNormal[2];
+            most = Math.max(most, along);
+        }
+        return most;
+    }
+    /** The swing of the whole region: three springs, along up, toward the other of a pair (or forward), and to the side */
+    lumpStep(p, h) {
+        const limit = this.limit(p);
+        const tip = Math.min(1, 0.05 / Math.max(0.05, this.softness) * this.sizeScale);
+        const firm = p.firmness * (this.dressed ? Math.sqrt(p.dressedStiffness) : 1);
+        const swing = Math.sqrt(this.lump[0] * this.lump[0] + this.lump[1] * this.lump[1] + this.lump[2] * this.lump[2]);
+        const stiffening = Math.sqrt(1 + square(swing / Math.max(1e-6, p.stiffen * limit)));
+        const omega = Math.min(OMEGA_MAX, Math.sqrt(tip) / STEP * 0.85 * stiffening * firm);
+        const zeta = this.dressed ? Math.max(p.lumpDamping, 0.4) : p.lumpDamping;
+        const c = CENTRE * 3;
+        const force = this.force;
+        const share = p.inertia * p.lumpShare;
+        for (let k = 0; k < 3; k++)
+            force[k] = -share * this.acceleration[c + k];
+        let tx = this.tipDirection[0];
+        let tz = this.tipDirection[2];
+        const flat = Math.sqrt(tx * tx + tz * tz);
+        if (flat > 1e-6) {
+            tx /= flat;
+            tz /= flat;
+            const sideX = tz;
+            const sideZ = -tx;
+            const turn = 30 * Math.tanh(this.headingRate / 5) + 0.3 * this.headingAcceleration;
+            const lateral = -Math.max(-40, Math.min(40, p.turn * turn));
+            force[0] += lateral * sideX + this.swayAcceleration * -sideX;
+            force[2] += lateral * sideZ + this.swayAcceleration * -sideZ;
+            const spin = 5 * Math.tanh(this.headingRate / 5);
+            const rx = this.target[c] - this.entityX;
+            const rz = this.target[c + 2] - this.entityZ;
+            force[0] += p.turn * spin * spin * rx;
+            force[2] += p.turn * spin * spin * rz;
+        }
+        const u = this.up;
+        const inA = this.inAxis;
+        if (this.paired)
+            for (let k = 0; k < 3; k++)
+                inA[k] = this.inward[k];
+        else
+            for (let k = 0; k < 3; k++)
+                inA[k] = this.tipDirection[k];
+        const along = inA[0] * u[0] + inA[1] * u[1] + inA[2] * u[2];
+        for (let k = 0; k < 3; k++)
+            inA[k] -= along * u[k];
+        if (!normalise(inA))
+            perpendicular(u, inA);
+        const side = this.side;
+        side[0] = u[1] * inA[2] - u[2] * inA[1];
+        side[1] = u[2] * inA[0] - u[0] * inA[2];
+        side[2] = u[0] * inA[1] - u[1] * inA[0];
+        const state = [0, 0];
+        const result = this.result;
+        const velocity = this.velocity;
+        result.fill(0);
+        velocity.fill(0);
+        for (let a = 0; a < 3; a++) {
+            const axis = a === 0 ? u : a === 1 ? inA : side;
+            state[0] = dot3(this.lump, axis);
+            state[1] = dot3(this.lumpVelocity, axis);
+            let w = omega;
+            if (a === 1)
+                w = this.paired ? omega * Math.sqrt(state[0] > 0 ? p.squeezeIn : p.squeezeOut) : omega * Math.sqrt(p.sideStiffness);
+            else if (a === 2)
+                w = omega * Math.sqrt(p.sideStiffness);
+            const reach = Math.min(OMEGA_MAX, w);
+            oscillate(state, dot3(force, axis), reach, zeta, h);
+            for (let k = 0; k < 3; k++) {
+                result[k] += state[0] * axis[k];
+                velocity[k] += state[1] * axis[k];
+            }
+        }
+        const length = Math.sqrt(dot3(result, result));
+        if (length > 2 * limit) {
+            const k = 2 * limit / length;
+            for (let i = 0; i < 3; i++) {
+                result[i] *= k;
+                velocity[i] *= k;
+            }
+        }
+        for (let i = 0; i < 3; i++) {
+            this.lump[i] = result[i];
+            this.lumpVelocity[i] = velocity[i];
+        }
+        this.lumpOmega = omega;
+        softClamp(this.lump, 0.8 * limit, this.lumpShown);
+    }
+    /** Each node's own lag behind its target, riding on the lump: a spring along up and one across */
+    nodesStep(p, h) {
+        const limit = this.limit(p);
+        const tip = Math.min(1, 0.05 / Math.max(0.05, this.softness) * this.sizeScale);
+        const firm = p.firmness * (this.dressed ? Math.sqrt(p.dressedStiffness) : 1);
+        const zetaTip = this.dressed ? Math.max(p.nodeDamping, 0.45) : p.nodeDamping;
+        const nodeShare = p.inertia * (1 - p.lumpShare);
+        const sag = p.gravity / (STEP * STEP);
+        const u = this.up;
+        const before = this.lumpShownBefore;
+        const now = this.lumpShown;
+        const state = [0, 0];
+        for (let i = 0; i < NODES; i++) {
+            const w = this.cage.anchor[i];
+            const soft = 1 - w;
+            const at = i * 3;
+            const ex = this.x[at] - (this.target[at] - this.shift[at]) - before[0] * soft;
+            const ey = this.x[at + 1] - (this.target[at + 1] - this.shift[at + 1]) - before[1] * soft;
+            const ez = this.x[at + 2] - (this.target[at + 2] - this.shift[at + 2]) - before[2] * soft;
+            const k = Math.min(1, tip + (1 - tip) * w);
+            const lag = Math.sqrt(ex * ex + ey * ey + ez * ez);
+            const base = Math.sqrt(k) / STEP * (1 + 0.6 * soft) * firm;
+            let stiffening = Math.sqrt(1 + square(lag / Math.max(1e-6, p.stiffen * limit)));
+            const zeta = zetaTip + (1 - zetaTip) * w * w;
+            // in steps of two percent, as the game does
+            stiffening = 1 + rint((stiffening - 1) * 50) / 50;
+            const omegaUp = Math.min(OMEGA_MAX, base * stiffening);
+            const omegaSide = Math.min(OMEGA_MAX, base * stiffening * Math.sqrt(p.sideStiffness));
+            const ax = -nodeShare * soft * this.acceleration[at];
+            const ay = -nodeShare * soft * this.acceleration[at + 1] - sag * soft - this.riseAcceleration * soft;
+            const az = -nodeShare * soft * this.acceleration[at + 2];
+            const vx = this.lagVelocity[at];
+            const vy = this.lagVelocity[at + 1];
+            const vz = this.lagVelocity[at + 2];
+            const eu = ex * u[0] + ey * u[1] + ez * u[2];
+            const vu = vx * u[0] + vy * u[1] + vz * u[2];
+            const au = ax * u[0] + ay * u[1] + az * u[2];
+            state[0] = eu;
+            state[1] = vu;
+            oscillate(state, au, omegaUp, zeta, h);
+            const eu2 = state[0];
+            const vu2 = state[1];
+            for (let c = 0; c < 3; c++) {
+                const e = (c === 0 ? ex : c === 1 ? ey : ez) - eu * u[c];
+                const v = (c === 0 ? vx : c === 1 ? vy : vz) - vu * u[c];
+                const a = (c === 0 ? ax : c === 1 ? ay : az) - au * u[c];
+                state[0] = e;
+                state[1] = v;
+                oscillate(state, a, omegaSide, zeta, h);
+                this.x[at + c] = this.target[at + c] + now[c] * soft + state[0] + eu2 * u[c];
+                this.lagVelocity[at + c] = state[1] + vu2 * u[c];
+            }
+        }
+    }
+    /** The cage pulled toward its own shape, turned and moved as the nodes are now: it may swing and shift as a whole but keeps its form */
+    shapeStep(p) {
+        const pull = p.shape / Math.max(0.1, p.shapeSoftness * this.softness / Math.max(1e-6, p.softness));
+        if (pull <= 0)
+            return;
+        let total = 0;
+        const cx = [0, 0, 0];
+        const ct = [0, 0, 0];
+        for (let i = 0; i < NODES; i++) {
+            const m = 1 - this.cage.anchor[i];
+            if (m < 0.05)
+                continue;
+            total += m;
+            for (let k = 0; k < 3; k++) {
+                cx[k] += m * this.x[i * 3 + k];
+                ct[k] += m * this.target[i * 3 + k];
+            }
+        }
+        if (total < 1e-9)
+            return;
+        for (let k = 0; k < 3; k++) {
+            cx[k] /= total;
+            ct[k] /= total;
+        }
+        const spread = new Array(9).fill(0);
+        for (let i = 0; i < NODES; i++) {
+            const m = 1 - this.cage.anchor[i];
+            if (m < 0.05)
+                continue;
+            for (let a = 0; a < 3; a++) {
+                const q = this.x[i * 3 + a] - cx[a];
+                for (let b = 0; b < 3; b++)
+                    spread[a * 3 + b] += m * q * (this.target[i * 3 + b] - ct[b]);
+            }
+        }
+        const rotation = new Array(9).fill(0);
+        if (!polar(spread, rotation))
+            return;
+        for (let i = 0; i < NODES; i++) {
+            const m = 1 - this.cage.anchor[i];
+            if (m < 0.05)
+                continue;
+            const qx = this.target[i * 3] - ct[0];
+            const qy = this.target[i * 3 + 1] - ct[1];
+            const qz = this.target[i * 3 + 2] - ct[2];
+            const amount = Math.min(1, pull * m);
+            for (let a = 0; a < 3; a++) {
+                const goal = cx[a] + rotation[a * 3] * qx + rotation[a * 3 + 1] * qy + rotation[a * 3 + 2] * qz;
+                this.x[i * 3 + a] += (goal - this.x[i * 3 + a]) * amount;
+            }
+        }
+    }
+    /** One pass over the cage's links: each kept toward the length its two targets are apart, the freer end moving more */
+    linksStep(p) {
+        const geometry = FleshGeometry.get();
+        const stiffness = p.link;
+        if (stiffness <= 0)
+            return;
+        if (this.linksStale) {
+            for (let l = 0; l < geometry.linkA.length; l++) {
+                const a = geometry.linkA[l] * 3;
+                const b = geometry.linkB[l] * 3;
+                const rx = this.target[b] - this.target[a];
+                const ry = this.target[b + 1] - this.target[a + 1];
+                const rz = this.target[b + 2] - this.target[a + 2];
+                this.linkLength[l] = Math.sqrt(rx * rx + ry * ry + rz * rz);
+            }
+            this.linksStale = false;
+        }
+        for (let l = 0; l < geometry.linkA.length; l++) {
+            const a = geometry.linkA[l];
+            const b = geometry.linkB[l];
+            const wa = 1 - this.cage.anchor[a];
+            const wb = 1 - this.cage.anchor[b];
+            if (wa + wb < 1e-6)
+                continue;
+            const dx = this.x[b * 3] - this.x[a * 3];
+            const dy = this.x[b * 3 + 1] - this.x[a * 3 + 1];
+            const dz = this.x[b * 3 + 2] - this.x[a * 3 + 2];
+            const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (length < 1e-9)
+                continue;
+            const error = (length - this.linkLength[l]) * stiffness / length;
+            const sa = wa / (wa + wb);
+            const sb = wb / (wa + wb);
+            this.x[a * 3] += dx * error * sa;
+            this.x[a * 3 + 1] += dy * error * sa;
+            this.x[a * 3 + 2] += dz * error * sa;
+            this.x[b * 3] -= dx * error * sb;
+            this.x[b * 3 + 1] -= dy * error * sb;
+            this.x[b * 3 + 2] -= dz * error * sb;
+        }
+    }
+    /** Each node softly held within the limit (free to half of it, then ever stiffer, never past it), anything not a number put back, and the displacement kept */
+    settle(p) {
+        const limit = this.limit(p);
+        const free = 0.5 * limit;
+        for (let i = 0; i < NODES; i++) {
+            const at = i * 3;
+            let dx = this.x[at] - this.target[at];
+            let dy = this.x[at + 1] - this.target[at + 1];
+            let dz = this.x[at + 2] - this.target[at + 2];
+            const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (!Number.isFinite(length)) {
+                for (let c = 0; c < 3; c++) {
+                    this.x[at + c] = this.target[at + c];
+                    this.lagVelocity[at + c] = 0;
+                }
+                dx = 0;
+                dy = 0;
+                dz = 0;
+            }
+            else if (length > free) {
+                const k = (free + (limit - free) * Math.tanh((length - free) / (limit - free))) / length;
+                dx *= k;
+                dy *= k;
+                dz *= k;
+                this.x[at] = this.target[at] + dx;
+                this.x[at + 1] = this.target[at + 1] + dy;
+                this.x[at + 2] = this.target[at + 2] + dz;
+            }
+            this.displacement[at] = dx;
+            this.displacement[at + 1] = dy;
+            this.displacement[at + 2] = dz;
+        }
+        for (let k = 0; k < 3; k++) {
+            if (!Number.isFinite(this.lump[k]) || !Number.isFinite(this.lumpVelocity[k])) {
+                this.lump.fill(0);
+                this.lumpVelocity.fill(0);
+                this.lumpShown.fill(0);
+                break;
+            }
+        }
+    }
+    /** Moves the free nodes that have crossed the plane halfway back toward it each step */
+    keepBehind() {
+        for (let i = 0; i < NODES; i++) {
+            if (this.cage.anchor[i] > HELD)
+                continue;
+            const at = i * 3;
+            const past = (this.x[at] - this.planePoint[0]) * this.planeNormal[0] + (this.x[at + 1] - this.planePoint[1]) * this.planeNormal[1]
+                + (this.x[at + 2] - this.planePoint[2]) * this.planeNormal[2] - this.planeAllow;
+            if (past > 0) {
+                const back = past * 0.5;
+                this.x[at] -= this.planeNormal[0] * back;
+                this.x[at + 1] -= this.planeNormal[1] * back;
+                this.x[at + 2] -= this.planeNormal[2] * back;
+                this.contact[i] += back;
+            }
+        }
+    }
+    /**
+     * What presses into the flesh: a free node inside a shape goes straight toward the middle of the flesh until it is clear (never past most of the way there),
+     * and the volume pressed in swells out along the free nodes that are clear, as much as {@code bulge} says. The shapes are in the world, as the nodes are
+     */
+    press(shapes, bulge) {
+        if (shapes.length === 0)
+            return;
+        const probe = [0, 0, 0];
+        const inside = (x, y, z) => {
+            for (const s of shapes) {
+                probe[0] = x;
+                probe[1] = y;
+                probe[2] = z;
+                if ((0,_solvers__WEBPACK_IMPORTED_MODULE_0__.pushOut)(s, probe, PRESS_SKIN))
+                    return true;
+            }
+            return false;
+        };
+        const c = CENTRE * 3;
+        const pressed = new Uint8Array(SURFACE);
+        let depth = 0;
+        for (let i = 0; i < SURFACE; i++) {
+            if (this.cage.anchor[i] > HELD)
+                continue;
+            const at = i * 3;
+            const x = this.x[at];
+            const y = this.x[at + 1];
+            const z = this.x[at + 2];
+            if (!inside(x, y, z))
+                continue;
+            const dx = this.x[c] - x;
+            const dy = this.x[c + 1] - y;
+            const dz = this.x[c + 2] - z;
+            let t = 0.9;
+            if (!inside(x + dx * t, y + dy * t, z + dz * t)) {
+                let lo = 0;
+                let hi = t;
+                for (let k = 0; k < 8; k++) {
+                    const mid = (lo + hi) / 2;
+                    if (inside(x + dx * mid, y + dy * mid, z + dz * mid))
+                        lo = mid;
+                    else
+                        hi = mid;
+                }
+                t = hi;
+            }
+            this.x[at] += dx * t;
+            this.x[at + 1] += dy * t;
+            this.x[at + 2] += dz * t;
+            const moved = t * Math.sqrt(dx * dx + dy * dy + dz * dz);
+            this.contact[i] += moved;
+            depth += moved;
+            pressed[i] = 1;
+        }
+        if (depth <= 0 || bulge <= 0)
+            return;
+        let free = 0;
+        for (let i = 0; i < SURFACE; i++)
+            if (!pressed[i] && this.cage.anchor[i] <= HELD)
+                free++;
+        if (free === 0)
+            return;
+        const out = Math.min(0.03, bulge * depth * 0.3 / free);
+        for (let i = 0; i < SURFACE; i++) {
+            if (pressed[i] || this.cage.anchor[i] > HELD)
+                continue;
+            const at = i * 3;
+            const dx = this.x[at] - this.x[c];
+            const dy = this.x[at + 1] - this.x[c + 1];
+            const dz = this.x[at + 2] - this.x[c + 2];
+            const length = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+            this.x[at] += dx / length * out;
+            this.x[at + 1] += dy / length * out;
+            this.x[at + 2] += dz / length * out;
+        }
+    }
+    /** A kick: a world velocity in blocks per second, taken by the swing and by every node */
+    kick(v) {
+        for (let a = 0; a < 3; a++)
+            this.lumpVelocity[a] += v[a];
+        for (let i = 0; i < NODES; i++)
+            for (let a = 0; a < 3; a++)
+                this.lagVelocity[i * 3 + a] += v[a] * (1 - this.cage.anchor[i]);
+    }
+    get lumpVelocityOf() { return this.lumpVelocity; }
+    get omega() { return this.lumpOmega; }
+    // the pair reads and writes these
+    pairLump() { return { lump: this.lump, velocity: this.lumpVelocity }; }
+    setInward(n) { this.inward[0] = n[0]; this.inward[1] = n[1]; this.inward[2] = n[2]; }
+}
+/** Where the two of a pair meet: the plane halfway between their middles, and which way is in for each */
+function pairPlane(a, b) {
+    const c = CENTRE * 3;
+    let nx = b.target[c] + b.lumpShown[0] - a.target[c] - a.lumpShown[0];
+    let ny = b.target[c + 1] + b.lumpShown[1] - a.target[c + 1] - a.lumpShown[1];
+    let nz = b.target[c + 2] + b.lumpShown[2] - a.target[c + 2] - a.lumpShown[2];
+    const length = Math.sqrt(nx * nx + ny * ny + nz * nz);
+    if (length < 1e-6) {
+        a.paired = false;
+        b.paired = false;
+        return;
+    }
+    nx /= length;
+    ny /= length;
+    nz /= length;
+    for (let k = 0; k < 3; k++) {
+        const middle = (a.target[c + k] + a.lumpShown[k] + b.target[c + k] + b.lumpShown[k]) * 0.5;
+        a.planePoint[k] = middle;
+        b.planePoint[k] = middle;
+    }
+    a.planeNormal[0] = nx;
+    a.planeNormal[1] = ny;
+    a.planeNormal[2] = nz;
+    b.planeNormal[0] = -nx;
+    b.planeNormal[1] = -ny;
+    b.planeNormal[2] = -nz;
+    a.setInward([nx, ny, nz]);
+    b.setInward([-nx, -ny, -nz]);
+    a.planeAllow = Math.max(0, a.reachPast(a.target));
+    b.planeAllow = Math.max(0, b.reachPast(b.target));
+    a.paired = true;
+    b.paired = true;
+}
+/** The two of a pair: kept on their own sides, squeezed apart when pressed together, and moved together when dressed */
+function pairStep(a, b, p, h) {
+    if (!a.paired || !b.paired)
+        return;
+    const A = a.pairLump();
+    const B = b.pairLump();
+    if (a.dressed && b.dressed && p.dressedCouple > 0) {
+        for (let k = 0; k < 3; k++) {
+            const mean = (A.lump[k] + B.lump[k]) * 0.5;
+            const meanVelocity = (A.velocity[k] + B.velocity[k]) * 0.5;
+            A.lump[k] += (mean - A.lump[k]) * p.dressedCouple;
+            B.lump[k] += (mean - B.lump[k]) * p.dressedCouple;
+            A.velocity[k] += (meanVelocity - A.velocity[k]) * p.dressedCouple;
+            B.velocity[k] += (meanVelocity - B.velocity[k]) * p.dressedCouple;
+        }
+    }
+    const n = a.planeNormal;
+    const front = a.reachPast(a.target);
+    const back = b.reachPast(b.target);
+    const gap = Math.max(0, -front - back);
+    const closing = dot3(A.lump, n) - dot3(B.lump, n);
+    const into = closing - gap;
+    a.squeeze = 0;
+    b.squeeze = 0;
+    if (into > 0) {
+        const omega = 0.5 * (a.omega + b.omega) * Math.sqrt(p.squeezeStiffness);
+        const approach = dot3(A.velocity, n) - dot3(B.velocity, n);
+        const push = (omega * omega * into + 2 * 0.6 * omega * approach) * h * 0.5;
+        for (let k = 0; k < 3; k++) {
+            A.velocity[k] -= n[k] * push;
+            B.velocity[k] += n[k] * push;
+        }
+        if (into > SQUEEZE_MAX) {
+            const back2 = (into - SQUEEZE_MAX) * 0.5;
+            for (let k = 0; k < 3; k++) {
+                A.lump[k] -= n[k] * back2;
+                B.lump[k] += n[k] * back2;
+            }
+        }
+        const squeeze = Math.min(1, into / SQUEEZE_MAX);
+        a.squeeze = squeeze;
+        b.squeeze = squeeze;
+    }
+    a.keepBehind();
+    b.keepBehind();
+}
+/**
+ * One step of every region of one flesh, {@link STEP} long (or {@code h}): each region's {@link FleshRegion.target}, up and tip direction must be set. What presses
+ * on it is the caller's: {@code press} is called for each region before it settles, to push the shapes that press it into the cage
+ */
+function fleshStep(regions, p, h = STEP, press) {
+    for (const r of regions) {
+        r.begin(h);
+        r.gait(p, h);
+    }
+    if (regions.length === 2)
+        pairPlane(regions[0], regions[1]);
+    for (const r of regions) {
+        r.lumpStep(p, h);
+        r.nodesStep(p, h);
+        r.shapeStep(p);
+        r.linksStep(p);
+    }
+    if (regions.length === 2)
+        pairStep(regions[0], regions[1], p, h);
+    for (const r of regions) {
+        press === null || press === void 0 ? void 0 : press(r);
+        r.settle(p);
+    }
+}
+// ---------------- the vertices following the cage ----------------
+/** {@code exp(L tanh(ln(1 + volume x) / L))} with {@code L = -ln 0.75}: the same as {@code 1 + volume x} near 1, and never below 0.75 or above 4/3 */
+function stretchOf(x, volume) {
+    const l = -Math.log(0.75);
+    const inner = Math.max(0.05, 1 + volume * x);
+    return Math.exp(l * Math.tanh(Math.log(inner) / l));
+}
+/** The rotation about the unit axis by {@code angle}, row major */
+function rotationAbout(x, y, z, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const k = 1 - c;
+    return [c + x * x * k, x * y * k - z * s, x * z * k + y * s, y * x * k + z * s, c + y * y * k, y * z * k - x * s, z * x * k - y * s, z * y * k + x * s, c + z * z * k];
+}
+/** Every vertex of a region's meshes, following its cage: the cage's blend, the swing turned about the pivot, the stretch that keeps the volume, and the pair's plane */
+class FleshSkin {
+    constructor(cage, binding, rest) {
+        this.cage = cage;
+        this.binding = binding;
+        this.rest = rest;
+        this.smoothed = new Float64Array(NODES * 3);
+    }
+    /** Each vertex's displacement, world, from where the animation puts it */
+    displacements(region, p, frame) {
+        const geometry = FleshGeometry.get();
+        const cage = this.cage;
+        const local = new Float64Array(NODES * 3);
+        for (let i = 0; i < NODES; i++) {
+            const d = frame.toRest([region.displacement[i * 3], region.displacement[i * 3 + 1], region.displacement[i * 3 + 2]]);
+            local[i * 3] = d[0];
+            local[i * 3 + 1] = d[1];
+            local[i * 3 + 2] = d[2];
+        }
+        // each node evened out with its neighbours, so the surface is smooth between them
+        const surface = [0, 0, 0];
+        for (let i = 0; i < SURFACE; i++) {
+            const around = geometry.neighbours[i];
+            let sx = 0;
+            let sy = 0;
+            let sz = 0;
+            for (const j of around) {
+                sx += local[j * 3];
+                sy += local[j * 3 + 1];
+                sz += local[j * 3 + 2];
+            }
+            this.smoothed[i * 3] = local[i * 3] * 0.5 + sx / around.length * 0.5;
+            this.smoothed[i * 3 + 1] = local[i * 3 + 1] * 0.5 + sy / around.length * 0.5;
+            this.smoothed[i * 3 + 2] = local[i * 3 + 2] * 0.5 + sz / around.length * 0.5;
+            surface[0] += local[i * 3];
+            surface[1] += local[i * 3 + 1];
+            surface[2] += local[i * 3 + 2];
+        }
+        const c = CENTRE * 3;
+        for (let k = 0; k < 3; k++)
+            this.smoothed[c + k] = local[c + k] * 0.5 + surface[k] / SURFACE * 0.5;
+        // the lump's swing in the region's frame, and the turn and stretch it makes
+        const m = frame.toRest([region.lumpShown[0], region.lumpShown[1], region.lumpShown[2]]);
+        const t = cage.tip;
+        const ax = t[1] * m[2] - t[2] * m[1];
+        const ay = t[2] * m[0] - t[0] * m[2];
+        const az = t[0] * m[1] - t[1] * m[0];
+        const across = Math.sqrt(ax * ax + ay * ay + az * az);
+        let turn = null;
+        if (p.rigid > 0 && across > 1e-9)
+            turn = rotationAbout(ax / across, ay / across, az / across, p.rigid * across / cage.length);
+        let stretch = null;
+        if (p.volume > 0 && !region.dressed) {
+            const up = cage.up;
+            const out = [t[0], t[1], t[2]];
+            const along = dot3(out, up);
+            for (let k = 0; k < 3; k++)
+                out[k] -= along * up[k];
+            const outLength = Math.sqrt(dot3(out, out));
+            if (outLength > 1e-6) {
+                for (let k = 0; k < 3; k++)
+                    out[k] /= outLength;
+                const down = [-up[0], -up[1], -up[2]];
+                const side = [down[1] * out[2] - down[2] * out[1], down[2] * out[0] - down[0] * out[2], down[0] * out[1] - down[1] * out[0]];
+                const scale = Math.max(1e-6, cage.length);
+                const ld = stretchOf((m[0] * down[0] + m[1] * down[1] + m[2] * down[2]) / scale, p.volume);
+                const lo = stretchOf((m[0] * out[0] + m[1] * out[1] + m[2] * out[2]) / scale, p.volume);
+                const ls = 1 / (ld * lo);
+                stretch = new Array(9).fill(0);
+                for (let a = 0; a < 3; a++) {
+                    for (let b = 0; b < 3; b++)
+                        stretch[a * 3 + b] = (ld - 1) * down[a] * down[b] + (lo - 1) * out[a] * out[b] + (ls - 1) * side[a] * side[b];
+                }
+            }
+        }
+        // the pair's plane in the region's frame
+        let plane = region.paired;
+        let px = 0;
+        let py = 0;
+        let pz = 0;
+        let nx = 0;
+        let ny = 0;
+        let nz = 0;
+        let allow = 0;
+        let edge = 0.025;
+        if (plane) {
+            const point = frame.pointToRest([region.planePoint[0], region.planePoint[1], region.planePoint[2]]);
+            const normal = frame.toRest([region.planeNormal[0], region.planeNormal[1], region.planeNormal[2]]);
+            const scale = Math.sqrt(dot3(normal, normal));
+            if (scale < 1e-9) {
+                plane = false;
+            }
+            else {
+                px = point[0];
+                py = point[1];
+                pz = point[2];
+                nx = normal[0] / scale;
+                ny = normal[1] / scale;
+                nz = normal[2] / scale;
+                allow = region.planeAllow * scale;
+                edge *= scale;
+            }
+        }
+        const out = [];
+        const centre = cage.centre;
+        const pivot = cage.pivot;
+        for (let k = 0; k < this.rest.length; k++) {
+            const [qx, qy, qz] = this.rest[k];
+            let sx = 0;
+            let sy = 0;
+            let sz = 0;
+            for (let j = this.binding.start[k]; j < this.binding.start[k + 1]; j++) {
+                const node = this.binding.node[j] * 3;
+                const w = this.binding.weight[j];
+                sx += this.smoothed[node] * w;
+                sy += this.smoothed[node + 1] * w;
+                sz += this.smoothed[node + 2] * w;
+            }
+            const s = this.binding.surface[k];
+            const soft = this.binding.softness[k];
+            let dx = sx * s + this.smoothed[c] * (1 - s);
+            let dy = sy * s + this.smoothed[c + 1] * (1 - s);
+            let dz = sz * s + this.smoothed[c + 2] * (1 - s);
+            if (turn) {
+                const rx = qx - pivot[0];
+                const ry = qy - pivot[1];
+                const rz = qz - pivot[2];
+                const held = Math.min(1, 2 * soft);
+                dx += (turn[0] * rx + turn[1] * ry + turn[2] * rz - rx) * held - m[0] * soft;
+                dy += (turn[3] * rx + turn[4] * ry + turn[5] * rz - ry) * held - m[1] * soft;
+                dz += (turn[6] * rx + turn[7] * ry + turn[8] * rz - rz) * held - m[2] * soft;
+            }
+            if (stretch) {
+                const rx = qx - centre[0];
+                const ry = qy - centre[1];
+                const rz = qz - centre[2];
+                dx += (stretch[0] * rx + stretch[1] * ry + stretch[2] * rz) * soft;
+                dy += (stretch[3] * rx + stretch[4] * ry + stretch[5] * rz) * soft;
+                dz += (stretch[6] * rx + stretch[7] * ry + stretch[8] * rz) * soft;
+            }
+            if (region.dressed) {
+                const rx = qx - centre[0];
+                const ry = qy - centre[1];
+                const rz = qz - centre[2];
+                const length = Math.sqrt(rx * rx + ry * ry + rz * rz);
+                if (length > 1e-9) {
+                    const outward = (dx * rx + dy * ry + dz * rz) / length;
+                    const room = 0.15 * cage.limit;
+                    if (outward > room) {
+                        const back = (outward - room) / length;
+                        dx -= rx * back;
+                        dy -= ry * back;
+                        dz -= rz * back;
+                    }
+                }
+            }
+            if (plane) {
+                const past = (qx + dx - px) * nx + (qy + dy - py) * ny + (qz + dz - pz) * nz - allow;
+                if (past > 0) {
+                    const kept = past < 2 * edge ? past - past * past / (4 * edge) : edge;
+                    const flattened = past - kept;
+                    dx -= nx * flattened;
+                    dy -= ny * flattened;
+                    dz -= nz * flattened;
+                    let ox = qx + dx - px;
+                    let oy = qy + dy - py;
+                    let oz = qz + dz - pz;
+                    const normal = ox * nx + oy * ny + oz * nz;
+                    ox -= normal * nx;
+                    oy -= normal * ny;
+                    oz -= normal * nz;
+                    const radial = Math.sqrt(ox * ox + oy * oy + oz * oz);
+                    if (radial > 1e-9) {
+                        const rim = p.rim * flattened / radial;
+                        dx += ox * rim;
+                        dy += oy * rim;
+                        dz += oz * rim;
+                    }
+                }
+            }
+            out.push(frame.toWorld([dx * p.weight, dy * p.weight, dz * p.weight]));
+        }
+        return out;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./ts/physics/fleshRig.ts":
+/*!********************************!*\
+  !*** ./ts/physics/fleshRig.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FleshRig: () => (/* binding */ FleshRig),
+/* harmony export */   pieces: () => (/* binding */ pieces)
+/* harmony export */ });
+/* harmony import */ var _cloth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cloth */ "./ts/physics/cloth.ts");
+/* harmony import */ var _flesh__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./flesh */ "./ts/physics/flesh.ts");
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./math */ "./ts/physics/math.ts");
+/**
+ * The flesh of one model in the plugin: for each flesh entry, a cage fitted to the mesh on its bone (a pair of bones, or a mesh that holds two parts, make a pair
+ * that press on each other), stepped on the rig's clock, and every vertex of the mesh following it. The twin of the game's {@code FleshInstance}, without what
+ * presses on it and the body (see {@link ./flesh}). No Blockbench globals
+ */
+
+
+
+const transposeApply = (r, v) => [r[0] * v[0] + r[3] * v[1] + r[6] * v[2], r[1] * v[0] + r[4] * v[1] + r[7] * v[2], r[2] * v[0] + r[5] * v[1] + r[8] * v[2]];
+/**
+ * The connected pieces of a mesh (particles that share a triangle are one piece) that are each a good share of it, as the particles of each; null when it has fewer
+ * than two. A piece inside another's bounds (a tip merged into the mesh of the pouch it sits on) is part of it, and a small piece goes with the big one nearest it
+ */
+function pieces(welded) {
+    var _a, _b;
+    const n = welded.rest.length;
+    const parent = Array.from({ length: n }, (_, i) => i);
+    const find = (i) => {
+        while (parent[i] !== i) {
+            parent[i] = parent[parent[i]];
+            i = parent[i];
+        }
+        return i;
+    };
+    for (let t = 0; t + 2 < welded.triangles.length; t += 3) {
+        parent[find(welded.triangles[t + 1])] = find(welded.triangles[t]);
+        parent[find(welded.triangles[t + 2])] = find(welded.triangles[t]);
+    }
+    const size = new Array(n).fill(0);
+    for (let i = 0; i < n; i++)
+        size[find(i)]++;
+    const threshold = Math.max(6, Math.floor(n / 4));
+    const low = new Map();
+    const high = new Map();
+    for (let i = 0; i < n; i++) {
+        const root = find(i);
+        if (size[root] < threshold)
+            continue;
+        const lo = (_a = low.get(root)) !== null && _a !== void 0 ? _a : [Infinity, Infinity, Infinity];
+        const hi = (_b = high.get(root)) !== null && _b !== void 0 ? _b : [-Infinity, -Infinity, -Infinity];
+        for (let a = 0; a < 3; a++) {
+            lo[a] = Math.min(lo[a], welded.rest[i][a]);
+            hi[a] = Math.max(hi[a], welded.rest[i][a]);
+        }
+        low.set(root, lo);
+        high.set(root, hi);
+    }
+    const volume = (r) => {
+        let v = 1;
+        for (let a = 0; a < 3; a++)
+            v *= Math.max(high.get(r)[a] - low.get(r)[a], 0.01);
+        return v;
+    };
+    const roots = [...low.keys()];
+    for (const a of roots) {
+        for (const b of roots) {
+            if (a === b || find(a) !== a || find(b) !== b)
+                continue;
+            const va = volume(a);
+            const vb = volume(b);
+            if (va > vb || (va === vb && a > b))
+                continue;
+            let share = 1;
+            for (let k = 0; k < 3; k++) {
+                const extent = Math.max(high.get(a)[k] - low.get(a)[k], 0.01);
+                const overlap = Math.min(high.get(a)[k], high.get(b)[k]) - Math.max(low.get(a)[k], low.get(b)[k]);
+                share *= Math.max(0, Math.min(1, overlap / extent));
+            }
+            if (share >= 0.25) {
+                parent[a] = b;
+                size[b] += size[a];
+                for (let k = 0; k < 3; k++) {
+                    high.get(b)[k] = Math.max(high.get(b)[k], high.get(a)[k]);
+                    low.get(b)[k] = Math.min(low.get(b)[k], low.get(a)[k]);
+                }
+            }
+        }
+    }
+    const big = roots.filter(r => find(r) === r);
+    if (big.length < 2)
+        return null;
+    const middle = big.map(() => [0, 0, 0]);
+    const count = big.map(() => 0);
+    for (let i = 0; i < n; i++) {
+        const at = big.indexOf(find(i));
+        if (at < 0)
+            continue;
+        for (let a = 0; a < 3; a++)
+            middle[at][a] += welded.rest[i][a];
+        count[at]++;
+    }
+    middle.forEach((m, b) => { for (let a = 0; a < 3; a++)
+        m[a] /= count[b]; });
+    const out = big.map(() => []);
+    const chosen = new Map();
+    for (let i = 0; i < n; i++) {
+        const root = find(i);
+        let at = big.indexOf(root);
+        if (at < 0) {
+            const known = chosen.get(root);
+            if (known === undefined) {
+                let nearest = Infinity;
+                at = 0;
+                big.forEach((_, b) => {
+                    const d = (middle[b][0] - welded.rest[i][0]) ** 2 + (middle[b][1] - welded.rest[i][1]) ** 2 + (middle[b][2] - welded.rest[i][2]) ** 2;
+                    if (d < nearest) {
+                        nearest = d;
+                        at = b;
+                    }
+                });
+                chosen.set(root, at);
+            }
+            else {
+                at = known;
+            }
+        }
+        out[at].push(i);
+    }
+    return out;
+}
+/** Leaves each rigid piece on the one region whose middle is nearest it */
+function keepCarriedOnNearest(regions) {
+    const best = new Map();
+    for (const r of regions) {
+        for (const c of r.carried) {
+            const middle = [0, 0, 0];
+            for (const v of c.input.rest)
+                for (let a = 0; a < 3; a++)
+                    middle[a] += v[a] / c.input.rest.length;
+            const distance = (middle[0] - r.cage.centre[0]) ** 2 + (middle[1] - r.cage.centre[1]) ** 2 + (middle[2] - r.cage.centre[2]) ** 2;
+            const old = best.get(c.input.key);
+            if (!old || distance < old.distance)
+                best.set(c.input.key, { region: r, distance });
+        }
+    }
+    for (const r of regions)
+        r.carried = r.carried.filter(c => { var _a; return ((_a = best.get(c.input.key)) === null || _a === void 0 ? void 0 : _a.region) === r; });
+}
+class FleshRig {
+    constructor(boneNames, parents, doc, meshes) {
+        this.parts = [];
+        /** What the checker says about the entries, for the panel */
+        this.problems = [];
+        const entries = Object.assign(Object.assign({}, (typeof doc.soft === 'object' && doc.soft !== null ? doc.soft : {})), (typeof doc.flesh === 'object' && doc.flesh !== null ? doc.flesh : {}));
+        const under = (bone, root) => {
+            for (let at = bone; at; at = parents.get(at))
+                if (at === root)
+                    return true;
+            return false;
+        };
+        for (const [name, raw] of Object.entries(entries)) {
+            const entry = (raw !== null && raw !== void 0 ? raw : {});
+            const params = (0,_flesh__WEBPACK_IMPORTED_MODULE_0__.resolveFlesh)(Object.assign({ bone: name }, entry), [], `flesh "${name}"`);
+            const where = `flesh "${name}"`;
+            const regions = [];
+            for (const bone of params.bones.slice(0, 2)) {
+                if (!boneNames.has(bone)) {
+                    this.problems.push(`${where}: bone "${bone}" is not in the model`);
+                    continue;
+                }
+                const below = meshes.filter(m => under(m.bone, bone));
+                const own = below.filter(m => m.bone === bone);
+                // when the root has meshes of its own, the meshes on the bones under it ride on it; when it has none, every mesh under it is flesh
+                const soft = own.length > 0 && !params.nestedSoft ? own : below;
+                const ride = own.length > 0 && !params.nestedSoft ? below.filter(m => m.bone !== bone) : [];
+                for (const boneName of params.carry) {
+                    if (!boneNames.has(boneName))
+                        this.problems.push(`${where}: carries bone "${boneName}", which is not in the model`);
+                    else
+                        ride.push(...meshes.filter(m => m.bone === boneName && !under(m.bone, bone)));
+                }
+                if (soft.length === 0) {
+                    this.problems.push(`${where}: bone "${bone}" has no mesh or cube`);
+                    continue;
+                }
+                const welds = soft.map(input => (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.weld)(input.rest, input.faces));
+                // a mesh that holds two parts is a region for each, when it is the only soft mesh
+                const split = soft.length === 1 ? pieces(welds[0]) : null;
+                const owned = split ? split.map(ids => [ids]) : [soft.map((_, i) => welds[i].rest.map((__, k) => k))];
+                owned.forEach(idsPerMember => {
+                    const members = [];
+                    const rest = [];
+                    idsPerMember.forEach((ids, i) => {
+                        const welded = welds[i];
+                        const vertexOfParticle = new Array(welded.rest.length).fill(-1);
+                        const indexOf = new Array(welded.rest.length).fill(-1);
+                        welded.particleOfVertex.forEach((k, v) => { if (vertexOfParticle[k] < 0)
+                            vertexOfParticle[k] = v; });
+                        ids.forEach(id => { indexOf[id] = rest.length; rest.push(welded.rest[id]); });
+                        members.push({ input: soft[i], welded, vertexOfParticle, ids, indexOf });
+                    });
+                    if (rest.length < 6)
+                        return;
+                    const cage = new _flesh__WEBPACK_IMPORTED_MODULE_0__.FleshCage(rest, params);
+                    const skin = new _flesh__WEBPACK_IMPORTED_MODULE_0__.FleshSkin(cage, cage.bind(rest), rest);
+                    regions.push({
+                        region: new _flesh__WEBPACK_IMPORTED_MODULE_0__.FleshRegion(cage), cage, skin, rest, members, carried: ride.map(input => ({ input, fit: (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.fitParticles)(rest, input.rest) })),
+                        anim: [], fit: null, disp: null, pivotSet: false,
+                    });
+                });
+            }
+            // a mesh that rides on the flesh (a top over a pair) is named by each of the pair's bones, so each of them made a region with it: it rides on the one whose
+            // middle is nearest it, and only that one moves it
+            keepCarriedOnNearest(regions);
+            if (regions.length > 0)
+                this.parts.push({ name, bone: params.bones[0], params, regions });
+        }
+    }
+    /** The flesh that has {@code bone} among its bones: its name, bones, the layers it is pressed by and the model's bones that press it */
+    partOf(bone) {
+        const part = this.parts.find(p => p.params.bones.includes(bone));
+        return part ? { name: part.name, bones: part.params.bones, layers: part.params.collidesWith, presses: part.params.presses } : null;
+    }
+    get count() { return this.parts.reduce((s, p) => s + p.regions.length, 0); }
+    reset() {
+        for (const p of this.parts) {
+            for (const r of p.regions) {
+                r.region.reset();
+                r.fit = null;
+                r.disp = null;
+            }
+        }
+    }
+    /** Where the animation puts each region's particles now: read from the meshes' animated vertices */
+    prepare(animated) {
+        for (const p of this.parts) {
+            for (const r of p.regions) {
+                const anim = [];
+                let ok = true;
+                for (const m of r.members) {
+                    const now = animated.get(m.input.key);
+                    if (!now) {
+                        ok = false;
+                        break;
+                    }
+                    for (const id of m.ids)
+                        anim.push(now[m.vertexOfParticle[id]]);
+                }
+                r.anim = ok ? anim : [];
+            }
+        }
+    }
+    /**
+     * One step with the entity at {@code stepPos}: each region's cage carried by where the animation puts its mesh (a rigid fit of the rest to it), and every
+     * region of a flesh stepped together
+     *
+     * @param place A point of the animation as it is placed on the entity at this step
+     * @param origin Where the animation leaves a bone, as placed at this step, for the swing's pivot
+     */
+    step(stepPos, place, origin, controlsSoftness = 1, pressers) {
+        var _a;
+        for (const p of this.parts) {
+            const live = p.regions.filter(r => r.anim.length > 0);
+            if (live.length === 0)
+                continue;
+            for (const r of live) {
+                const anim = r.anim.map(place);
+                const fit = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.rigidFit)(r.rest, anim);
+                const R = fit.rotation;
+                const t = r.region.target;
+                for (let i = 0; i < _flesh__WEBPACK_IMPORTED_MODULE_0__.NODES; i++) {
+                    const q = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.applyRotation)(R, (0,_math__WEBPACK_IMPORTED_MODULE_2__.sub)([r.cage.rest[i * 3], r.cage.rest[i * 3 + 1], r.cage.rest[i * 3 + 2]], fit.centreFrom));
+                    t[i * 3] = q[0] + fit.centreTo[0];
+                    t[i * 3 + 1] = q[1] + fit.centreTo[1];
+                    t[i * 3 + 2] = q[2] + fit.centreTo[2];
+                }
+                const up = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.applyRotation)(R, r.cage.up);
+                const tip = (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.applyRotation)(R, r.cage.tip);
+                const ul = Math.hypot(...up) || 1;
+                const tl = Math.hypot(...tip) || 1;
+                for (let a = 0; a < 3; a++) {
+                    r.region.up[a] = up[a] / ul;
+                    r.region.tipDirection[a] = tip[a] / tl;
+                }
+                r.region.entityX = stepPos[0];
+                r.region.entityY = stepPos[1];
+                r.region.entityZ = stepPos[2];
+                r.region.animatedHeight = t[_flesh__WEBPACK_IMPORTED_MODULE_0__.CENTRE * 3 + 1] - stepPos[1];
+                r.region.softness = p.params.softness * controlsSoftness;
+                r.region.linksStale = true;
+                // the swing turns about the bone's own pivot, found once from where the animation leaves the bone, unless it is far from the flesh
+                if (!r.pivotSet) {
+                    r.pivotSet = true;
+                    const where = (_a = p.params.pivot) !== null && _a !== void 0 ? _a : (p.params.bonePivot ? origin(p.bone) : null);
+                    if (where && !p.params.pivot) {
+                        const rest = transposeApply(R, (0,_math__WEBPACK_IMPORTED_MODULE_2__.sub)(where, fit.centreTo));
+                        const pivot = [rest[0] + fit.centreFrom[0], rest[1] + fit.centreFrom[1], rest[2] + fit.centreFrom[2]];
+                        const away = Math.hypot(pivot[0] - r.cage.centre[0], pivot[1] - r.cage.centre[1], pivot[2] - r.cage.centre[2]);
+                        if (away <= r.cage.length * 4) {
+                            r.cage.pivot[0] = pivot[0];
+                            r.cage.pivot[1] = pivot[1];
+                            r.cage.pivot[2] = pivot[2];
+                        }
+                    }
+                }
+                r.fit = { centreFrom: fit.centreFrom, centreTo: fit.centreTo, rotation: R };
+                r.disp = null;
+            }
+            const shapes = pressers ? pressers(p.name, p.params) : [];
+            (0,_flesh__WEBPACK_IMPORTED_MODULE_0__.fleshStep)(live.map(r => r.region), p.params, undefined, shapes.length > 0 ? r => r.press(shapes, p.params.bulge) : undefined);
+        }
+    }
+    /** A kick to the flesh of a bone, a world velocity in blocks per second */
+    impulse(bone, v) {
+        for (const p of this.parts) {
+            if (p.bone !== bone && !p.params.bones.includes(bone))
+                continue;
+            for (const r of p.regions)
+                r.region.kick(v);
+        }
+    }
+    frameOf(r) {
+        const f = r.fit;
+        if (!f)
+            return null;
+        return {
+            toRest: v => transposeApply(f.rotation, v),
+            toWorld: v => (0,_cloth__WEBPACK_IMPORTED_MODULE_1__.applyRotation)(f.rotation, v),
+            pointToRest: v => (0,_math__WEBPACK_IMPORTED_MODULE_2__.add)(transposeApply(f.rotation, (0,_math__WEBPACK_IMPORTED_MODULE_2__.sub)(v, f.centreTo)), f.centreFrom),
+        };
+    }
+    displacements(p, r) {
+        if (r.disp)
+            return r.disp;
+        const frame = this.frameOf(r);
+        if (!frame || !r.region.initialised)
+            return null;
+        r.disp = r.skin.displacements(r.region, p.params, frame);
+        return r.disp;
+    }
+    /** The keys of the input meshes that are flesh, or ride on it, for hiding the originals while the preview runs */
+    keys() {
+        return this.parts.flatMap(p => p.regions.flatMap(r => [...r.members.map(m => m.input.key), ...r.carried.map(c => c.input.key)]));
+    }
+    /**
+     * Where each vertex of the mesh with this key is now (blocks): the animated vertex moved by what the cage does there, turned from the last step's frame to
+     * the one it is drawn in. Null when the mesh is not flesh or has not been simulated
+     *
+     * @param animated Where the animation puts the mesh's vertices now
+     * @param back Turns a world direction at the last step into one now
+     */
+    vertices(key, animated, back) {
+        for (const p of this.parts) {
+            for (const r of p.regions) {
+                const disp = this.displacements(p, r);
+                if (!disp)
+                    continue;
+                const member = r.members.find(m => m.input.key === key);
+                if (member) {
+                    return animated.map((v, vertex) => {
+                        const particle = member.welded.particleOfVertex[vertex];
+                        const at = member.indexOf[particle];
+                        return at < 0 ? v : (0,_math__WEBPACK_IMPORTED_MODULE_2__.add)(v, back(disp[at]));
+                    });
+                }
+                const carried = r.carried.find(c => c.input.key === key);
+                if (carried && carried.fit.length > 0) {
+                    const move = [0, 0, 0];
+                    for (const k of carried.fit)
+                        for (let a = 0; a < 3; a++)
+                            move[a] += disp[k][a] / carried.fit.length;
+                    const shift = back(move);
+                    return animated.map(v => (0,_math__WEBPACK_IMPORTED_MODULE_2__.add)(v, shift));
+                }
+            }
+        }
+        return null;
+    }
+    /** A line per flesh for the panel: how many vertices it moves, and how far its swing has gone of its limit */
+    report() {
+        return this.parts.map(p => ({
+            name: p.name,
+            particles: p.regions.reduce((s, r) => s + r.rest.length, 0),
+            swing: Math.max(0, ...p.regions.map(r => Math.hypot(...r.region.lumpShown) / Math.max(1e-9, r.region.limit(p.params)))),
+        }));
+    }
+    /** The turn from the step frame into the frame now: the caller's own {@code qaxisY(entity.yaw - stepYaw)} */
+    static turnOf(entityYaw, stepYaw, v) {
+        return (0,_math__WEBPACK_IMPORTED_MODULE_2__.qrotate)((0,_math__WEBPACK_IMPORTED_MODULE_2__.qaxisY)(entityYaw - stepYaw), v);
+    }
 }
 
 
@@ -12296,7 +14789,9 @@ const qaxisY = (radians) => [0, Math.sin(radians / 2), 0, Math.cos(radians / 2)]
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MOTIONS: () => (/* binding */ MOTIONS),
+/* harmony export */   MOTION_DEFS: () => (/* binding */ MOTION_DEFS),
 /* harmony export */   colliderLines: () => (/* binding */ colliderLines),
+/* harmony export */   defaultMotionOptions: () => (/* binding */ defaultMotionOptions),
 /* harmony export */   limitArc: () => (/* binding */ limitArc),
 /* harmony export */   limitCone: () => (/* binding */ limitCone),
 /* harmony export */   motionAt: () => (/* binding */ motionAt)
@@ -12304,33 +14799,186 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./math */ "./ts/physics/math.ts");
 /** The scripted movements the model is put through in the preview, and the line drawings of colliders. Pure maths; no Blockbench globals */
 
-const MOTIONS = [
-    { id: 'idle', label: 'Stand still' },
-    { id: 'walk', label: 'Walk back and forth' },
-    { id: 'run', label: 'Run and stop' },
-    { id: 'turn', label: 'Turn side to side' },
-    { id: 'spin', label: 'Spin' },
-    { id: 'jump', label: 'Jump' },
+/** The directions a move may go in, for the moves that go along a line */
+const AXIS = [{ id: 0, label: 'Forward' }, { id: 1, label: 'Sideways' }, { id: 2, label: 'Up' }];
+const FACING = [{ id: 0, label: 'No' }, { id: 1, label: 'Yes' }];
+const axisOption = (hint = 'Which way it goes: forward and back, sideways, or up and down.') => ({ id: 'axis', label: 'Direction', min: 0, max: 2, step: 1, value: 0, hint, choices: AXIS });
+const facingOption = (hint) => ({ id: 'facing', label: 'Faces the way it goes', min: 0, max: 1, step: 1, value: 0, hint, choices: FACING });
+const MOTION_DEFS = [
+    { id: 'idle', label: 'Stand still', help: 'No move: only an animation, if one is chosen.', options: [] },
+    {
+        id: 'walk', label: 'Walk back and forth', help: 'Walks to one side and back, at a steady pace.', options: [
+            { id: 'distance', label: 'Distance', min: 0.1, max: 4, step: 0.05, value: 1.4, unit: 'blocks', hint: 'How far it goes each way.' },
+            { id: 'pace', label: 'Pace', min: 0.2, max: 5, step: 0.05, value: 1.3, hint: 'How quickly it goes back and forth.' },
+            axisOption(),
+            facingOption('Turns to face where it is walking, and turns round at each end.'),
+        ],
+    },
+    {
+        id: 'run', label: 'Run and stop', help: 'Speeds up, coasts, stops hard, stands, then goes back.', options: [
+            { id: 'distance', label: 'Distance', min: 0.5, max: 8, step: 0.1, value: 3.36, unit: 'blocks', hint: 'How far the run goes.' },
+            { id: 'cycle', label: 'Cycle', min: 1.5, max: 10, step: 0.1, value: 4, unit: 's', hint: 'How long one run, stop and return takes. Shorter is a harder stop.' },
+            axisOption(),
+        ],
+    },
+    {
+        id: 'turn', label: 'Turn side to side', help: 'Turns on the spot to one side and back.', options: [
+            { id: 'angle', label: 'Angle', min: 5, max: 180, step: 1, value: 51.5, unit: '°', hint: 'How far it turns each way.' },
+            { id: 'pace', label: 'Pace', min: 0.3, max: 8, step: 0.1, value: 2.4, hint: 'How quickly it turns back and forth.' },
+        ],
+    },
+    {
+        id: 'spin', label: 'Spin', help: 'Turns round and round.', options: [
+            { id: 'rate', label: 'Spin speed', min: 0.3, max: 14, step: 0.1, value: 3.2, unit: 'rad/s', hint: 'How fast it turns: 6.28 is one turn a second.' },
+            { id: 'direction', label: 'Turns', min: -1, max: 1, step: 2, value: 1, hint: 'Which way round.', choices: [{ id: 1, label: 'One way' }, { id: -1, label: 'The other' }] },
+        ],
+    },
+    {
+        id: 'jump', label: 'Jump', help: 'Jumps up and lands, again and again.', options: [
+            { id: 'height', label: 'Height', min: 0.1, max: 3, step: 0.05, value: 0.9, unit: 'blocks', hint: 'How high it goes.' },
+            { id: 'pace', label: 'Pace', min: 1, max: 12, step: 0.1, value: 5, hint: 'How quickly it jumps again.' },
+            { id: 'drift', label: 'Travels', min: -2, max: 2, step: 0.05, value: 0, unit: 'blocks/s', hint: 'How fast it goes forward while it jumps (a negative number goes back).' },
+        ],
+    },
+    {
+        id: 'hop', label: 'Bounce', help: 'Small quick bounces, like a jog on the spot.', options: [
+            { id: 'height', label: 'Height', min: 0.02, max: 0.6, step: 0.01, value: 0.15, unit: 'blocks', hint: 'How high each bounce goes.' },
+            { id: 'pace', label: 'Pace', min: 2, max: 24, step: 0.5, value: 8, hint: 'How quickly it bounces.' },
+        ],
+    },
+    {
+        id: 'crouch', label: 'Crouch and rise', help: 'Drops down and comes back up.', options: [
+            { id: 'depth', label: 'Depth', min: 0.05, max: 1.2, step: 0.05, value: 0.5, unit: 'blocks', hint: 'How far it drops.' },
+            { id: 'pace', label: 'Pace', min: 0.2, max: 6, step: 0.1, value: 1.2, hint: 'How quickly it goes down and up.' },
+        ],
+    },
+    {
+        id: 'shake', label: 'Shake', help: 'A quick small shake along a line, to see how it holds on.', options: [
+            { id: 'amount', label: 'Amount', min: 0.01, max: 0.4, step: 0.01, value: 0.08, unit: 'blocks', hint: 'How far each shake goes.' },
+            { id: 'pace', label: 'Pace', min: 4, max: 60, step: 1, value: 25, hint: 'How quickly it shakes.' },
+            axisOption(),
+        ],
+    },
+    {
+        id: 'circle', label: 'Walk in a circle', help: 'Walks round a circle.', options: [
+            { id: 'radius', label: 'Radius', min: 0.2, max: 4, step: 0.05, value: 1.2, unit: 'blocks', hint: 'How wide the circle is.' },
+            { id: 'pace', label: 'Pace', min: 0.2, max: 4, step: 0.05, value: 0.8, hint: 'How quickly it goes round.' },
+            facingOption('Turns along the circle, as someone walking it would.'),
+        ],
+    },
+    {
+        id: 'eight', label: 'Figure of eight', help: 'Walks a figure of eight, so it speeds up, slows and turns both ways.', options: [
+            { id: 'size', label: 'Size', min: 0.2, max: 4, step: 0.05, value: 1, unit: 'blocks', hint: 'How wide the eight is.' },
+            { id: 'pace', label: 'Pace', min: 0.2, max: 4, step: 0.05, value: 0.9, hint: 'How quickly it walks it.' },
+            facingOption('Turns along the path, as someone walking it would.'),
+        ],
+    },
+    {
+        id: 'stutter', label: 'Start and stop', help: 'Moves off, stops dead, waits, and moves back: sudden starts and stops.', options: [
+            { id: 'distance', label: 'Distance', min: 0.1, max: 4, step: 0.05, value: 1.2, unit: 'blocks', hint: 'How far it goes each time.' },
+            { id: 'travel', label: 'Time to go', min: 0.1, max: 3, step: 0.05, value: 0.6, unit: 's', hint: 'How long each move takes. Shorter is a harder start and stop.' },
+            { id: 'hold', label: 'Time standing', min: 0, max: 3, step: 0.05, value: 0.5, unit: 's', hint: 'How long it stands between moves.' },
+            axisOption(),
+        ],
+    },
+    {
+        id: 'knock', label: 'Knock', help: 'Is shoved suddenly and settles back, again and again.', options: [
+            { id: 'distance', label: 'Shove', min: 0.05, max: 2, step: 0.05, value: 0.8, unit: 'blocks', hint: 'How far it is shoved.' },
+            { id: 'every', label: 'Every', min: 0.5, max: 6, step: 0.1, value: 1.5, unit: 's', hint: 'How long between shoves.' },
+            { id: 'settle', label: 'Settles in', min: 0.1, max: 3, step: 0.05, value: 0.6, unit: 's', hint: 'How quickly it comes back.' },
+            axisOption(),
+        ],
+    },
+    {
+        id: 'dance', label: 'Dance', help: 'A bounce, a sway and a turn together.', options: [
+            { id: 'bounce', label: 'Bounce', min: 0, max: 0.5, step: 0.01, value: 0.12, unit: 'blocks', hint: 'How high it bounces.' },
+            { id: 'sway', label: 'Sway', min: 0, max: 1.5, step: 0.05, value: 0.4, unit: 'blocks', hint: 'How far it sways side to side.' },
+            { id: 'turn', label: 'Turn', min: 0, max: 90, step: 1, value: 25, unit: '°', hint: 'How far it turns each way.' },
+            { id: 'pace', label: 'Pace', min: 0.5, max: 8, step: 0.1, value: 2.5, hint: 'How quickly it dances.' },
+        ],
+    },
 ];
-/** Where the model is at {@code t} seconds, blocks and radians */
-function motionAt(kind, t) {
+/** The moves as a list for a menu */
+const MOTIONS = MOTION_DEFS.map(d => ({ id: d.id, label: d.label }));
+/** The settings of every move, at their defaults */
+function defaultMotionOptions() {
+    return Object.fromEntries(MOTION_DEFS.map(d => [d.id, Object.fromEntries(d.options.map(o => [o.id, o.value]))]));
+}
+const smooth = (x) => {
+    const c = Math.max(0, Math.min(1, x));
+    return c * c * (3 - 2 * c);
+};
+/** A point on a line along {@code axis} (0 forward, 1 sideways, 2 up), as a position */
+function along(axis, v) {
+    return axis === 1 ? [v, 0, 0] : axis === 2 ? [0, v, 0] : [0, 0, v];
+}
+/** The turn that faces something going in the direction (x, z): 0 is facing forward (+z) */
+const heading = (x, z) => Math.atan2(x, z);
+/** Where the model is at {@code t} seconds, blocks and radians; {@code options} are the move's settings (what is missing is the default) */
+function motionAt(kind, t, options = {}) {
+    const def = MOTION_DEFS.find(d => d.id === kind);
+    const o = (id) => { var _a, _b, _c; return (_c = (_a = options[id]) !== null && _a !== void 0 ? _a : (_b = def === null || def === void 0 ? void 0 : def.options.find(x => x.id === id)) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : 0; };
     switch (kind) {
-        case 'walk':
-            // back and forth along z with a slow turn at each end: a triangle-ish wave keeps a steady speed between the ends
-            return { pos: [0, 0, 1.4 * Math.sin(t * 1.3)], yaw: 0 };
+        case 'walk': {
+            const a = t * o('pace');
+            const v = o('distance') * Math.sin(a);
+            const axis = o('axis');
+            let yaw = 0;
+            if (o('facing') >= 0.5) {
+                // the way it goes is the sign of its speed, and it turns round smoothly at the ends
+                const h = Math.tanh(6 * Math.cos(a));
+                yaw = axis === 1 ? h * Math.PI / 2 : (1 - h) / 2 * Math.PI;
+            }
+            return { pos: along(axis, v), yaw };
+        }
         case 'run': {
-            // a 4 second cycle: speed up for 1.5 s, coast for 1, stop hard, stand, then back to the start
-            const c = t % 4;
+            // speed up for 3/8 of the cycle, coast for a quarter, stop hard, stand, then back to the start
+            const cycle = o('cycle');
+            const c = (t % cycle) * 4 / cycle;
             const d = c < 1.5 ? 1.6 * c * c : c < 2.5 ? 3.6 + 4.8 * (c - 1.5) : 8.4;
             const back = c > 3 ? (c - 3) * 8.4 : 0;
-            return { pos: [0, 0, (d - back) * 0.4], yaw: 0 };
+            return { pos: along(o('axis'), (d - back) * o('distance') / 8.4), yaw: 0 };
         }
         case 'turn':
-            return { pos: [0, 0, 0], yaw: 0.9 * Math.sin(t * 2.4) };
+            return { pos: [0, 0, 0], yaw: o('angle') * Math.PI / 180 * Math.sin(t * o('pace')) };
         case 'spin':
-            return { pos: [0, 0, 0], yaw: t * 3.2 };
+            return { pos: [0, 0, 0], yaw: t * o('rate') * (o('direction') < 0 ? -1 : 1) };
         case 'jump':
-            return { pos: [0, Math.max(0, 0.9 * Math.sin(t * 5)), 0], yaw: 0 };
+            return { pos: [0, Math.max(0, o('height') * Math.sin(t * o('pace'))), t * o('drift')], yaw: 0 };
+        case 'hop':
+            return { pos: [0, o('height') * Math.abs(Math.sin(t * o('pace') / 2)), 0], yaw: 0 };
+        case 'crouch':
+            return { pos: [0, -o('depth') * (0.5 - 0.5 * Math.cos(t * o('pace'))), 0], yaw: 0 };
+        case 'shake':
+            return { pos: along(o('axis'), o('amount') * Math.sin(t * o('pace'))), yaw: 0 };
+        case 'circle': {
+            const a = t * o('pace');
+            const r = o('radius');
+            // round a circle that starts at the origin; the way it goes is the slope of the path
+            return { pos: [r * Math.sin(a), 0, r * (Math.cos(a) - 1)], yaw: o('facing') >= 0.5 ? heading(Math.cos(a), -Math.sin(a)) : 0 };
+        }
+        case 'eight': {
+            const a = t * o('pace');
+            const s = o('size');
+            return { pos: [s * Math.sin(a), 0, s * Math.sin(2 * a) / 2], yaw: o('facing') >= 0.5 ? heading(Math.cos(a), Math.cos(2 * a)) : 0 };
+        }
+        case 'stutter': {
+            const go = Math.max(0.05, o('travel'));
+            const hold = o('hold');
+            const c = t % (2 * (go + hold));
+            const s = c < go ? smooth(c / go) : c < go + hold ? 1 : c < 2 * go + hold ? 1 - smooth((c - go - hold) / go) : 0;
+            return { pos: along(o('axis'), o('distance') * s), yaw: 0 };
+        }
+        case 'knock': {
+            const c = t % o('every');
+            const rise = 0.08;
+            const s = c < rise ? smooth(c / rise) : Math.exp(-(c - rise) * 3 / Math.max(0.05, o('settle')));
+            return { pos: along(o('axis'), o('distance') * s), yaw: 0 };
+        }
+        case 'dance': {
+            const a = t * o('pace');
+            return { pos: [o('sway') * Math.sin(a / 2), o('bounce') * Math.abs(Math.sin(a)), 0], yaw: o('turn') * Math.PI / 180 * Math.sin(a / 2 + 1) };
+        }
         default:
             return { pos: [0, 0, 0], yaw: 0 };
     }
@@ -12578,9 +15226,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PhysicsRig: () => (/* binding */ PhysicsRig),
 /* harmony export */   qaxisY: () => (/* reexport safe */ _math__WEBPACK_IMPORTED_MODULE_0__.qaxisY)
 /* harmony export */ });
-/* harmony import */ var _autoColliders__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./autoColliders */ "./ts/physics/autoColliders.ts");
+/* harmony import */ var _autoColliders__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./autoColliders */ "./ts/physics/autoColliders.ts");
 /* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./math */ "./ts/physics/math.ts");
 /* harmony import */ var _cloth__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./cloth */ "./ts/physics/cloth.ts");
+/* harmony import */ var _fleshRig__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fleshRig */ "./ts/physics/fleshRig.ts");
 /* harmony import */ var _preview__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./preview */ "./ts/physics/preview.ts");
 /* harmony import */ var _solvers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./solvers */ "./ts/physics/solvers.ts");
 /**
@@ -12589,6 +15238,7 @@ __webpack_require__.r(__webpack_exports__);
  * (its pivot, its world orientation, its local rotation) as the animation left it, and the rig answers with a new local rotation (and scale) for the bones it
  * drives. The Blockbench tab feeds it three.js matrices; the tests feed it a hand-built skeleton. No Blockbench globals
  */
+
 
 
 
@@ -12727,17 +15377,17 @@ class PhysicsRig {
                 points: [], orientation: [], animatedLocal: [], tipLocal: [], rest: [], parentOrientation: [0, 0, 0, 1], output: null,
             });
         }
-        for (const flesh of [false, true]) {
-            for (const [name, entry] of Object.entries((_g = (flesh ? doc.flesh : doc.cloth)) !== null && _g !== void 0 ? _g : {})) {
+        for (const flesh of [false]) {
+            for (const [name, entry] of Object.entries((_g = doc.cloth) !== null && _g !== void 0 ? _g : {})) {
                 const params = (0,_cloth__WEBPACK_IMPORTED_MODULE_3__.resolveCloth)(Object.assign({ bone: name }, (entry !== null && entry !== void 0 ? entry : {})), flesh);
                 const where = `${flesh ? 'flesh' : 'cloth'} "${name}"`;
                 if (!names.has(params.bone)) {
                     this.problems.push(`${where}: bone "${params.bone}" is not in the model`);
                     continue;
                 }
-                const own = meshes.filter(m => m.bone === params.bone);
+                const own = meshes.filter(m => m.bone === params.bone && !m.cube);
                 if (own.length === 0) {
-                    this.problems.push(`${where}: bone "${params.bone}" has no mesh (cloth and flesh are made from a mesh, not from cubes)`);
+                    this.problems.push(`${where}: bone "${params.bone}" has no mesh (cloth is made from a mesh, not from cubes)`);
                     continue;
                 }
                 own.forEach((input, index) => {
@@ -12761,7 +15411,7 @@ class PhysicsRig {
                             this.problems.push(`${where}: carries bone "${boneName}", which is not in the model`);
                             continue;
                         }
-                        for (const other of meshes.filter(m => m.bone === boneName))
+                        for (const other of meshes.filter(m => m.bone === boneName && !m.cube))
                             carried.push({ input: other, fit: (0,_cloth__WEBPACK_IMPORTED_MODULE_3__.fitParticles)(welded.rest, other.rest) });
                     }
                     this.cloths.push({
@@ -12771,6 +15421,9 @@ class PhysicsRig {
                 });
             }
         }
+        // flesh: a cage fitted to the mesh on each bone, that every vertex follows
+        this.fleshRig = new _fleshRig__WEBPACK_IMPORTED_MODULE_4__.FleshRig(names, this.parents, doc, meshes);
+        this.problems.push(...this.fleshRig.problems);
         for (const c of Array.isArray(doc.colliders) ? doc.colliders : []) {
             if (c && names.has(c.bone) && ['sphere', 'capsule', 'box'].includes(c.shape)) {
                 this.authored.push(Object.assign({ bone: c.bone, shape: c.shape, a: ((_j = (_h = c.center) !== null && _h !== void 0 ? _h : c.from) !== null && _j !== void 0 ? _j : [0, 0, 0]), b: ((_l = (_k = c.size) !== null && _k !== void 0 ? _k : c.to) !== null && _l !== void 0 ? _l : [0, 0, 0]), radius: typeof c.radius === 'number' ? c.radius : 0, layer: typeof c.layer === 'string' ? c.layer : 'body' }, (c.shape === 'box' && Array.isArray(c.rotation) ? { rotation: c.rotation } : {})));
@@ -12781,13 +15434,13 @@ class PhysicsRig {
         const auto = doc.autoColliders;
         const options = typeof auto === 'object' && auto !== null
             ? {
-                maxCubes: typeof auto.maxCubes === 'number' ? auto.maxCubes : _autoColliders__WEBPACK_IMPORTED_MODULE_4__.DEFAULT_AUTO.maxCubes,
+                maxCubes: typeof auto.maxCubes === 'number' ? auto.maxCubes : _autoColliders__WEBPACK_IMPORTED_MODULE_5__.DEFAULT_AUTO.maxCubes,
                 exclude: Array.isArray(auto.exclude) ? auto.exclude.map(String) : [],
-                layer: typeof auto.layer === 'string' ? auto.layer : _autoColliders__WEBPACK_IMPORTED_MODULE_4__.DEFAULT_AUTO.layer,
-                maxShapes: typeof auto.maxShapes === 'number' ? auto.maxShapes : _autoColliders__WEBPACK_IMPORTED_MODULE_4__.DEFAULT_AUTO.maxShapes,
+                layer: typeof auto.layer === 'string' ? auto.layer : _autoColliders__WEBPACK_IMPORTED_MODULE_5__.DEFAULT_AUTO.layer,
+                maxShapes: typeof auto.maxShapes === 'number' ? auto.maxShapes : _autoColliders__WEBPACK_IMPORTED_MODULE_5__.DEFAULT_AUTO.maxShapes,
                 modes: typeof auto.bones === 'object' && auto.bones !== null ? auto.bones : {},
             }
-            : _autoColliders__WEBPACK_IMPORTED_MODULE_4__.DEFAULT_AUTO;
+            : _autoColliders__WEBPACK_IMPORTED_MODULE_5__.DEFAULT_AUTO;
         const forced = typeof auto === 'boolean' ? auto : typeof auto === 'object' && auto !== null && typeof auto.enabled === 'boolean' ? auto.enabled : null;
         // made whenever a part collides with the body, except on bones that have shapes of their own (the game's rule)
         if (forced !== null && forced !== void 0 ? forced : wantsBody)
@@ -12795,7 +15448,7 @@ class PhysicsRig {
     }
     get springCount() { return this.springs.length; }
     get chainCount() { return this.chains.length; }
-    get clothCount() { return this.cloths.length; }
+    get clothCount() { return this.cloths.length + this.fleshRig.count; }
     get colliderCount() { return this.authored.length + this.auto.length; }
     /** The shapes made from the model, for drawing them apart from the authored ones */
     madeColliders() {
@@ -12819,6 +15472,7 @@ class PhysicsRig {
         }
         for (const c of this.cloths)
             c.state.initialised = false;
+        this.fleshRig.reset();
         this.kinematics.reset();
         this.last = null;
         this.history = [];
@@ -12849,6 +15503,7 @@ class PhysicsRig {
                 for (let a = 0; a < 3; a++)
                     chain.state.prev[k][a] -= v[a] * _solvers__WEBPACK_IMPORTED_MODULE_2__.STEP;
         }
+        this.fleshRig.impulse(name, v);
         for (const c of this.cloths) {
             if (c.bone !== name || !c.state.initialised)
                 continue;
@@ -12999,9 +15654,9 @@ class PhysicsRig {
         const f = this.filters.get(part);
         if (!f)
             return true;
-        if (f.ignore.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_4__.matches)(p, bone)))
+        if (f.ignore.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.matches)(p, bone)))
             return false;
-        return f.only.length === 0 || f.only.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_4__.matches)(p, bone));
+        return f.only.length === 0 || f.only.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.matches)(p, bone));
     }
     /** The spring bone or chain that {@code bone} is part of: its name, its bones and the layers it collides with, or null */
     partOf(bone) {
@@ -13011,6 +15666,9 @@ class PhysicsRig {
         const chain = this.chains.find(c => c.bones.includes(bone));
         if (chain)
             return { name: chain.name, bones: chain.bones, layers: chain.settings.collidesWith };
+        const flesh = this.fleshRig.partOf(bone);
+        if (flesh)
+            return flesh;
         const soft = this.cloths.find(c => c.bone === bone);
         return soft ? { name: soft.name.split('#')[0], bones: [soft.bone], layers: soft.params.collidesWith } : null;
     }
@@ -13022,7 +15680,10 @@ class PhysicsRig {
         const part = this.partOf(bone);
         if (!part || !part.layers.includes(spec.layer))
             return false;
-        if (generated && part.bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_4__.isRelated)(spec.bone, b, this.parents)))
+        // a flesh rests against the body of the bones that do not press it
+        if (part.presses && spec.layer === 'body' && !part.presses.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.matches)(p, spec.bone)))
+            return false;
+        if (generated && part.bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.isRelated)(spec.bone, b, this.parents)))
             return false;
         return this.allows(part.name, spec.bone);
     }
@@ -13035,12 +15696,36 @@ class PhysicsRig {
         const look = (spec, generated) => {
             if (!part.layers.includes(spec.layer) || out.includes(spec.bone))
                 return;
-            if (generated && part.bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_4__.isRelated)(spec.bone, b, this.parents)))
+            if (part.presses && spec.layer === 'body' && !part.presses.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.matches)(p, spec.bone)))
+                return;
+            if (generated && part.bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.isRelated)(spec.bone, b, this.parents)))
                 return;
             out.push(spec.bone);
         };
         this.authored.forEach(s => look(s, false));
         this.auto.forEach(s => look(s, true));
+        return out;
+    }
+    /**
+     * The shapes that press into a flesh, in the world: the model's own shapes on the bones its {@code presses} list names (an arm, a hand), shapes of the layers it
+     * is pressed by (other models, players), and the floor and test shapes when blocks press it. Its own bones never do, and its allow and deny lists are kept
+     */
+    pressersFor(name, params) {
+        const out = [];
+        const layers = params.collidesWith;
+        for (const { spec, shape } of this.placed) {
+            if (params.bones.some(b => b === spec.bone || (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.isRelated)(spec.bone, b, this.parents)) || !this.allows(name, spec.bone))
+                continue;
+            const pressing = spec.layer === 'body' ? layers.includes('body') && params.presses.some(p => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.matches)(p, spec.bone)) : layers.includes(spec.layer);
+            if (pressing)
+                out.push(shape);
+        }
+        if (layers.includes('world')) {
+            const floor = this.floorShape();
+            if (floor)
+                out.push(floor);
+            out.push(...this.props);
+        }
         return out;
     }
     shapesFor(part, bones, layers, restPoints, radius) {
@@ -13049,7 +15734,7 @@ class PhysicsRig {
             if (!layers.includes(spec.layer) || !this.allows(part, spec.bone))
                 continue;
             if (shape.generated) {
-                if (bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_4__.isRelated)(spec.bone, b, this.parents)))
+                if (bones.some(b => (0,_autoColliders__WEBPACK_IMPORTED_MODULE_5__.isRelated)(spec.bone, b, this.parents)))
                     continue;
                 const probe = [0, 0, 0];
                 let resting = false;
@@ -13203,6 +15888,7 @@ class PhysicsRig {
     }
     // ---------------- cloth and flesh ----------------
     prepareCloth() {
+        this.fleshRig.prepare(this.clothAnimated);
         for (const c of this.cloths) {
             const now = this.clothAnimated.get(c.input.key);
             c.animNow = now ? c.vertexOfParticle.map(v => now[v]) : [];
@@ -13211,6 +15897,7 @@ class PhysicsRig {
     stepCloth(stepPos, stepYaw, entityDelta) {
         const turn = (0,_math__WEBPACK_IMPORTED_MODULE_0__.qaxisY)(stepYaw - this.entity.yaw);
         const place = (p) => (0,_math__WEBPACK_IMPORTED_MODULE_0__.add)(stepPos, (0,_math__WEBPACK_IMPORTED_MODULE_0__.qrotate)(turn, (0,_math__WEBPACK_IMPORTED_MODULE_0__.sub)(p, this.entity.pos)));
+        this.fleshRig.step(stepPos, place, bone => { var _a, _b; return (_b = (_a = this.frames.get(bone)) === null || _a === void 0 ? void 0 : _a.origin) !== null && _b !== void 0 ? _b : null; }, 1, (name, params) => this.pressersFor(name, params));
         for (const c of this.cloths) {
             if (c.animNow.length === 0)
                 continue;
@@ -13234,6 +15921,13 @@ class PhysicsRig {
      * one, or has not been simulated yet. For a carried mesh: the animated vertices moved by the one rigid motion of the particles around it
      */
     clothVertices(key) {
+        const animated = this.clothAnimated.get(key);
+        if (animated) {
+            const turn = (0,_math__WEBPACK_IMPORTED_MODULE_0__.qaxisY)(this.entity.yaw - this.stepYaw);
+            const flesh = this.fleshRig.vertices(key, animated, d => (this.stepKnown ? (0,_math__WEBPACK_IMPORTED_MODULE_0__.qrotate)(turn, d) : d));
+            if (flesh)
+                return flesh;
+        }
         for (const c of this.cloths) {
             if (!c.state.initialised)
                 continue;
@@ -13250,21 +15944,22 @@ class PhysicsRig {
     }
     /** Which input meshes are simulated or carried (their keys), for hiding the originals while the preview runs */
     clothKeys() {
-        return this.cloths.flatMap(c => [c.input.key, ...c.carried.map(k => k.input.key)]);
+        return [...this.cloths.flatMap(c => [c.input.key, ...c.carried.map(k => k.input.key)]), ...this.fleshRig.keys()];
     }
     /** A line per cloth or flesh for the panel: how many particles, and how far the worst edge has stretched */
     clothReport() {
-        return this.cloths.map(c => {
-            let worst = 0;
-            if (c.state.initialised) {
-                for (let e = 0; e < c.topology.edgeA.length; e++) {
-                    const r = c.topology.edgeRest[e];
-                    if (r > 1e-9)
-                        worst = Math.max(worst, Math.abs(Math.hypot(...((0,_math__WEBPACK_IMPORTED_MODULE_0__.sub)(c.state.x[c.topology.edgeA[e]], c.state.x[c.topology.edgeB[e]]))) - r) / r);
+        const flesh = this.fleshRig.report().map(f => ({ name: f.name, flesh: true, particles: f.particles, worstEdge: f.swing }));
+        return [...flesh, ...this.cloths.map(c => {
+                let worst = 0;
+                if (c.state.initialised) {
+                    for (let e = 0; e < c.topology.edgeA.length; e++) {
+                        const r = c.topology.edgeRest[e];
+                        if (r > 1e-9)
+                            worst = Math.max(worst, Math.abs(Math.hypot(...((0,_math__WEBPACK_IMPORTED_MODULE_0__.sub)(c.state.x[c.topology.edgeA[e]], c.state.x[c.topology.edgeB[e]]))) - r) / r);
+                    }
                 }
-            }
-            return { name: c.name, flesh: c.flesh, particles: c.welded.rest.length, worstEdge: worst };
-        });
+                return { name: c.name, flesh: c.flesh, particles: c.welded.rest.length, worstEdge: worst };
+            })];
     }
     // ---------------- output ----------------
     output() {
@@ -13673,6 +16368,903 @@ function chainStep(st, p, h, anim, rest, entityDelta, colliders) {
 
 /***/ }),
 
+/***/ "./ts/physicsComponents.ts":
+/*!*********************************!*\
+  !*** ./ts/physicsComponents.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   WINDOWS: () => (/* binding */ WINDOWS),
+/* harmony export */   windowComponent: () => (/* binding */ windowComponent)
+/* harmony export */ });
+/* harmony import */ var _physicsPanels__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physicsPanels */ "./ts/physicsPanels.ts");
+/* harmony import */ var _physics_motion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./physics/motion */ "./ts/physics/motion.ts");
+/* harmony import */ var _physics_edit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./physics/edit */ "./ts/physics/edit.ts");
+/**
+ * What the windows of the Physics tab are made of: the small components (a section, a slider, a tick box, joined buttons, a list of bones), the values every window
+ * can compute from the state, and the methods that pass what the user does to the session. Each window is one component built from these around its own template.
+ * The state ({@code ui}) is shared, so all of the windows show the same thing
+ */
+
+
+
+const TEMPLATES = { simulate: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.SIMULATE_TEMPLATE, bones: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.BONES_TEMPLATE, properties: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.PROPERTIES_TEMPLATE, shapes: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.SHAPES_TEMPLATE, objects: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.OBJECTS_TEMPLATE, json: _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.JSON_TEMPLATE };
+const COMPONENTS = {
+    /** A collapsible section: a header that folds its body, with a line saying what it is for */
+    'phys-sec': {
+        props: ['title', 'open', 'badge', 'icon', 'desc', 'sub'],
+        template: `<div class="ph-sec" :class="{ sub: sub !== undefined && sub !== false }">
+            <div class="ph-sec-head" @click="$emit('toggle')"><i class="material-icons">{{ open ? 'expand_more' : 'chevron_right' }}</i><i class="material-icons" v-if="icon">{{ icon }}</i>
+              <span class="ph-sec-title">{{ title }}</span><span class="ph-sec-badge" v-if="badge">{{ badge }}</span></div>
+            <div class="ph-sec-desc" v-if="open && desc">{{ desc }}</div>
+            <div class="ph-sec-body" v-if="open"><slot></slot></div></div>`,
+    },
+    /** A number with a slider and a box to type it in; its description under it when the descriptions are on */
+    'phys-slider': {
+        props: ['label', 'hint', 'help', 'min', 'max', 'step', 'value', 'unit', 'base'],
+        computed: {
+            /** Whether it is not at its default */
+            changed() {
+                const base = this.base;
+                return base !== undefined && base !== null && Math.abs(Number(this.value) - Number(base)) > (Number(this.step) || 0.01) / 2;
+            },
+        },
+        methods: {
+            shown(of) {
+                const v = Number(of !== undefined ? of : this.value);
+                const step = Number(this.step) || 0.01;
+                const places = Math.min(4, Math.max(0, Math.ceil(-Math.log10(step) - 1e-9)));
+                return Number.isFinite(v) ? v.toFixed(places) : '';
+            },
+        },
+        template: `<div class="ph-slider" :title="hint">
+            <div class="ph-slider-top"><label>{{ label }}</label><input type="number" :step="step" :value="shown()" @change="$emit('input', Number($event.target.value))"><span class="ph-unit" v-if="unit">{{ unit }}</span>
+              <button class="ph-reset" :class="{ off: !changed }" :disabled="!changed" @click="$emit('input', base)" :title="changed ? 'Put it back to its default (' + shown(base) + ')' : 'It is at its default'"><i class="material-icons">undo</i></button></div>
+            <input type="range" :min="min" :max="max" :step="step" :value="value" @input="$emit('input', Number($event.target.value))">
+            <div class="ph-help" v-if="help && hint">{{ hint }}</div></div>`,
+    },
+    /** A tick box with its label, and what it does under it */
+    'phys-check': {
+        props: ['label', 'hint', 'help', 'value'],
+        template: `<label class="ph-check" :title="hint"><span class="ph-check-row"><input type="checkbox" :checked="value" @change="$emit('input', $event.target.checked)"><span>{{ label }}</span></span>
+            <div class="ph-help" v-if="help && hint">{{ hint }}</div></label>`,
+    },
+    /** One choice of a few, as joined buttons */
+    'phys-seg': {
+        props: ['options', 'value'],
+        template: `<div class="ph-seg"><button v-for="o in options" :key="o.id" :class="{ on: o.id === value }" :disabled="o.disabled" :title="o.title" @click="$emit('input', o.id)">
+            <i class="material-icons" v-if="o.icon">{{ o.icon }}</i>{{ o.label }}</button></div>`,
+    },
+    /** A list of bones as chips that can be taken off, and the one way bones are chosen everywhere: the button picks them in the view or in the Bones window, where the ones that cannot be picked are greyed out */
+    'phys-bones': {
+        props: ['items', 'active', 'all', 'limit'],
+        computed: {
+            shown() {
+                return this.items.slice(0, this.limit || 12);
+            },
+            more() {
+                return Math.max(0, this.items.length - (this.limit || 12));
+            },
+        },
+        template: `<div class="ph-bones-list">
+            <div class="ph-chips"><span class="ph-all" v-if="all">{{ all }}</span>
+              <template v-else><span class="ph-pick" v-for="b in shown" :key="b">{{ b }}<i class="material-icons" @click.stop="$emit('remove', b)" title="Take it off">close</i></span>
+              <span class="ph-hint" v-if="more">and {{ more }} more</span>
+              <span class="ph-hint" v-if="!items.length"><slot></slot></span></template></div>
+            <div class="ph-tools"><button class="ph-chip" :class="{ on: active }" @click="$emit('pick')" title="Click bones in the view or in the Bones window; the ones that cannot be picked here are greyed out"><i class="material-icons">touch_app</i>{{ active ? 'Done' : 'Pick bones' }}</button>
+              <slot name="tools"></slot></div></div>`,
+    },
+};
+/** One window's component: its template, the shared state, and what it can compute and do */
+function windowComponent(id, ui, session, openPhysicsJson) {
+    return {
+        template: TEMPLATES[id],
+        data() {
+            return { ui };
+        },
+        computed: {
+            kindOptions() {
+                return _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.KIND_OPTIONS.map(o => (Object.assign(Object.assign({}, o), { disabled: (o.id === 'cloth' && !ui.hasMesh && ui.kind !== 'cloth') || (o.id === 'flesh' && !ui.hasShape && ui.kind !== 'flesh'), title: o.id === 'cloth' && !ui.hasMesh && ui.kind !== 'cloth' ? 'This bone has no mesh. Cloth is made from the vertices of a mesh, not from cubes.'
+                        : o.id === 'flesh' && !ui.hasShape && ui.kind !== 'flesh' ? 'This bone has no mesh or cube, and none of the bones under it have, to make flesh from.' : o.title })));
+            },
+            kindHelp() {
+                return _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.KIND_HELP[ui.kind];
+            },
+            /** The ready-made looks of the picked kind */
+            looks() {
+                if (ui.kind === 'flesh')
+                    return ui.fleshLooks;
+                if (ui.kind === 'cloth')
+                    return ui.softLooks.filter((l) => l.kind === 'cloth');
+                return ui.looks.filter((l) => l.kind === ui.kind);
+            },
+            groups() {
+                const all = ui.kind === 'spring' ? _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.SPRING_GROUPS : ui.kind === 'chain' ? _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.CHAIN_GROUPS : ui.kind === 'cloth' ? _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.CLOTH_GROUPS : ui.kind === 'flesh' ? _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.FLESH_GROUPS : [];
+                return all.filter(g => g.when !== 'pair' || ui.flesh.bones.length > 1);
+            },
+            earlyGroups() {
+                return this.groups.filter((g) => !g.late);
+            },
+            lateGroups() {
+                return this.groups.filter((g) => g.late);
+            },
+            /** The controls of the picked part, whatever its kind */
+            model() {
+                return ui.kind === 'flesh' ? ui.flesh : ui.kind === 'cloth' ? ui.soft : ui.controls;
+            },
+            /** The other bone of the picked flesh's pair, or none */
+            partner() {
+                var _a;
+                return (_a = ui.flesh.bones.find((b) => b !== ui.selected)) !== null && _a !== void 0 ? _a : '';
+            },
+            /** The three collision ticks, as a label and what it means */
+            /** The default of every number of the picked part: those of its look, the ones to put a slider back to */
+            defaults() {
+                if (ui.kind === 'flesh')
+                    return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_1__.fleshControls)({ flesh: { x: { bone: 'x', preset: ui.flesh.preset } } }, 'x');
+                if (ui.kind === 'cloth')
+                    return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_1__.softControls)({}, '', 'cloth');
+                return ui.kind === 'chain' ? _physics_edit__WEBPACK_IMPORTED_MODULE_1__.CHAIN_DEFAULTS : _physics_edit__WEBPACK_IMPORTED_MODULE_1__.SPRING_DEFAULTS;
+            },
+            /** The bones it reacts to, as the list shows them: a line when it is all of them */
+            collideAll() {
+                const n = ui.candidates.length;
+                return n > 0 && ui.candidates.every((b) => session.isTicked(b)) ? `Every bone with a shape (${n})` : '';
+            },
+            collideItems() {
+                return ui.candidates.filter((b) => session.isTicked(b));
+            },
+            collideLabels() {
+                if (ui.kind === 'flesh') {
+                    return [
+                        ['Rests on its own body', 'The rest of the model is solid for it, except the bones named in Pressed by.'],
+                        ['Is pressed by the floor and test objects', 'They push the flesh in; what they press out of shows as it swelling elsewhere.'],
+                        ['Is pressed by other models and players', 'Only in the game: not drawn here.'],
+                    ];
+                }
+                return [
+                    ['Bumps into its own body', 'It cannot pass through the shapes of the rest of the model.'],
+                    ['Bumps into the floor and test objects', 'Blocks in the game, and the floor and the test objects here.'],
+                    ['Bumps into other models and players', 'Only in the game: not drawn here.'],
+                ];
+            },
+            pivotHelp() {
+                return ui.flesh.pivotMode === 'bone' ? "The swing turns about the bone's own pivot, where you put the joint."
+                    : ui.flesh.pivotMode === 'auto' ? 'The swing turns about the base of the fitted cage.' : "The swing turns about this point, in the bone's space, in blocks.";
+            },
+            nestedOptions() { return [{ id: 'rigid', label: 'Ride on it' }, { id: 'soft', label: 'Are soft too' }]; },
+            pivotOptions() { return [{ id: 'bone', label: 'The bone' }, { id: 'auto', label: 'Auto' }, { id: 'custom', label: 'A point' }]; },
+            autoOptions() {
+                return [{ id: 'auto', label: 'Auto', title: 'By the rules: a box per cube for a few cubes, one simple shape for many' }, { id: 'exact', label: 'Exact', title: 'A box around every cube' },
+                    { id: 'simple', label: 'Simple', title: 'One capsule or box around the whole bone' }, { id: 'off', label: 'None', title: 'No shape for this bone' }];
+            },
+            axisOptions() { return [{ id: 'x', label: 'X', title: 'Left and right' }, { id: 'y', label: 'Y', title: 'Up and down' }, { id: 'z', label: 'Z', title: 'Forward and back' }]; },
+            shapeOptions() { return [{ id: 'sphere', label: 'Sphere' }, { id: 'capsule', label: 'Capsule' }, { id: 'box', label: 'Box' }]; },
+            camOptions() {
+                return [{ id: 'off', label: 'Free', icon: 'videocam_off', title: 'The camera stays where you put it' }, { id: 'model', label: 'Model', icon: 'person', title: 'Hold the camera on the model' },
+                    { id: 'bone', label: 'Bone', icon: 'adjust', title: 'Hold the camera on the picked bone' }];
+            },
+            motionDef() {
+                var _a;
+                return (_a = _physics_motion__WEBPACK_IMPORTED_MODULE_2__.MOTION_DEFS.find(d => d.id === ui.motion)) !== null && _a !== void 0 ? _a : _physics_motion__WEBPACK_IMPORTED_MODULE_2__.MOTION_DEFS[0];
+            },
+            axes() { return ['auto', '+x', '-x', '+y', '-y', '+z', '-z']; },
+            /** The test object picked, or null */
+            object() {
+                var _a;
+                return (_a = ui.props.find((p) => p.id === ui.selectedProp)) !== null && _a !== void 0 ? _a : null;
+            },
+            /** The bones shown: all whose parents are open, or every match while searching or listing only the bones with physics */
+            visibleTree() {
+                const q = ui.query.trim().toLowerCase();
+                if (q || ui.onlyPhysics)
+                    return ui.tree.filter((n) => (!q || n.name.toLowerCase().includes(q)) && (!ui.onlyPhysics || n.kind !== 'none'));
+                const byName = new Map(ui.tree.map((n) => [n.name, n]));
+                return ui.tree.filter((n) => {
+                    var _a, _b;
+                    for (let p = n.parent; p; p = (_b = (_a = byName.get(p)) === null || _a === void 0 ? void 0 : _a.parent) !== null && _b !== void 0 ? _b : null)
+                        if (!ui.open[p])
+                            return false;
+                    return true;
+                });
+            },
+        },
+        methods: {
+            camMode(mode) { session.setCamMode(mode); },
+            setMotion(id, value) { this.$set(ui.motionOpts[ui.motion], id, value); },
+            resetMotion() { ui.motionOpts = Object.assign(Object.assign({}, ui.motionOpts), { [ui.motion]: (0,_physics_motion__WEBPACK_IMPORTED_MODULE_2__.defaultMotionOptions)()[ui.motion] }); },
+            toggle() { if (ui.running)
+                session.stop();
+            else
+                session.start(); },
+            reset() { session.resetSim(); },
+            poke() { session.poke(); },
+            undo() { session.undo(); },
+            redo() { session.redo(); },
+            groupOpen(g) { var _a; return (_a = ui.groups[`${ui.kind}:${g.id}`]) !== null && _a !== void 0 ? _a : !!g.open; },
+            toggleGroup(g) { this.$set(ui.groups, `${ui.kind}:${g.id}`, !this.groupOpen(g)); },
+            kindIcon(kind) { var _a; return (_a = _physicsPanels__WEBPACK_IMPORTED_MODULE_0__.KIND_ICONS[kind]) !== null && _a !== void 0 ? _a : ''; },
+            // bones
+            pick(name, event) {
+                if (ui.picking)
+                    session.pickRow(name);
+                else
+                    session.pick(name, event);
+            },
+            // the state of a row of the Bones window while bones are picked for a list
+            offRow(name) { return !!ui.picking && !ui.picking.valid.includes(name); },
+            offReason(name) { return ui.picking && !ui.picking.valid.includes(name) ? `${name} ${session.whyNot(ui.picking.kind, name)}` : ''; },
+            listedRow(name) { return !!ui.picking && session.pickedList().includes(name); },
+            togglePicking(kind) {
+                if (ui.picking && ui.picking.kind === kind)
+                    session.stopPicking();
+                else
+                    session.startPicking(kind);
+            },
+            untick(bone) { session.tick(bone, false); },
+            fold(n) { ui.open = Object.assign(Object.assign({}, ui.open), { [n.name]: !ui.open[n.name] }); },
+            expandAll(open) { session.expandAll(open); },
+            pickPhysics() { session.pickPhysics(); },
+            pickNone() { session.pickNone(); },
+            // properties
+            kind(k) { session.setKind(k); },
+            look(id) { session.applyAnyLook(id); },
+            lookOn(id) { return ui.kind === 'flesh' && ui.flesh.preset === id; },
+            setField(key, value) { session.setField(key, value); },
+            centre(axis, value) { session.setCentre(axis, value); },
+            zone() { session.zoneFromMesh(); },
+            carryOn(bone, on) { session.toggleCarry(bone, on); },
+            pairWith(bone) { session.setFleshPartner(bone); },
+            nestedChoice(id) { session.setFleshPatch({ nestedSoft: id === 'soft' }); },
+            pivotChoice(id) { session.setFleshPatch({ pivotMode: id }); },
+            pivotAt(axis, value) {
+                const pivot = [...ui.flesh.pivot];
+                pivot[axis] = value;
+                session.setFleshPatch({ pivot });
+            },
+            axisChoice(which, value) { session.setFleshPatch({ [which]: value }); },
+            pressesChoice(text) { session.setFleshPatch({ presses: text.split(/[\s,]+/).filter(s => s.length > 0) }); },
+            startPicking(kind) { session.startPicking(kind); },
+            stopPicking() { session.stopPicking(); },
+            setCollide(how) { session.setCollide(how); },
+            isTicked(bone) { return session.isTicked(bone); },
+            tick(bone, event) { session.tick(bone, event.target.checked); },
+            limitOn(axis, on) { session.toggleLimit(axis, on); },
+            setLimit(axis, end, value) { session.setLimit(axis, end, value); },
+            redraw() { session.drawOverlay(); },
+            // shapes
+            auto(value) { session.setAuto(value ? null : false); },
+            setMode(m) { session.setMode(m); },
+            shape(s) { session.addShape(s); },
+            selectShape(index) { session.selectShape(index); },
+            shapeKind(k) { session.setShapeKind(k); },
+            val(key, axis, value) { session.setShapeValue(key, axis, value); },
+            fitShape() { session.fitShape(); },
+            duplicateShape() { session.duplicateShape(); },
+            deleteShape() { session.deleteShape(); },
+            // test objects
+            prop(kind) { session.addProp(kind); },
+            propsChanged() { session.syncProps(); session.keepGizmo(); },
+            refreshProps() { session.refreshProps(); },
+            dupProp(id) { session.duplicateProp(id); },
+            dropProp(id) { session.removeProp(id); },
+            clearProps() { session.clearProps(); },
+            selectProp(id) { session.selectProp(ui.selectedProp === id ? null : id); },
+            propName(p) {
+                const label = p.kind === 'sphere' ? 'Ball' : p.kind === 'box' ? 'Block' : p.kind === 'capsule' ? 'Pole' : 'Wall';
+                const same = ui.props.filter((x) => x.kind === p.kind);
+                return same.length > 1 ? `${label} ${same.indexOf(p) + 1}` : label;
+            },
+            propIcon(p) { return p.kind === 'sphere' ? 'circle' : p.kind === 'box' ? 'crop_square' : p.kind === 'capsule' ? 'straighten' : 'view_column'; },
+            // json
+            jsonInput(text) { session.editJson(text); },
+            jsonFocus(on) { session.jsonFocus(on); },
+            jsonFormat() { session.formatJson(); },
+            jsonRevert() { session.revertJson(); },
+            jsonFill() { session.fillJson(); },
+            jsonTab(event) {
+                const area = event.target;
+                const from = area.selectionStart;
+                area.setRangeText('  ', from, area.selectionEnd, 'end');
+                session.editJson(area.value);
+            },
+            openJson() { openPhysicsJson === null || openPhysicsJson === void 0 ? void 0 : openPhysicsJson(); },
+        },
+        components: COMPONENTS,
+    };
+}
+/** The windows, with where each docks until the user moves it */
+const WINDOWS = [
+    { id: 'simulate', panel: 'strut_physics_panel', name: 'Physics', icon: 'play_circle', position: { slot: 'right_bar', height: 330 } },
+    { id: 'bones', panel: 'strut_physics_bones', name: 'Physics: Bones', icon: 'account_tree', position: { slot: 'left_bar', height: 420 } },
+    { id: 'properties', panel: 'strut_physics_properties', name: 'Physics: Properties', icon: 'tune', position: { slot: 'right_bar', height: 620 } },
+    { id: 'shapes', panel: 'strut_physics_shapes', name: 'Physics: Shapes', icon: 'category', position: { slot: 'right_bar', height: 360, folded: true } },
+    { id: 'objects', panel: 'strut_physics_objects', name: 'Physics: Test Objects', icon: 'sports_baseball', position: { slot: 'left_bar', height: 360 } },
+    { id: 'json', panel: 'strut_physics_json', name: 'Physics: JSON', icon: 'code', position: { slot: 'bottom', height: 240 } },
+];
+
+
+/***/ }),
+
+/***/ "./ts/physicsPanels.ts":
+/*!*****************************!*\
+  !*** ./ts/physicsPanels.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BONES_TEMPLATE: () => (/* binding */ BONES_TEMPLATE),
+/* harmony export */   CHAIN_GROUPS: () => (/* binding */ CHAIN_GROUPS),
+/* harmony export */   CLOTH_GROUPS: () => (/* binding */ CLOTH_GROUPS),
+/* harmony export */   CSS: () => (/* binding */ CSS),
+/* harmony export */   FLESH_GROUPS: () => (/* binding */ FLESH_GROUPS),
+/* harmony export */   JSON_TEMPLATE: () => (/* binding */ JSON_TEMPLATE),
+/* harmony export */   KIND_HELP: () => (/* binding */ KIND_HELP),
+/* harmony export */   KIND_ICONS: () => (/* binding */ KIND_ICONS),
+/* harmony export */   KIND_OPTIONS: () => (/* binding */ KIND_OPTIONS),
+/* harmony export */   OBJECTS_TEMPLATE: () => (/* binding */ OBJECTS_TEMPLATE),
+/* harmony export */   PROPERTIES_TEMPLATE: () => (/* binding */ PROPERTIES_TEMPLATE),
+/* harmony export */   SHAPES_TEMPLATE: () => (/* binding */ SHAPES_TEMPLATE),
+/* harmony export */   SIMULATE_TEMPLATE: () => (/* binding */ SIMULATE_TEMPLATE),
+/* harmony export */   SPRING_GROUPS: () => (/* binding */ SPRING_GROUPS)
+/* harmony export */ });
+const FEEL_SPRING = [
+    { key: 'stiffness', label: 'Stiffness', min: 0, max: 1, step: 0.01, hint: 'How hard it pulls back to where the animation puts it.' },
+    { key: 'bounce', label: 'Bounciness', min: 0, max: 1, step: 0.01, hint: 'How long it keeps wobbling.' },
+    { key: 'weight', label: 'Amount', min: 0, max: 1, step: 0.01, hint: 'How much of the physics shows. 0 is the animation alone.' },
+    { key: 'inertia', label: 'Lag', min: 0, max: 1, step: 0.01, hint: 'How much it trails behind when the model moves or turns.' },
+];
+const SPRING_GROUPS = [
+    { id: 'feel', title: 'Feel', icon: 'tune', desc: 'How stiff, bouncy and laggy it is.', open: true, sliders: FEEL_SPRING },
+    {
+        id: 'detail', title: 'Detail', icon: 'straighten', desc: 'The size of the swinging mass and how gravity acts on it.', sliders: [
+            { key: 'gravity', label: 'Gravity', min: 0, max: 15, step: 0.1, hint: '0 for jiggle, about 10 for hair.' },
+            { key: 'length', label: 'Reach', min: 0.02, max: 1.2, step: 0.01, hint: 'Distance from the pivot to the swinging mass (blocks).' },
+            { key: 'radius', label: 'Thickness', min: 0, max: 0.5, step: 0.01, hint: 'Its size when it bumps into things (blocks).' },
+            { key: 'squish', label: 'Squish', min: 0, max: 1, step: 0.01, hint: 'How much it flattens when pressed.' },
+        ],
+    },
+];
+const CHAIN_GROUPS = [
+    { id: 'feel', title: 'Feel', icon: 'tune', desc: 'How stiff, bouncy and laggy it is.', open: true, sliders: FEEL_SPRING },
+    {
+        id: 'detail', title: 'Detail', icon: 'straighten', desc: 'How far it reaches and how it hangs.', sliders: [
+            { key: 'gravity', label: 'Gravity', min: 0, max: 15, step: 0.1, hint: '0 for jiggle, about 10 for hair.' },
+            { key: 'length', label: 'Reach', min: 0.02, max: 1.2, step: 0.01, hint: 'How far the last bone reaches (blocks).' },
+            { key: 'radius', label: 'Thickness', min: 0, max: 0.5, step: 0.01, hint: 'Its size when it bumps into things (blocks).' },
+            { key: 'friction', label: 'Grip', min: 0, max: 1, step: 0.01, hint: 'How much it grips what it lies on.' },
+        ],
+    },
+];
+const CLOTH_GROUPS = [
+    {
+        id: 'feel', title: 'Feel', icon: 'tune', desc: 'How the cloth stretches, folds and is held.', open: true, sliders: [
+            { key: 'stiffness', label: 'Stretch', min: 0, max: 1, step: 0.01, hint: 'How firmly each edge keeps its length. 1 does not stretch at all.' },
+            { key: 'bend', label: 'Fold', min: 0, max: 1, step: 0.01, hint: 'How much a fold resists: 0 is silk, 1 is card.' },
+            { key: 'anchor', label: 'Pull back', min: 0, max: 30, step: 0.5, hint: 'How firmly it is pulled back to the animated shape, per second. 0 lets cloth hang free.' },
+            { key: 'weight', label: 'Amount', min: 0, max: 1, step: 0.01, hint: 'How much of the physics shows. 0 is the mesh as modelled.' },
+        ],
+    },
+    {
+        id: 'detail', title: 'Detail', icon: 'straighten', desc: 'Where it is sewn on, how it settles and how thick it is.', sliders: [
+            { key: 'pinHeight', label: 'Sewn on at top', min: 0, max: 1, step: 0.01, hint: 'The share of the mesh height, from the top, that is sewn to the bone.' },
+            { key: 'damping', label: 'Settling', min: 0, max: 8, step: 0.1, hint: 'How quickly it stops moving.' },
+            { key: 'inertia', label: 'Lag', min: 0, max: 1, step: 0.01, hint: 'How much it trails behind when the model moves or turns.' },
+            { key: 'gravity', label: 'Gravity', min: 0, max: 15, step: 0.1, hint: '9.8 for cloth.' },
+            { key: 'radius', label: 'Thickness', min: 0, max: 0.2, step: 0.005, hint: 'How thick it is when it bumps into things (blocks).' },
+        ],
+    },
+];
+const FLESH_GROUPS = [
+    {
+        id: 'feel', title: 'Feel', icon: 'tune', desc: 'How soft, firm and heavy it feels.', open: true, sliders: [
+            { key: 'softness', label: 'Softness', min: 0.1, max: 3, step: 0.05, hint: '1 is the look. More is softer and slower, less is firmer.' },
+            { key: 'firmness', label: 'Firmness', min: 0.2, max: 2, step: 0.05, hint: 'How fast it swings and settles: a scale on its frequency.' },
+            { key: 'meat', label: 'Meat', min: 0, max: 2, step: 0.05, hint: 'How heavy and fleshy it feels: damped more, sagging more, a dent fading slowly. 0 is bouncy like a balloon.' },
+            { key: 'weight', label: 'Amount', min: 0, max: 1, step: 0.01, hint: 'How much of the physics shows. 0 is the mesh as modelled.' },
+        ],
+    },
+    {
+        id: 'swing', title: 'Swing', icon: 'swap_horiz', desc: 'How far it moves and how it settles after the body moves.', open: true, sliders: [
+            { key: 'limit', label: 'Reach', min: 0, max: 0.4, step: 0.005, hint: 'The farthest the flesh moves from where the animation puts it, in blocks.' },
+            { key: 'inertia', label: 'Lag', min: 0, max: 3, step: 0.05, hint: 'How much it swings with the body moving and turning.' },
+            { key: 'lumpDamping', label: 'Swing settling', min: 0, max: 1, step: 0.01, hint: 'The swing of the whole: below 1 it wobbles back, 1 does not.' },
+            { key: 'nodeDamping', label: 'Jiggle settling', min: 0, max: 1, step: 0.01, hint: 'The free end lagging behind the rest: below 1 it wobbles.' },
+            { key: 'rigid', label: 'Turns about base', min: 0, max: 2, step: 0.05, hint: 'How much the swing turns about the base, like something hanging, rather than sliding.' },
+            { key: 'turn', label: 'Swings on turns', min: 0, max: 3, step: 0.05, hint: 'How strongly turning swings it.' },
+        ],
+    },
+    {
+        id: 'volume', title: 'Volume', icon: 'bubble_chart', desc: 'How it keeps its volume when stretched or pressed.', sliders: [
+            { key: 'volume', label: 'Keeps volume', min: 0, max: 1.5, step: 0.05, hint: 'Pulled down and out it lengthens and narrows, the volume kept.' },
+            { key: 'bulge', label: 'Swells out', min: 0, max: 2, step: 0.05, hint: 'How much of the volume pressed in swells out elsewhere.' },
+        ],
+    },
+    {
+        id: 'walk', title: 'Walking', icon: 'directions_walk', late: true, desc: 'What a walk does to it.', sliders: [
+            { key: 'rise', label: 'Bounce', min: 0, max: 0.3, step: 0.005, hint: 'How much a step bounces it, in blocks.' },
+            { key: 'sway', label: 'Side to side', min: 0, max: 1, step: 0.01, hint: 'How much a walk sways it from side to side, in blocks.' },
+        ],
+    },
+    {
+        id: 'pair', title: 'Pair', icon: 'compare_arrows', late: true, when: 'pair', desc: 'How the two press on each other.', sliders: [
+            { key: 'squeezeIn', label: 'Gives way', min: 0.01, max: 3, step: 0.01, hint: 'How quickly the two give way toward each other.' },
+            { key: 'squeezeOut', label: 'Comes back', min: 0.01, max: 12, step: 0.05, hint: 'How quickly they come back apart.' },
+            { key: 'squeezeStiffness', label: 'Pushes apart', min: 0, max: 8, step: 0.1, hint: 'How hard they push each other apart.' },
+            { key: 'rim', label: 'Bulge at rim', min: 0, max: 2, step: 0.05, hint: 'How much they bulge out where they meet.' },
+        ],
+    },
+    {
+        id: 'hold', title: 'How it is held', icon: 'anchor', late: true, desc: 'How firmly each part is held to the animation, from the base to the tip. Leave these unless the look is wrong.', sliders: [
+            { key: 'anchorFrom', label: 'Held from', min: 0, max: 1, step: 0.01, hint: 'Where, from the base to the tip, the nodes start to be free.' },
+            { key: 'anchorHold', label: 'Held to', min: 0, max: 1, step: 0.01, hint: 'How much of the way along they stay held.' },
+            { key: 'anchorFull', label: 'Free at', min: 0, max: 1, step: 0.01, hint: 'Where they are fully free.' },
+            { key: 'shapeSoftness', label: 'Pull to shape', min: 0.1, max: 3, step: 0.05, hint: 'How soft the pull back to the cage form is.' },
+            { key: 'shape', label: 'Shape strength', min: 0, max: 1, step: 0.01, hint: 'The pull back to the cage form.' },
+            { key: 'link', label: 'Link strength', min: 0, max: 1, step: 0.01, hint: 'How firmly neighbouring nodes keep their distance.' },
+            { key: 'gravity', label: 'Sag', min: -0.02, max: 0.02, step: 0.0005, hint: 'The sag each step.' },
+            { key: 'reach', label: 'Share of reach', min: 0, max: 1, step: 0.01, hint: 'The share of the reach the region uses.' },
+            { key: 'lumpShare', label: 'Lump share', min: 0, max: 1, step: 0.01, hint: 'The share of the inertia the whole region takes.' },
+            { key: 'sideStiffness', label: 'Side stiffness', min: 0.1, max: 6, step: 0.1, hint: 'How much stiffer it is sideways.' },
+            { key: 'stiffen', label: 'Stiffens', min: 0.05, max: 3, step: 0.05, hint: 'How soon a big swing stiffens.' },
+        ],
+    },
+    {
+        id: 'dressed', title: 'When dressed', icon: 'checkroom', late: true, desc: 'How it changes under clothes.', sliders: [
+            { key: 'dressedStiffness', label: 'Firmer by', min: 0.1, max: 4, step: 0.05, hint: 'How much firmer it is under clothes.' },
+            { key: 'dressedLimit', label: 'Travels', min: 0, max: 1, step: 0.01, hint: 'The share of its reach it keeps under clothes.' },
+            { key: 'dressedCouple', label: 'Moves together', min: 0, max: 1, step: 0.01, hint: 'How much a pair moves together under clothes.' },
+        ],
+    },
+];
+const KIND_OPTIONS = [
+    { id: 'none', label: 'None', icon: 'block', title: 'This bone just follows the animation' },
+    { id: 'spring', label: 'Spring', icon: 'vibration', title: 'One bone that jiggles: pouches, jowls, belly' },
+    { id: 'chain', label: 'Chain', icon: 'link', title: 'This bone and the bones under it swing like rope: hair, tails, ears' },
+    { id: 'cloth', label: 'Cloth', icon: 'checkroom', title: 'The vertices of this bone mesh hang and swing like cloth: a skirt, a cape' },
+    { id: 'flesh', label: 'Flesh', icon: 'bubble_chart', title: 'The mesh (or the cubes) of this bone is soft: it swings, lags, keeps its volume and is pressed in' },
+];
+const KIND_HELP = {
+    none: 'This bone only follows the animation. Pick a type to make it move on its own.',
+    spring: 'One bone that swings about its pivot and settles back: a pouch, a jowl, a belly.',
+    chain: 'This bone and the bones under it swing like a rope: hair, a tail, an ear.',
+    cloth: 'The vertices of this bone mesh are the cloth: the top is sewn on, the rest hangs and swings.',
+    flesh: 'A small cage is fitted to this bone and every vertex follows it. It swings as one lump, lags at its free end, keeps its volume and is pressed in by what touches it.',
+};
+const KIND_ICONS = { spring: 'vibration', chain: 'link', cloth: 'checkroom', flesh: 'bubble_chart', none: '' };
+// ---------------- the windows ----------------
+/** The banner shown in every window while bones are being picked in the view for a list */
+const PICK_BAR = `
+  <div class="ph-pickbar" v-if="ui.picking"><i class="material-icons">touch_app</i><span>{{ ui.picking.text }}</span><button class="ph-btn on" @click="stopPicking">Done</button></div>`;
+const SIMULATE_TEMPLATE = `
+<div class="ph ph-simulate">
+  <div class="ph-bar">
+    <button class="ph-play" :class="ui.running ? 'stop' : 'go'" @click="toggle" :title="ui.running ? 'Stop the simulation' : 'Run the physics on the model'"><i class="material-icons">{{ ui.running ? 'stop' : 'play_arrow' }}</i>{{ ui.running ? 'Stop' : 'Simulate' }}</button>
+    <button class="ph-icon" :disabled="!ui.running" @click="reset" title="Start the motion again from the beginning"><i class="material-icons">replay</i></button>
+    <button class="ph-icon" :disabled="!ui.running || !ui.selected" @click="poke" title="Kick the selected bone while it is simulating"><i class="material-icons">flash_on</i></button>
+    <span class="ph-gap"></span>
+    <button class="ph-icon" :class="{ on: ui.showColliders }" @click="ui.showColliders = !ui.showColliders; redraw()" :title="ui.showColliders ? 'Hide the collision shapes' : 'Show the collision shapes'"><i class="material-icons">{{ ui.showColliders ? 'visibility' : 'visibility_off' }}</i></button>
+    <button class="ph-icon" :class="{ on: ui.showDebug }" @click="ui.showDebug = !ui.showDebug; redraw()" :title="ui.showDebug ? 'Hide the lines of springs, chains and flesh' : 'Show the lines of springs, chains and flesh'"><i class="material-icons">timeline</i></button>
+    <button class="ph-icon" :disabled="!ui.canUndo" @click="undo" title="Undo the last change to the physics (Ctrl+Z)"><i class="material-icons">undo</i></button>
+    <button class="ph-icon" :disabled="!ui.canRedo" @click="redo" title="Redo (Ctrl+Y)"><i class="material-icons">redo</i></button>
+  </div>
+  <div class="ph-status" :class="{ on: ui.running }"><span class="ph-dot"></span>{{ ui.running ? 'Simulating. Change anything and watch it.' : 'Stopped. Press Simulate to see the physics.' }}</div>
+  <div class="ph-notice" v-if="ui.notice"><i class="material-icons">info</i><span>{{ ui.notice }}</span><button class="ph-x" @click="ui.notice = ''" title="Dismiss"><i class="material-icons">close</i></button></div>${PICK_BAR}
+  <div class="ph-group">
+    <div class="ph-group-title">Test motion</div>
+    <div class="ph-field"><label>Move</label><select v-model="ui.motion"><option v-for="m in ui.motions" :value="m.id">{{ m.label }}</option></select></div>
+    <div class="ph-hint" v-if="ui.help && motionDef.help">{{ motionDef.help }}</div>
+    <template v-for="o in motionDef.options">
+      <div class="ph-field" v-if="o.choices" :key="ui.motion + o.id"><label :title="o.hint">{{ o.label }}</label>
+        <phys-seg :options="o.choices" :value="ui.motionOpts[ui.motion][o.id]" @input="setMotion(o.id, $event)"></phys-seg></div>
+      <phys-slider v-else :key="ui.motion + o.id" :label="o.label" :hint="o.hint" :help="ui.help" :base="o.value" :min="o.min" :max="o.max" :step="o.step" :unit="o.unit" :value="ui.motionOpts[ui.motion][o.id]" @input="setMotion(o.id, $event)"></phys-slider>
+    </template>
+    <button class="ph-link" v-if="motionDef.options.length" @click="resetMotion">Put this move's settings back</button>
+    <div class="ph-field"><label>Animation</label><select v-model="ui.animation"><option value="">None (rest pose)</option><option v-for="a in ui.animations" :value="a">{{ a }}</option></select></div>
+    <phys-slider label="Speed" hint="How fast the move and the animation play." :help="ui.help" :base="1" :min="0.1" :max="1.5" :step="0.05" unit="x" :value="ui.speed" @input="ui.speed = $event"></phys-slider>
+  </div>
+  <div class="ph-group">
+    <div class="ph-group-title">Camera</div>
+    <div class="ph-hint" v-if="ui.help">Hold the camera on the model while it simulates, so the physics can be watched without the move in the way.</div>
+    <phys-seg :options="camOptions" :value="ui.camMode" @input="camMode"></phys-seg>
+    <template v-if="ui.camMode !== 'off'">
+      <div class="ph-hint">{{ ui.camMode === 'bone' ? (ui.selected ? 'Held on ' + ui.selected + '.' : 'Pick a bone to hold it on; until then it is held on the model.') : 'Held on the model.' }} Turn off what it should not follow:</div>
+      <phys-check label="Walking left and right" :value="ui.camX" @input="ui.camX = $event"></phys-check>
+      <phys-check label="Walking forward and back" :value="ui.camZ" @input="ui.camZ = $event"></phys-check>
+      <phys-check label="Going up and down" hint="Jumps." :help="ui.help" :value="ui.camY" @input="ui.camY = $event"></phys-check>
+      <phys-check label="Turning" hint="The camera turns with the model, so a spin looks still." :help="ui.help" :value="ui.camTurn" @input="ui.camTurn = $event"></phys-check>
+    </template>
+  </div>
+  <div class="ph-footer">
+    <div class="ph-hint">{{ ui.summary }}</div>
+    <div class="ph-problems" v-if="ui.problems.length"><div v-for="p in ui.problems.slice(0, 6)"><i class="material-icons">warning</i>{{ p }}</div></div>
+  </div>
+</div>`;
+const BONES_TEMPLATE = `
+<div class="ph ph-bones">${PICK_BAR}
+  <div class="ph-search"><i class="material-icons">search</i><input type="text" v-model="ui.query" placeholder="Search bones">
+    <button class="ph-icon small" :class="{ on: ui.onlyPhysics }" @click="ui.onlyPhysics = !ui.onlyPhysics" title="Show only the bones that have physics"><i class="material-icons">filter_list</i></button>
+    <button class="ph-icon small" @click="expandAll(true)" title="Open every branch"><i class="material-icons">unfold_more</i></button>
+    <button class="ph-icon small" @click="expandAll(false)" title="Close every branch"><i class="material-icons">unfold_less</i></button>
+  </div>
+  <div class="ph-tree">
+    <div v-for="n in visibleTree" :key="n.name" class="ph-node" :class="{ sel: ui.targets.includes(n.name) || n.name === ui.selected, main: n.name === ui.selected, off: offRow(n.name), choose: ui.picking && !offRow(n.name) }" :style="{ paddingLeft: (4 + n.depth * 14) + 'px' }" :title="offReason(n.name)" @click="pick(n.name, $event)">
+      <span class="ph-twist" @click.stop="fold(n)"><i class="material-icons" v-if="n.hasKids && !ui.query && !ui.onlyPhysics">{{ ui.open[n.name] ? 'expand_more' : 'chevron_right' }}</i></span>
+      <i class="material-icons ph-kind" :class="'k-' + n.kind" v-if="n.kind !== 'none'" :title="n.kind">{{ kindIcon(n.kind) }}</i>
+      <span class="ph-name">{{ n.name }}</span>
+      <i class="material-icons ph-listed" v-if="listedRow(n.name)" title="In the list">check_circle</i>
+      <span class="ph-tag" v-if="n.auto !== 'auto'" :title="'Collision shape made from the model: ' + n.auto">{{ n.auto === 'off' ? 'no shape' : n.auto }}</span>
+    </div>
+    <div class="ph-hint" v-if="!visibleTree.length">No bones match.</div>
+  </div>
+  <div class="ph-foot">
+    <span>{{ ui.targets.length > 1 ? ui.targets.length + ' bones picked' : ui.selected ? '1 bone picked' : 'Nothing picked' }}</span>
+    <button class="ph-link" @click="pickPhysics" title="Pick every bone that has physics">All with physics</button>
+    <button class="ph-link" v-if="ui.targets.length" @click="pickNone">Clear</button>
+  </div>
+  <div class="ph-hint tip">Click a bone here or in the view to pick it. Ctrl-click adds more, shift-click picks a run of the list. Whatever you change in Properties is changed on all the picked bones.</div>
+</div>`;
+const PROPERTIES_TEMPLATE = `
+<div class="ph ph-props">${PICK_BAR}
+  <div class="ph-empty" v-if="!ui.selected"><i class="material-icons">touch_app</i><div>Pick a bone in the Bones window, or click one in the view, to give it physics. Ctrl-click adds more bones.</div></div>
+  <div v-else>
+    <div class="ph-title">
+      <span class="ph-title-name">{{ ui.targets.length > 1 ? ui.targets.length + ' bones' : ui.selected }}</span><span class="ph-badge" :class="'k-' + ui.kind" v-if="ui.kind !== 'none'">{{ ui.kind }}</span>
+      <span class="ph-gap"></span>
+      <button class="ph-icon small" :class="{ on: ui.help }" @click="ui.help = !ui.help" title="Show or hide the description under each setting"><i class="material-icons">help_outline</i></button>
+    </div>
+    <div class="ph-multi" v-if="ui.targets.length > 1">
+      <div class="ph-chips"><span class="ph-pick" v-for="b in ui.targets" :key="b">{{ b }}</span></div>
+      <div class="ph-hint">{{ ui.mixed ? 'These are not all of one type. A change is made to the ones of the type shown (' + ui.kind + '); picking a type changes all of them.' : 'Whatever you change here is changed on every one of them.' }}</div>
+    </div>
+    <phys-seg :options="kindOptions" :value="ui.kind" @input="kind"></phys-seg>
+    <div class="ph-hint">{{ kindHelp }}</div>
+
+    <template v-if="ui.kind !== 'none'">
+      <div class="ph-looks" v-if="looks.length"><span>Start from</span><button class="ph-chip" :class="{ on: lookOn(l.id) }" v-for="l in looks" :key="l.id" @click="look(l.id)" title="Start from this look; the settings stay yours to change">{{ l.label }}</button></div>
+
+      <phys-sec v-for="g in earlyGroups" :key="ui.kind + ':' + g.id" :icon="g.icon" :title="g.title" :desc="g.desc" :open="groupOpen(g)" @toggle="toggleGroup(g)">
+        <phys-slider v-for="s in g.sliders" :key="s.key" :label="s.label" :hint="s.hint" :help="ui.help" :base="defaults[s.key]" :min="s.min" :max="s.max" :step="s.step" :value="model[s.key]" @input="setField(s.key, $event)"></phys-slider>
+      </phys-sec>
+
+      <template v-if="ui.kind === 'flesh'">
+        <phys-sec icon="account_tree" title="Region" desc="Which bones make up the flesh, and what its swing turns about." v-if="ui.targets.length < 2" :open="groupOpen({ id: 'region' })" @toggle="toggleGroup({ id: 'region' })">
+          <div class="ph-sub-title">Pairs with</div>
+          <phys-bones :items="partner ? [partner] : []" :active="ui.picking && ui.picking.kind === 'pair'" @remove="pairWith('')" @pick="togglePicking('pair')">Nothing: one bone.</phys-bones>
+          <div class="ph-hint" v-if="ui.flesh.bones.length > 1">A pair presses on each other, flattens where they meet and bulges out at the rim.</div>
+          <div class="ph-field"><label>Bones under it</label>
+            <phys-seg :options="nestedOptions" :value="ui.flesh.nestedSoft ? 'soft' : 'rigid'" @input="nestedChoice"></phys-seg></div>
+          <div class="ph-hint">{{ ui.flesh.nestedSoft ? 'The meshes on the bones under it are soft too, like its own.' : 'When it has a mesh of its own, the meshes on the bones under it ride on it as rigid pieces.' }}</div>
+          <div class="ph-field"><label>Pivot</label>
+            <phys-seg :options="pivotOptions" :value="ui.flesh.pivotMode" @input="pivotChoice"></phys-seg></div>
+          <div class="ph-hint">{{ pivotHelp }}</div>
+          <template v-if="ui.flesh.pivotMode === 'custom'">
+            <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'pv' + i" :label="'Pivot ' + axis" :base="0" :min="-2" :max="3" :step="0.01" :value="ui.flesh.pivot[i]" @input="pivotAt(i, $event)"></phys-slider>
+          </template>
+          <div class="ph-field"><label>Free end</label><select :value="ui.flesh.tip" @change="axisChoice('tip', $event.target.value)"><option v-for="a in axes" :value="a">{{ a === 'auto' ? 'Auto' : a }}</option></select></div>
+          <div class="ph-field"><label>Hangs from</label><select :value="ui.flesh.up" @change="axisChoice('up', $event.target.value)"><option v-for="a in axes" :value="a">{{ a === 'auto' ? 'Auto' : a }}</option></select></div>
+          <div class="ph-hint">Change the last two only when the guess is wrong: the free end of the flesh and the side it hangs from, as an axis of the bone.</div>
+        </phys-sec>
+
+        <phys-sec icon="adjust" title="Soft zone" desc="Only the part inside the zone is soft; the rest is held as animated. Radius 0 makes all of the mesh soft." :open="groupOpen({ id: 'zone' })" @toggle="toggleGroup({ id: 'zone' })">
+          <phys-slider label="Radius" :base="0" :min="0" :max="1.5" :step="0.01" :value="ui.flesh.softRadius" @input="setField('softRadius', $event)"></phys-slider>
+          <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'zc' + i" :label="'Centre ' + axis" :base="0" :min="i === 1 ? -1 : -2" :max="i === 1 ? 3 : 2" :step="0.01" :value="ui.flesh.softCenter[i]" @input="centre(i, $event)"></phys-slider>
+          <button class="ph-btn" @click="zone" title="Put the zone in the middle of this bone mesh, with half its reach as the radius"><i class="material-icons">center_focus_strong</i>Zone from the mesh</button>
+        </phys-sec>
+
+        <phys-sec icon="layers" title="Pieces that ride on it" desc="Other bones whose meshes move with this one as a rigid piece: a tip on a pouch." :badge="ui.flesh.carry.length ? ui.flesh.carry.length + '' : ''" :open="groupOpen({ id: 'carry' })" @toggle="toggleGroup({ id: 'carry' })">
+          <phys-bones :items="ui.flesh.carry" :active="ui.picking && ui.picking.kind === 'carry'" @remove="carryOn($event, false)" @pick="togglePicking('carry')">None yet.</phys-bones>
+        </phys-sec>
+      </template>
+
+      <template v-if="ui.kind === 'cloth'">
+        <phys-sec icon="adjust" title="Soft zone" desc="Only the vertices inside the zone are soft; they blend to sewn on beyond it. Radius 0 makes all of the mesh soft." :open="groupOpen({ id: 'zone' })" @toggle="toggleGroup({ id: 'zone' })">
+          <phys-slider label="Radius" :base="0" :min="0" :max="1.5" :step="0.01" :value="ui.soft.softRadius" @input="setField('softRadius', $event)"></phys-slider>
+          <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'sc' + i" :label="'Centre ' + axis" :base="0" :min="i === 1 ? -1 : -2" :max="i === 1 ? 3 : 2" :step="0.01" :value="ui.soft.softCenter[i]" @input="centre(i, $event)"></phys-slider>
+          <button class="ph-btn" @click="zone" title="Put the zone in the middle of this bone mesh, with half its reach as the radius"><i class="material-icons">center_focus_strong</i>Zone from the mesh</button>
+        </phys-sec>
+        <phys-sec icon="layers" title="Pieces that ride on it" desc="Other bones whose meshes move with this one as a rigid piece." :badge="ui.soft.carry.length ? ui.soft.carry.length + '' : ''" :open="groupOpen({ id: 'carry' })" @toggle="toggleGroup({ id: 'carry' })">
+          <phys-bones :items="ui.soft.carry" :active="ui.picking && ui.picking.kind === 'carry'" @remove="carryOn($event, false)" @pick="togglePicking('carry')">None yet.</phys-bones>
+        </phys-sec>
+      </template>
+
+      <phys-sec v-for="g in lateGroups" :key="ui.kind + ':' + g.id" :icon="g.icon" :title="g.title" :desc="g.desc" :open="groupOpen(g)" @toggle="toggleGroup(g)">
+        <phys-slider v-for="s in g.sliders" :key="s.key" :label="s.label" :hint="s.hint" :help="ui.help" :base="defaults[s.key]" :min="s.min" :max="s.max" :step="s.step" :value="model[s.key]" @input="setField(s.key, $event)"></phys-slider>
+      </phys-sec>
+
+      <phys-sec icon="sports_mma" title="Collisions" desc="What it bumps into, or is pressed by." :open="groupOpen({ id: 'collide' })" @toggle="toggleGroup({ id: 'collide' })">
+        <phys-check :label="collideLabels[0][0]" :hint="collideLabels[0][1]" :help="ui.help" :value="model.collideBody" @input="setField('collideBody', $event)"></phys-check>
+        <phys-check :label="collideLabels[1][0]" :hint="collideLabels[1][1]" :help="ui.help" :value="model.collideWorld" @input="setField('collideWorld', $event)"></phys-check>
+        <phys-check :label="collideLabels[2][0]" :hint="collideLabels[2][1]" :help="ui.help" :value="model.collideOthers" @input="setField('collideOthers', $event)"></phys-check>
+        <div class="ph-field" v-if="ui.kind === 'flesh'"><label title="The model's own bones that press into it rather than being body it rests on. Names may start or end with *">Pressed by</label>
+          <input type="text" :value="ui.flesh.presses.join(', ')" @change="pressesChoice($event.target.value)" placeholder="arm*, hand*"></div>
+        <div class="ph-hint" v-if="ui.kind === 'flesh'">The bones named in Pressed by press into the flesh; the others are body it rests on. Names may start or end with *.</div>
+        <template v-if="model.collideBody">
+          <div class="ph-sub-title">Bones it reacts to <span>{{ ui.candidates.filter(b => isTicked(b)).length }} of {{ ui.candidates.length }}</span></div>
+          <div class="ph-hint" v-if="!ui.candidates.length">{{ ui.kind === 'flesh' ? 'None of the model\\'s shapes press it yet: add a shape to a bone named above, or turn on Make shapes from the model in Shapes.' : 'No other bone has a shape for it to bump into yet: turn on Make shapes from the model in Shapes, or add shapes of your own.' }}</div>
+          <template v-else>
+<phys-bones :items="collideItems" :all="collideAll" :limit="10" :active="ui.picking && ui.picking.kind === 'collide'" @remove="untick" @pick="togglePicking('collide')">None of them.
+              <template slot="tools"><button class="ph-chip" @click="setCollide('all')">All</button><button class="ph-chip" @click="setCollide('none')">None</button><button class="ph-chip" @click="setCollide('invert')">Invert</button></template></phys-bones>
+          </template>
+        </template>
+      </phys-sec>
+
+      <phys-sec icon="rotate_right" title="Angle limits" v-if="ui.kind === 'spring' || ui.kind === 'chain'" desc="How far the physics may turn the bone." :open="groupOpen({ id: 'limits' })" @toggle="toggleGroup({ id: 'limits' })">
+        <phys-check label="Show them on the model" :value="ui.showLimits" @input="ui.showLimits = $event; redraw()"></phys-check>
+        <div v-if="ui.kind === 'spring'">
+          <div class="ph-hint">In degrees about each axis of the bone. The arcs show the range (x red, y green, z blue).</div>
+          <div v-for="axis in ['x', 'y', 'z']" :key="axis" class="ph-limit">
+            <phys-check :label="'Limit ' + axis.toUpperCase()" :value="!!ui.limits[axis]" @input="limitOn(axis, $event)"></phys-check>
+            <template v-if="ui.limits[axis]">
+              <phys-slider label="From" :min="-180" :max="0" :step="1" unit="°" :value="ui.limits[axis][0]" @input="setLimit(axis, 0, $event)"></phys-slider>
+              <phys-slider label="To" :min="0" :max="180" :step="1" unit="°" :value="ui.limits[axis][1]" @input="setLimit(axis, 1, $event)"></phys-slider>
+            </template>
+          </div>
+        </div>
+        <div v-else>
+          <div class="ph-hint">How far each segment may swing away from where the animation puts it. The cones show it. 0 is no limit.</div>
+          <phys-slider label="Bend limit" :min="0" :max="150" :step="1" unit="°" :value="ui.controls.maxAngle" @input="setField('maxAngle', $event)"></phys-slider>
+        </div>
+      </phys-sec>
+
+      <div class="ph-hint" v-if="ui.kind === 'flesh' || ui.kind === 'cloth'">The preview draws the simulated mesh with the model's texture in place of the original while it runs.</div>
+    </template>
+  </div>
+</div>`;
+const SHAPES_TEMPLATE = `
+<div class="ph ph-shapes">
+  <div class="ph-group">
+    <phys-check label="Make shapes from the model" hint="A box or capsule is made around the cubes of every bone, for parts to bump into." :help="ui.help" :value="ui.autoColliders !== false" @input="auto"></phys-check>
+    <phys-check label="Show shapes" hint="Draw them on the model." :help="ui.help" :value="ui.showColliders" @input="ui.showColliders = $event; redraw()"></phys-check>
+    <phys-check label="Show springs, chains and flesh" hint="Draw their rest and moved lines." :help="ui.help" :value="ui.showDebug" @input="ui.showDebug = $event; redraw()"></phys-check>
+    <phys-check label="Show every shape" hint="Otherwise only those the picked bone bumps into." :help="ui.help" :value="ui.showAllShapes" @input="ui.showAllShapes = $event; redraw()"></phys-check>
+    <div class="ph-hint">Lines: dim cyan are shapes made from the model, yellow are your own, white is the one you are editing.</div>
+  </div>
+  <div class="ph-empty" v-if="!ui.selected"><i class="material-icons">touch_app</i><div>Pick a bone to tag it or give it its own shapes.</div></div>
+  <div class="ph-group" v-else>
+    <div class="ph-group-title">{{ ui.targets.length > 1 ? ui.targets.length + ' bones' : ui.selected }}</div>
+    <div class="ph-hint">Shape made from the cubes of {{ ui.targets.length > 1 ? 'each of them' : 'this bone' }}:</div>
+    <phys-seg :options="autoOptions" :value="ui.autoMode" @input="setMode"></phys-seg>
+    <template v-if="ui.targets.length < 2">
+      <div class="ph-hint" v-if="ui.shapes.length">It has shapes of its own below, so none is made for it.</div>
+      <div class="ph-sub-title">Its own shapes</div>
+      <div class="ph-chips">
+        <button class="ph-chip" v-for="s in ui.shapes" :key="s.index" :class="{ on: s.index === ui.shapeIndex }" @click="selectShape(s.index)">{{ s.label }}</button>
+        <button class="ph-chip add" @click="shape('sphere')"><i class="material-icons">add</i>Sphere</button>
+        <button class="ph-chip add" @click="shape('capsule')"><i class="material-icons">add</i>Capsule</button>
+        <button class="ph-chip add" @click="shape('box')"><i class="material-icons">add</i>Box</button>
+      </div>
+      <div class="ph-card" v-if="ui.form">
+        <phys-seg :options="shapeOptions" :value="ui.form.shape" @input="shapeKind"></phys-seg>
+        <div class="ph-sub-title">Position <span>from the bone's pivot, in pixels</span></div>
+        <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'c' + i" :label="axis" :min="-32" :max="32" :step="0.1" :value="ui.form.center[i]" @input="val('center', i, $event)"></phys-slider>
+        <template v-if="ui.form.shape === 'box'">
+          <div class="ph-sub-title">Size</div>
+          <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'s' + i" :label="axis" :min="0.1" :max="32" :step="0.1" :value="ui.form.size[i]" @input="val('size', i, $event)"></phys-slider>
+          <div class="ph-sub-title">Turn <span>degrees</span></div>
+          <phys-slider v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'r' + i" :label="axis" :min="-180" :max="180" :step="1" :value="ui.form.rotation[i]" @input="val('rotation', i, $event)"></phys-slider>
+        </template>
+        <template v-if="ui.form.shape === 'sphere'">
+          <phys-slider label="Radius" :min="0.1" :max="16" :step="0.1" :value="ui.form.radius" @input="val('radius', 0, $event)"></phys-slider>
+        </template>
+        <template v-if="ui.form.shape === 'capsule'">
+          <phys-slider label="Length" :min="0" :max="32" :step="0.1" :value="ui.form.length" @input="val('length', 0, $event)"></phys-slider>
+          <phys-slider label="Radius" :min="0.1" :max="16" :step="0.1" :value="ui.form.radius" @input="val('radius', 0, $event)"></phys-slider>
+          <div class="ph-sub-title">Tilt <span>degrees</span></div>
+          <phys-slider label="X" :min="-180" :max="180" :step="1" :value="ui.form.rotation[0]" @input="val('rotation', 0, $event)"></phys-slider>
+          <phys-slider label="Z" :min="-180" :max="180" :step="1" :value="ui.form.rotation[2]" @input="val('rotation', 2, $event)"></phys-slider>
+        </template>
+        <div class="ph-chips">
+          <button class="ph-chip" @click="fitShape" title="Wrap it around this bone's cubes again"><i class="material-icons">crop_free</i>Fit to bone</button>
+          <button class="ph-chip" @click="duplicateShape"><i class="material-icons">content_copy</i>Duplicate</button>
+          <button class="ph-chip danger" @click="deleteShape"><i class="material-icons">delete</i>Delete</button>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>`;
+const OBJECTS_TEMPLATE = `
+<div class="ph ph-objects">
+  <div class="ph-hint">Things to bump into, only on this screen (not part of the model). Parts that collide with the floor and test objects feel them, and flesh is pressed in by them.</div>
+  <div class="ph-tools">
+    <button class="ph-chip add" @click="prop('sphere')"><i class="material-icons">add</i>Ball</button>
+    <button class="ph-chip add" @click="prop('box')"><i class="material-icons">add</i>Block</button>
+    <button class="ph-chip add" @click="prop('capsule')"><i class="material-icons">add</i>Pole</button>
+    <button class="ph-chip add" @click="prop('wall')"><i class="material-icons">add</i>Wall</button>
+    <button class="ph-chip danger" v-if="ui.props.length" @click="clearProps">Clear all</button>
+  </div>
+  <div class="ph-rows">
+    <div class="ph-row" v-for="p in ui.props" :key="p.id" :class="{ sel: ui.selectedProp === p.id }" @click="selectProp(p.id)">
+      <i class="material-icons">{{ propIcon(p) }}</i><span class="ph-name">{{ propName(p) }}</span>
+      <span class="ph-tag" v-if="p.sweep">sweeps {{ p.sweepAxis.toUpperCase() }}</span>
+      <button class="ph-icon small" @click.stop="dupProp(p.id)" title="Duplicate this object"><i class="material-icons">content_copy</i></button>
+      <button class="ph-icon small" @click.stop="dropProp(p.id)" title="Remove this object"><i class="material-icons">close</i></button>
+    </div>
+    <div class="ph-empty" v-if="!ui.props.length"><i class="material-icons">category</i><div>No objects yet. Add one, then pick it here or in the view and use the gizmo: the move tool moves it, the rotate tool turns it and the scale tool resizes it.</div></div>
+  </div>
+  <div class="ph-group" v-if="object">
+    <div class="ph-group-title">{{ propName(object) }}</div>
+    <phys-sec sub icon="open_with" title="Transform" desc="Where it is, how it is turned and how big it is." :open="groupOpen({ id: 'obj-transform', open: true })" @toggle="toggleGroup({ id: 'obj-transform', open: true })">
+      <phys-slider label="Left / right" :min="-3" :max="3" :step="0.02" :value="object.x" @input="object.x = $event; refreshProps()"></phys-slider>
+      <phys-slider label="Up / down" :min="-1" :max="4" :step="0.02" :value="object.y" @input="object.y = $event; refreshProps()"></phys-slider>
+      <phys-slider label="Forward / back" :min="-3" :max="3" :step="0.02" :value="object.z" @input="object.z = $event; refreshProps()"></phys-slider>
+      <template v-if="object.kind !== 'sphere'">
+        <phys-slider v-for="axis in ['x', 'y', 'z']" :key="'rot' + axis" :label="'Turn ' + axis.toUpperCase()" :min="-180" :max="180" :step="1" unit="°" :value="object['r' + axis]" @input="object['r' + axis] = $event; refreshProps()"></phys-slider>
+      </template>
+      <phys-slider label="Size" :min="0.1" :max="2.5" :step="0.02" :value="object.size" @input="object.size = $event; propsChanged()"></phys-slider>
+    </phys-sec>
+    <phys-sec sub icon="swap_horiz" title="Sweep" desc="Slides back and forth, so a moving thing can be tried against the model." :badge="object.sweep ? 'on' : ''" :open="groupOpen({ id: 'obj-sweep', open: true })" @toggle="toggleGroup({ id: 'obj-sweep', open: true })">
+      <phys-check label="Sweeps back and forth" :value="object.sweep" @input="object.sweep = $event; refreshProps()"></phys-check>
+      <template v-if="object.sweep">
+        <div class="ph-field"><label>Direction</label><phys-seg :options="axisOptions" :value="object.sweepAxis" @input="object.sweepAxis = $event; refreshProps()"></phys-seg></div>
+        <phys-slider label="Distance" :min="0.05" :max="3" :step="0.05" :value="object.sweepRange" @input="object.sweepRange = $event; refreshProps()"></phys-slider>
+        <phys-slider label="Speed" :min="0.2" :max="8" :step="0.1" :value="object.sweepSpeed" @input="object.sweepSpeed = $event; refreshProps()"></phys-slider>
+      </template>
+    </phys-sec>
+  </div>
+</div>`;
+const JSON_TEMPLATE = `
+<div class="ph ph-json">
+  <div class="ph-bar">
+    <span class="ph-jstatus" :class="ui.jsonOk ? 'ok' : 'bad'"><i class="material-icons">{{ ui.jsonOk ? 'check_circle' : 'error_outline' }}</i>{{ ui.jsonStatus }}</span>
+    <span class="ph-gap"></span>
+    <button class="ph-btn" @click="jsonFormat" title="Lay the text out neatly"><i class="material-icons">format_align_left</i>Format</button>
+    <button class="ph-btn" @click="jsonRevert" title="Throw away what you typed and show the model's physics again"><i class="material-icons">restore</i>Revert</button>
+    <button class="ph-btn" @click="jsonFill" title="Fill in a starter for the model's bones"><i class="material-icons">auto_fix_high</i>Starter</button>
+  </div>
+  <textarea class="ph-code" spellcheck="false" :value="ui.json" @input="jsonInput($event.target.value)" @focus="jsonFocus(true)" @blur="jsonFocus(false)" @keydown.tab.prevent="jsonTab($event)"></textarea>
+  <div class="ph-problems" v-if="ui.jsonProblems.length"><div v-for="p in ui.jsonProblems.slice(0, 8)"><i class="material-icons">warning</i>{{ p }}</div></div>
+  <div class="ph-hint">The same text the game reads. It is saved with the project and written into the exported .strutmodel, and changes you make in the other windows show here as you make them. Typing here applies after a pause, when the JSON is valid.</div>
+</div>`;
+const CSS = `
+.ph { padding: 0 0 12px; font-size: 12px; box-sizing: border-box; color: var(--color-text); overflow-y: auto; overscroll-behavior: contain; max-height: calc(100vh - 160px); }
+.ph i.material-icons { font-size: 16px; line-height: 1; vertical-align: middle; flex: none; }
+/* Blockbench gives every button a width and a height of its own: these start from none, and the rules below set what each kind needs */
+:where(.ph) button { font: inherit; min-width: 0; height: auto; padding: 0; box-shadow: none; border-radius: 2px; line-height: 1.2; }
+.ph button > i.material-icons { margin-right: 0; vertical-align: middle; pointer-events: none; }
+:where(.ph) select { height: 26px; padding-top: 0; padding-bottom: 0; line-height: 26px; }
+:where(.ph) input[type=range] { margin: 0; }
+.ph-gap { flex: 1; }
+.ph-bar { display: flex; align-items: center; gap: 4px; padding: 6px 8px 4px; }
+.ph-play { display: inline-flex; align-items: center; gap: 4px; border: 0; padding: 5px 12px 5px 8px; font-weight: 600; cursor: pointer; color: #fff; }
+.ph-play.go { background: #2f9e4f; }
+.ph-play.go:hover { background: #37b25a; }
+.ph-play.stop { background: #c2453f; }
+.ph-play.stop:hover { background: #d2524b; }
+.ph-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; background: var(--color-button); color: var(--color-text); cursor: pointer; padding: 0; flex: none; }
+.ph-icon.small { width: 22px; height: 22px; background: transparent; }
+.ph-icon:hover:not(:disabled) { background: var(--color-accent); color: var(--color-light); }
+.ph-icon.on { background: var(--color-accent); color: var(--color-light); }
+.ph-icon:disabled { opacity: .35; cursor: default; }
+.ph-status { display: flex; align-items: center; gap: 6px; padding: 0 10px 6px; color: var(--color-subtle_text); }
+.ph-dot { width: 8px; height: 8px; border-radius: 50%; background: #7a7f8a; flex: none; }
+.ph-status.on .ph-dot { background: #43c463; box-shadow: 0 0 6px #43c463; }
+.ph-notice { display: flex; align-items: flex-start; gap: 6px; margin: 0 8px 6px; padding: 6px 8px; background: var(--color-back); border-left: 3px solid var(--color-accent); line-height: 1.35; }
+.ph-notice > span { flex: 1; }
+.ph-notice i.material-icons { color: var(--color-accent); }
+.ph-pickbar { display: flex; align-items: center; gap: 6px; margin: 4px 8px; padding: 6px 8px; background: var(--color-accent); color: var(--color-light); line-height: 1.3; position: sticky; top: 0; z-index: 3; }
+.ph-pickbar > span { flex: 1; }
+.ph-x { display: inline-flex; border: 0; background: transparent; color: var(--color-subtle_text); cursor: pointer; padding: 0; margin-left: auto; }
+.ph-x:hover { color: var(--color-text); }
+.ph-group { margin: 6px 8px; padding: 6px 8px 8px; background: var(--color-back); }
+.ph-group-title { font-weight: 600; margin-bottom: 4px; }
+.ph-title { display: flex; align-items: center; gap: 6px; padding: 8px 8px 2px; }
+.ph-title-name { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-badge { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 8px; background: var(--color-button); color: var(--color-subtle_text); }
+.ph-badge.k-spring { background: #d0559a; color: #fff; }
+.ph-badge.k-chain { background: #4d8fd6; color: #fff; }
+.ph-badge.k-cloth { background: #3fae8c; color: #fff; }
+.ph-badge.k-flesh { background: #e08a4a; color: #fff; }
+.ph-props > div > .ph-hint, .ph-props > div > .ph-seg, .ph-props > div > .ph-looks, .ph-props > div > .ph-multi { margin-left: 8px; margin-right: 8px; }
+.ph-looks { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; margin-bottom: 6px; }
+.ph-looks > span { color: var(--color-subtle_text); margin-right: 2px; }
+.ph-sec { margin: 6px 8px 0; background: var(--color-back); }
+.ph-sec-head { display: flex; align-items: center; gap: 4px; padding: 6px 6px; cursor: pointer; user-select: none; font-weight: 600; }
+.ph-sec-head:hover { background: var(--color-hover, rgba(255,255,255,.04)); }
+.ph-sec-head i.material-icons { opacity: .75; }
+.ph-sec-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-sec-badge { font-size: 10px; font-weight: 600; padding: 0 6px; border-radius: 8px; background: var(--color-accent); color: var(--color-light); }
+.ph-sec-desc { padding: 0 10px 2px 28px; color: var(--color-subtle_text); line-height: 1.35; }
+.ph-sec-body { padding: 4px 10px 10px; }
+.ph-sec.sub { margin: 4px 0 0; background: var(--color-ui); }
+.ph-field { display: grid; grid-template-columns: 86px 1fr; align-items: center; gap: 6px; margin: 4px 0; }
+.ph-field > label { color: var(--color-subtle_text); }
+.ph-field select, .ph-field input[type=text] { min-width: 0; width: 100%; box-sizing: border-box; }
+.ph-inline { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.ph-inline select { flex: 1; }
+.ph-slider { margin: 5px 0 7px; }
+.ph-slider-top { display: flex; align-items: center; gap: 6px; }
+.ph-slider-top > label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-slider input[type=range] { width: 100%; min-width: 0; margin: 2px 0 0; display: block; }
+.ph-slider input[type=number] { width: 62px; box-sizing: border-box; text-align: right; padding: 1px 4px; background: var(--color-dark); border: 1px solid transparent; color: var(--color-text); }
+.ph-slider input[type=number]:focus { border-color: var(--color-accent); outline: 0; }
+.ph-slider .ph-unit { color: var(--color-subtle_text); }
+.ph-slider .ph-help { color: var(--color-subtle_text); line-height: 1.3; margin-top: 1px; }
+.ph-seg { display: flex; margin: 4px 0; background: var(--color-dark); }
+.ph-seg button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 3px; border: 0; background: transparent; color: var(--color-text); padding: 6px 2px; cursor: pointer; min-width: 0; }
+.ph-seg button:hover:not(:disabled):not(.on) { background: var(--color-button); }
+.ph-seg button.on { background: var(--color-accent); color: var(--color-light); }
+.ph-seg button:disabled { opacity: .3; cursor: default; }
+.ph-check { display: block; margin: 5px 0; cursor: pointer; }
+.ph-check-row { display: flex; align-items: center; gap: 6px; }
+.ph-check input { margin: 0; flex: none; }
+.ph-check .ph-help { color: var(--color-subtle_text); line-height: 1.3; margin: 1px 0 0 20px; }
+.ph-search { display: flex; align-items: center; gap: 2px; margin: 6px 8px; background: var(--color-dark); padding: 0 4px 0 6px; }
+.ph-search input[type=text] { flex: 1; min-width: 0; background: transparent; border: 0; padding: 5px 4px; }
+.ph-search i.material-icons { opacity: .6; }
+.ph-tree { margin: 0 8px; max-height: calc(100vh - 330px); min-height: 120px; overflow-y: auto; background: var(--color-back); }
+.ph-node { display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 4px; cursor: pointer; white-space: nowrap; min-height: 22px; }
+.ph-node:hover { background: var(--color-button); }
+.ph-node.sel { background: rgba(255,255,255,.1); }
+.ph-node.main { background: var(--color-accent); color: var(--color-light); }
+.ph-twist { display: inline-flex; width: 16px; justify-content: center; opacity: .8; flex: none; }
+.ph-name { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.ph-kind.k-spring { color: #d0559a; }
+.ph-kind.k-chain { color: #4d8fd6; }
+.ph-kind.k-cloth { color: #3fae8c; }
+.ph-kind.k-flesh { color: #e08a4a; }
+.ph-node.main .ph-kind { color: inherit; }
+.ph-tag { font-size: 10px; padding: 0 6px; border-radius: 8px; color: #fff; background: #6b6f7a; flex: none; }
+.ph-foot { display: flex; align-items: center; gap: 10px; margin: 4px 8px; color: var(--color-subtle_text); }
+.ph-foot > span { flex: 1; }
+.ph-link { border: 0; background: transparent; color: var(--color-accent); cursor: pointer; padding: 0; }
+.ph-link:hover { text-decoration: underline; }
+.ph-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.ph-tools { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 8px; }
+.ph-group .ph-tools, .ph-sec-body .ph-tools { margin-left: 0; margin-right: 0; }
+.ph-chip { display: inline-flex; align-items: center; gap: 2px; border: 0; background: var(--color-button); color: var(--color-text); padding: 3px 8px; cursor: pointer; border-radius: 2px; }
+.ph-chip:hover { background: var(--color-accent); color: var(--color-light); }
+.ph-chip.on { background: var(--color-accent); color: var(--color-light); }
+.ph-chip.add { padding-left: 4px; }
+.ph-chip.danger:hover { background: #c2453f; }
+.ph-btn { display: inline-flex; align-items: center; gap: 4px; border: 0; background: var(--color-button); color: var(--color-text); padding: 4px 10px; cursor: pointer; margin: 4px 0; }
+.ph-btn:hover, .ph-btn.on { background: var(--color-accent); color: var(--color-light); }
+.ph-pickbar .ph-btn { margin: 0; background: rgba(0,0,0,.25); }
+.ph-list { display: flex; flex-direction: column; gap: 2px; max-height: 170px; overflow-y: auto; background: var(--color-dark); padding: 4px 6px; margin: 4px 0; }
+.ph-list label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.ph-card { background: var(--color-ui); padding: 4px 8px 6px; margin: 6px 0; }
+.ph-reset { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 0; background: transparent; color: var(--color-subtle_text); cursor: pointer; padding: 0; flex: none; }
+.ph-reset i.material-icons { font-size: 14px; }
+.ph-reset:hover:not(:disabled) { background: var(--color-accent); color: var(--color-light); }
+.ph-reset.off { visibility: hidden; }
+.ph-node.off { opacity: .35; cursor: not-allowed; }
+.ph-node.off:hover { background: transparent; }
+.ph-node.choose { cursor: crosshair; }
+.ph-listed { color: #40ffa0; }
+.ph-all { color: var(--color-subtle_text); }
+.ph-sub-title { font-weight: 600; margin: 8px 0 2px; }
+.ph-sub-title span { font-weight: 400; color: var(--color-subtle_text); margin-left: 4px; }
+.ph-limit { margin: 4px 0 6px; }
+.ph-hint { color: var(--color-subtle_text); margin: 4px 0; line-height: 1.4; }
+.ph-hint.tip { margin: 6px 10px; }
+.ph-empty { display: flex; gap: 8px; align-items: center; color: var(--color-subtle_text); padding: 10px 10px; line-height: 1.4; }
+.ph-empty i.material-icons { font-size: 22px; opacity: .6; }
+.ph-pick { display: inline-flex; align-items: center; gap: 2px; background: var(--color-accent); color: var(--color-light); padding: 0 6px; border-radius: 8px; font-size: 11px; }
+.ph-pick i.material-icons { font-size: 13px; cursor: pointer; opacity: .8; }
+.ph-pick i.material-icons:hover { opacity: 1; }
+.ph-rows { margin: 4px 8px; }
+.ph-row { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; cursor: pointer; background: var(--color-back); margin-bottom: 1px; min-height: 26px; }
+.ph-row:hover { background: var(--color-button); }
+.ph-row.sel { background: var(--color-accent); color: var(--color-light); }
+.ph-problems { color: #e0a040; margin: 4px 8px; line-height: 1.35; }
+.ph-problems i.material-icons { font-size: 14px; margin-right: 3px; }
+.ph-footer { padding: 4px 10px 0; }
+.ph-json { display: flex; flex-direction: column; max-height: none; height: 100%; }
+.ph-jstatus { display: inline-flex; align-items: center; gap: 4px; }
+.ph-jstatus.ok i.material-icons { color: #43c463; }
+.ph-jstatus.bad i.material-icons { color: #e0a040; }
+.ph-code { flex: 1; min-height: 120px; margin: 0 8px; resize: none; box-sizing: border-box; font-family: ui-monospace, Consolas, monospace; font-size: 12px; line-height: 1.4; tab-size: 2; white-space: pre; background: var(--color-dark); color: var(--color-text); border: 1px solid var(--color-border); padding: 6px 8px; width: calc(100% - 16px); }
+.ph-code:focus { border-color: var(--color-accent); outline: 0; }
+`;
+
+
+/***/ }),
+
 /***/ "./ts/physicsTab.ts":
 /*!**************************!*\
   !*** ./ts/physicsTab.ts ***!
@@ -13686,16 +17278,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   unloadPhysicsTab: () => (/* binding */ unloadPhysicsTab)
 /* harmony export */ });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
-/* harmony import */ var _physics_autoColliders__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./physics/autoColliders */ "./ts/physics/autoColliders.ts");
-/* harmony import */ var _physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./physics/colliderEdit */ "./ts/physics/colliderEdit.ts");
+/* harmony import */ var _physics_autoColliders__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./physics/autoColliders */ "./ts/physics/autoColliders.ts");
+/* harmony import */ var _physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./physics/colliderEdit */ "./ts/physics/colliderEdit.ts");
 /* harmony import */ var _physics_edit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./physics/edit */ "./ts/physics/edit.ts");
-/* harmony import */ var _physics_preview__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./physics/preview */ "./ts/physics/preview.ts");
+/* harmony import */ var _physics_preview__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./physics/preview */ "./ts/physics/preview.ts");
 /* harmony import */ var _physics_math__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./physics/math */ "./ts/physics/math.ts");
+/* harmony import */ var _physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./physics/cubeMesh */ "./ts/physics/cubeMesh.ts");
+/* harmony import */ var _physics_display__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./physics/display */ "./ts/physics/display.ts");
 /* harmony import */ var _physics_motion__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./physics/motion */ "./ts/physics/motion.ts");
-/* harmony import */ var _physics_rig__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./physics/rig */ "./ts/physics/rig.ts");
-/* harmony import */ var _physics_config__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./physics/config */ "./ts/physics/config.ts");
-/* harmony import */ var _physics_history__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./physics/history */ "./ts/physics/history.ts");
-/* harmony import */ var _physicsUi__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./physicsUi */ "./ts/physicsUi.ts");
+/* harmony import */ var _physics_rig__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./physics/rig */ "./ts/physics/rig.ts");
+/* harmony import */ var _physics_config__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./physics/config */ "./ts/physics/config.ts");
+/* harmony import */ var _physics_history__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./physics/history */ "./ts/physics/history.ts");
+/* harmony import */ var _physicsPanels__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./physicsPanels */ "./ts/physicsPanels.ts");
+/* harmony import */ var _physicsComponents__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./physicsComponents */ "./ts/physicsComponents.ts");
 /**
  * The Physics tab: a mode beside Edit, Paint and Animate. Pick a bone in the panel's own bone list, turn it into a spring (jiggle) or a chain (hair, tail) with
  * sliders, add colliders and test shapes, and press Simulate to watch the real model move with the same physics the game runs, driven by a scripted motion or
@@ -13716,27 +17311,48 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
 const G = globalThis;
 const MODE_ID = 'strut_physics';
-const PANEL_ID = 'strut_physics_panel';
 /** Blockbench units per block */
 const U = 16;
+/** The faces of a cube in the order the scene's own geometry of it has them */
+const CUBE_FACES = ['east', 'west', 'up', 'down', 'south', 'north'];
 const SHAPE_NAMES = { sphere: 'Sphere', capsule: 'Capsule', box: 'Box' };
 /** Everything the panel shows and edits; reactive, shared with the Vue component */
 const ui = {
     selected: '',
+    /** Every selected bone (the controls act on all of them) and whether they are not all of one type */
+    targets: [],
+    mixed: false,
+    /** The test shape picked in the panel or the view, or null (a shape and a bone are never both picked) */
+    selectedProp: null,
     kind: 'none',
     controls: Object.assign({}, _physics_edit__WEBPACK_IMPORTED_MODULE_0__.SPRING_DEFAULTS),
     /** The picked bone as cloth or flesh */
     soft: (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softControls)({}, '', 'cloth'),
+    /** The picked bone as flesh */
+    flesh: (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshControls)({}, ''),
+    fleshLooks: Object.entries(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.FLESH_LOOKS).map(([id, label]) => ({ id, label })),
     /** Whether the picked bone has a mesh of its own (cloth and flesh are made from one), and the other bones that have meshes */
     hasMesh: false,
+    /** The selected bone has a mesh or a cube: what flesh can be made from */
+    hasShape: false,
     meshBones: [],
     softLooks: Object.entries(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.SOFT_LOOKS).map(([id, l]) => ({ id, label: l.label, kind: l.kind })),
     running: false,
     motion: 'walk',
     animation: '',
     speed: 1,
+    /** The camera while it simulates: free, or held on the model or on the picked bone so the physics can be watched without the move in the way */
+    camMode: 'off',
+    /** Which of the move the camera follows: along each axis, and the turning */
+    camX: true,
+    camY: true,
+    camZ: true,
+    camTurn: true,
     animations: [],
     showColliders: true,
     showDebug: true,
@@ -13747,7 +17363,23 @@ const ui = {
     query: '',
     tree: [],
     open: {},
-    sections: { test: true, bones: true, feel: true, more: false, limits: false, shapes: true, props: false, zone: true, carry: true },
+    sections: { test: true, bones: true, feel: true, shapes: false, props: false },
+    /** Show the description under each setting */
+    help: true,
+    /** Bones are being picked in the view for a list: which list, and what to tell the user */
+    picking: null,
+    /** The JSON window: the text, whether it is valid and what is wrong with it */
+    json: '',
+    jsonOk: true,
+    jsonStatus: '',
+    jsonProblems: [],
+    jsonFocused: false,
+    /** Which groups of controls are open, by kind and group */
+    groups: {},
+    /** List only the bones that have physics */
+    onlyPhysics: false,
+    /** The other bones that have a mesh or a cube: what flesh may pair with or carry */
+    shapeBones: [],
     /** The selected bone's own collision shapes: their places in the document's list, and names */
     shapes: [],
     /** The one being edited, by its place in the document's list, or -1 */
@@ -13767,6 +17399,8 @@ const ui = {
     canRedo: false,
     looks: Object.entries(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.LOOKS).map(([id, l]) => ({ id, label: l.label, kind: l.kind })),
     motions: _physics_motion__WEBPACK_IMPORTED_MODULE_1__.MOTIONS,
+    /** The settings of every move, by move */
+    motionOpts: (0,_physics_motion__WEBPACK_IMPORTED_MODULE_1__.defaultMotionOptions)(),
 };
 // ---------------- reading the project ----------------
 function groups() {
@@ -13779,6 +17413,19 @@ function groupName(node) {
 function childGroups(group) {
     var _a;
     return ((_a = group.children) !== null && _a !== void 0 ? _a : []).filter((c) => c instanceof G.Group);
+}
+/** The names of a bone and every bone under it */
+function bonesUnder(name) {
+    const out = new Set();
+    const visit = (g) => {
+        out.add(g.name);
+        for (const k of childGroups(g))
+            visit(k);
+    };
+    const root = groups().find(x => x.name === name);
+    if (root)
+        visit(root);
+    return out;
 }
 function physicsText() {
     var _a, _b;
@@ -13838,20 +17485,46 @@ function meshElements() {
     }
     return out;
 }
+/** The cube elements of the project, with the bone each is in: flesh moves these as meshes (the game cuts them) */
+function cubeElements() {
+    var _a;
+    const out = [];
+    for (const g of groups()) {
+        for (const child of (_a = g.children) !== null && _a !== void 0 ? _a : []) {
+            if (child instanceof G.Cube && child.export !== false && (0,_physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__.cubeGrid)(child.from, child.to))
+                out.push({ element: child, bone: g.name });
+        }
+    }
+    return out;
+}
+/** A cube's grid in its own space (relative to its origin, unrotated): the space of its vertices in the scene */
+function cubeLocal(element) {
+    var _a;
+    const o = ((_a = element.origin) !== null && _a !== void 0 ? _a : [0, 0, 0]);
+    const from = element.from.map((v, a) => v - o[a]);
+    const to = element.to.map((v, a) => v - o[a]);
+    return (0,_physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__.cubeGrid)(from, to).local;
+}
 /** Each mesh as cloth and flesh see it: vertices in blocks in the game's mesh space (the vertex and the mesh's origin, over 16), faces as indices */
 function meshInputs() {
-    return meshElements().map(({ element, bone }) => {
-        var _a, _b, _c;
-        const keys = Object.keys((_a = element.vertices) !== null && _a !== void 0 ? _a : {});
-        const o = ((_b = element.origin) !== null && _b !== void 0 ? _b : [0, 0, 0]);
-        const index = new Map(keys.map((k, i) => [k, i]));
-        return {
-            key: String(element.uuid),
-            bone,
-            rest: keys.map((k) => [(element.vertices[k][0] + o[0]) / U, (element.vertices[k][1] + o[1]) / U, (element.vertices[k][2] + o[2]) / U]),
-            faces: Object.values((_c = element.faces) !== null && _c !== void 0 ? _c : {}).map(f => f.vertices.map(v => { var _a; return (_a = index.get(v)) !== null && _a !== void 0 ? _a : 0; })).filter(f => f.length >= 3),
-        };
+    const cubes = cubeElements().map(({ element, bone }) => {
+        var _a, _b;
+        const o = ((_a = element.origin) !== null && _a !== void 0 ? _a : [0, 0, 0]);
+        const grid = (0,_physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__.cubeGrid)(element.from.map((v, a) => v - o[a]), element.to.map((v, a) => v - o[a]));
+        return { key: String(element.uuid), bone, rest: (0,_physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__.cubeRest)(grid.local, o, ((_b = element.rotation) !== null && _b !== void 0 ? _b : [0, 0, 0]), U), faces: grid.faces, cube: true };
     });
+    return [...meshElements().map(({ element, bone }) => {
+            var _a, _b, _c;
+            const keys = Object.keys((_a = element.vertices) !== null && _a !== void 0 ? _a : {});
+            const o = ((_b = element.origin) !== null && _b !== void 0 ? _b : [0, 0, 0]);
+            const index = new Map(keys.map((k, i) => [k, i]));
+            return {
+                key: String(element.uuid),
+                bone,
+                rest: keys.map((k) => [(element.vertices[k][0] + o[0]) / U, (element.vertices[k][1] + o[1]) / U, (element.vertices[k][2] + o[2]) / U]),
+                faces: Object.values((_c = element.faces) !== null && _c !== void 0 ? _c : {}).map(f => f.vertices.map(v => { var _a; return (_a = index.get(v)) !== null && _a !== void 0 ? _a : 0; })).filter(f => f.length >= 3),
+            };
+        }), ...cubes];
 }
 // ---------------- the session: rig, pose capture, overlay, simulation loop ----------------
 class Session {
@@ -13865,11 +17538,18 @@ class Session {
         this.raf = 0;
         this.started = 0;
         this.modelSnapshot = null;
-        this.history = new _physics_history__WEBPACK_IMPORTED_MODULE_3__.History();
+        this.history = new _physics_history__WEBPACK_IMPORTED_MODULE_4__.History();
         this.correcting = false;
         this.refreshQueued = false;
+        // ---- the JSON window ----
+        this.jsonTimer = 0;
+        this.frozen = null;
+        this.simTime = 0;
         this.clothObjects = new Map();
         this.hiddenMeshes = [];
+        // ---- the camera follows the model ----
+        /** What the camera has been moved by while it follows: a turn about the vertical axis and a move, which are undone when the simulation stops */
+        this.camLock = null;
     }
     /** Reads the document from the project, rebuilds the rig and redraws */
     reload() {
@@ -13880,10 +17560,11 @@ class Session {
     }
     rebuild() {
         const bones = groups().map(g => ({ name: g.name, parent: groupName(g.parent) }));
-        this.rig = new _physics_rig__WEBPACK_IMPORTED_MODULE_4__.PhysicsRig(bones, this.doc, options => (0,_physics_autoColliders__WEBPACK_IMPORTED_MODULE_5__.generateAutoColliders)(autoBones(), options), meshInputs());
-        const check = (0,_physics_config__WEBPACK_IMPORTED_MODULE_6__.checkPhysics)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.writeDoc)(this.doc), bones.map(b => b.name));
+        this.rig = new _physics_rig__WEBPACK_IMPORTED_MODULE_5__.PhysicsRig(bones, this.doc, options => (0,_physics_autoColliders__WEBPACK_IMPORTED_MODULE_6__.generateAutoColliders)(autoBones(), options), meshInputs());
+        const check = (0,_physics_config__WEBPACK_IMPORTED_MODULE_7__.checkPhysics)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.writeDoc)(this.doc), bones.map(b => b.name));
         ui.problems = [...check.warnings, ...this.rig.problems];
         ui.summary = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.summarise)(this.doc);
+        this.syncJson();
         ui.autoColliders = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.autoCollidersOf)(this.doc);
         this.refreshTags();
         this.refreshTree();
@@ -13894,11 +17575,11 @@ class Session {
      * "bumps into its own body" or editing a shape changes what is on offer without changing the selection
      */
     refreshTags() {
-        ui.autoMode = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.autoModeOf)(this.doc, ui.selected) : 'auto';
+        ui.autoMode = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.autoModeOf)(this.doc, ui.selected) : 'auto';
         ui.candidates = ui.selected && this.rig ? this.rig.candidateBones(ui.selected) : [];
-        ui.filter = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.boneFilterOf)(this.doc, ui.selected) : { only: [], ignore: [] };
+        ui.filter = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.boneFilterOf)(this.doc, ui.selected) : { only: [], ignore: [] };
         ui.onlyTicked = ui.filter.only.length > 0;
-        ui.limits = ui.selected && ui.kind === 'spring' ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.springLimits)(this.doc, ui.selected) : { x: null, y: null, z: null };
+        ui.limits = ui.selected && ui.kind === 'spring' ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.springLimits)(this.doc, ui.selected) : { x: null, y: null, z: null };
     }
     syncHistory() {
         ui.canUndo = this.history.canUndo;
@@ -13946,24 +17627,44 @@ class Session {
             (_a = this.rig) === null || _a === void 0 ? void 0 : _a.reset();
     }
     refreshSelection() {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e;
         ui.selected = selectedGroupName();
+        ui.targets = ((_b = (_a = G.Group) === null || _a === void 0 ? void 0 : _a.multi_selected) !== null && _b !== void 0 ? _b : []).map(g => groupName(g)).filter((n) => n !== null);
+        if (ui.selected && !ui.targets.includes(ui.selected))
+            ui.targets = [ui.selected, ...ui.targets];
         ui.kind = ui.selected ? (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(this.doc, ui.selected) : 'none';
+        ui.mixed = ui.targets.some(b => (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(this.doc, b) !== ui.kind);
+        // a bone and a test shape are never picked together
+        if (ui.selected && ui.selectedProp !== null) {
+            ui.selectedProp = null;
+            this.styleProps();
+            this.updateGizmo();
+        }
         if (ui.kind === 'spring')
             ui.controls = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.springControls)(this.doc, ui.selected);
         else if (ui.kind === 'chain')
             ui.controls = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainControls)(this.doc, ui.selected);
-        else if (ui.kind === 'cloth' || ui.kind === 'flesh')
-            ui.soft = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softControls)(this.doc, ui.selected, ui.kind);
+        else if (ui.kind === 'cloth')
+            ui.soft = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softControls)(this.doc, ui.selected, 'cloth');
+        else if (ui.kind === 'flesh')
+            ui.flesh = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshControls)(this.doc, ui.selected);
         const withMesh = meshElements().map(m => m.bone);
-        ui.hasMesh = !!ui.selected && withMesh.includes(ui.selected);
-        ui.meshBones = [...new Set(withMesh)].filter(b => b !== ui.selected);
+        const withCube = cubeElements().map(c => c.bone);
+        const picked = ui.targets.length > 0 ? ui.targets : ui.selected ? [ui.selected] : [];
+        ui.hasMesh = picked.length > 0 && picked.every(b => withMesh.includes(b));
+        // flesh may be made from the meshes and cubes of the bones under a bone too (a bone with none of its own is all of what is under it)
+        ui.hasShape = picked.length > 0 && picked.every(b => [...bonesUnder(b)].some(u => withMesh.includes(u) || withCube.includes(u)));
+        ui.meshBones = [...new Set(withMesh)].filter(b => !picked.includes(b));
+        ui.shapeBones = [...new Set([...withMesh, ...withCube])].filter(b => !picked.includes(b));
         this.refreshShapes();
         this.refreshTags();
-        ui.animations = ((_b = (_a = G.Animation) === null || _a === void 0 ? void 0 : _a.all) !== null && _b !== void 0 ? _b : []).map(a => a.name);
+        ui.animations = ((_d = (_c = G.Animation) === null || _c === void 0 ? void 0 : _c.all) !== null && _d !== void 0 ? _d : []).map(a => a.name);
         // the bones above the selection are opened so it can be seen in the list
-        for (let g = (_c = groups().find(x => x.name === ui.selected)) === null || _c === void 0 ? void 0 : _c.parent; g && g !== 'root'; g = g.parent)
-            ui.open[g.name] = true;
+        const above = {};
+        for (let g = (_e = groups().find(x => x.name === ui.selected)) === null || _e === void 0 ? void 0 : _e.parent; g && g !== 'root'; g = g.parent)
+            above[g.name] = true;
+        if (Object.keys(above).some(k => !ui.open[k]))
+            ui.open = Object.assign(Object.assign({}, ui.open), above);
         this.refreshTree();
         this.drawOverlay();
     }
@@ -14004,13 +17705,85 @@ class Session {
             this.refreshSelection();
         });
     }
-    pick(name) {
-        var _a;
+    /** Picks a bone; with ctrl it is added to (or taken from) the picked ones, with shift every bone of the list between the picked one and it is */
+    pick(name, event) {
+        var _a, _b, _c, _d, _e;
         const g = groups().find(x => x.name === name);
         try {
-            (_a = g === null || g === void 0 ? void 0 : g.select) === null || _a === void 0 ? void 0 : _a.call(g);
+            if (g && (event === null || event === void 0 ? void 0 : event.shiftKey) && ui.selected) {
+                const names = ui.tree.map(n => n.name);
+                const from = names.indexOf(ui.selected);
+                const to = names.indexOf(name);
+                if (from >= 0 && to >= 0) {
+                    for (let i = Math.min(from, to); i <= Math.max(from, to); i++)
+                        (_b = (_a = groups().find(x => x.name === names[i])) === null || _a === void 0 ? void 0 : _a.multiSelect) === null || _b === void 0 ? void 0 : _b.call(_a);
+                }
+            }
+            else if (g && ((event === null || event === void 0 ? void 0 : event.ctrlKey) || (event === null || event === void 0 ? void 0 : event.metaKey))) {
+                if (g.selected)
+                    (_c = g.unselect) === null || _c === void 0 ? void 0 : _c.call(g);
+                else
+                    (_d = g.multiSelect) === null || _d === void 0 ? void 0 : _d.call(g);
+            }
+            else {
+                (_e = g === null || g === void 0 ? void 0 : g.select) === null || _e === void 0 ? void 0 : _e.call(g);
+            }
         }
-        catch ( /* not selectable right now */_b) { /* not selectable right now */ }
+        catch ( /* not selectable right now */_f) { /* not selectable right now */ }
+        this.queueRefresh();
+    }
+    // ---- picking in the view ----
+    /**
+     * A click in the 3D view: the nearest of the bones and the test shapes under the pointer is picked. A bone is the bone of the cube or mesh that was hit (ctrl adds
+     * it to the picked ones), as in the Animate tab, since a bone is not an element
+     */
+    pickInView(preview, event) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        let hit = false;
+        try {
+            hit = preview.raycast(event);
+        }
+        catch ( /* nothing to hit */_m) { /* nothing to hit */ }
+        const boneDistance = hit && hit.type === 'element' && ((_a = hit.intersects) === null || _a === void 0 ? void 0 : _a[0]) ? hit.intersects[0].distance : Infinity;
+        const propHit = this.propMeshes.length > 0 ? (_c = (_b = preview.raycaster) === null || _b === void 0 ? void 0 : _b.intersectObjects(this.propMeshes, true)) === null || _c === void 0 ? void 0 : _c[0] : undefined;
+        if (propHit && propHit.distance < boneDistance) {
+            let node = propHit.object;
+            while (node && ((_d = node.userData) === null || _d === void 0 ? void 0 : _d.propId) === undefined)
+                node = node.parent;
+            if (node) {
+                this.selectProp(node.userData.propId);
+                return;
+            }
+        }
+        if (((_e = G.Transformer) === null || _e === void 0 ? void 0 : _e.was_clicked) || ((_f = G.Transformer) === null || _f === void 0 ? void 0 : _f.axis))
+            return;
+        // while a list is being picked a click on a bone adds or takes the bone, and a click on nothing changes nothing
+        if (ui.picking) {
+            const picked = hit && hit.type === 'element' ? (_g = hit.element) === null || _g === void 0 ? void 0 : _g.parent : null;
+            if (picked instanceof G.Group)
+                this.pickedBone(picked.name);
+            else if (ui.picking.kind === 'pair' || ui.picking.kind === 'carry')
+                ui.notice = 'Click a bone that has a mesh or a cube.';
+            return;
+        }
+        if (!hit || hit.type !== 'element') {
+            // a click on nothing puts a picked test shape down
+            if (ui.selectedProp !== null && !(event.ctrlKey || event.metaKey))
+                this.selectProp(null);
+            return;
+        }
+        const group = (_h = hit.element) === null || _h === void 0 ? void 0 : _h.parent;
+        if (!(group instanceof G.Group))
+            return;
+        try {
+            if ((event.ctrlKey || event.metaKey) && group.selected)
+                (_j = group.unselect) === null || _j === void 0 ? void 0 : _j.call(group);
+            else if (event.ctrlKey || event.metaKey)
+                (_k = group.multiSelect) === null || _k === void 0 ? void 0 : _k.call(group);
+            else
+                (_l = group.select) === null || _l === void 0 ? void 0 : _l.call(group, event);
+        }
+        catch ( /* not selectable right now */_o) { /* not selectable right now */ }
         this.queueRefresh();
     }
     refreshTree() {
@@ -14018,121 +17791,201 @@ class Session {
         const nodes = [];
         const visit = (g, depth, parent) => {
             const kids = childGroups(g);
-            nodes.push({ name: g.name, depth, hasKids: kids.length > 0, kind: (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(this.doc, g.name), parent, auto: (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.autoModeOf)(this.doc, g.name) });
+            nodes.push({ name: g.name, depth, hasKids: kids.length > 0, kind: (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(this.doc, g.name), parent, auto: (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.autoModeOf)(this.doc, g.name) });
             for (const k of kids)
                 visit(k, depth + 1, g.name);
         };
         for (const n of ((_b = (_a = G.Outliner) === null || _a === void 0 ? void 0 : _a.root) !== null && _b !== void 0 ? _b : []))
             if (n instanceof G.Group)
                 visit(n, 0, null);
-        for (const n of nodes)
-            if (ui.open[n.name] === undefined && n.depth < 1)
-                ui.open[n.name] = true;
+        // replaced whole, not added to: a key added to a reactive object does not tell the panel it changed
+        const first = nodes.filter(n => ui.open[n.name] === undefined && n.depth < 1);
+        if (first.length > 0)
+            ui.open = Object.assign(Object.assign({}, ui.open), Object.fromEntries(first.map(n => [n.name, true])));
         // frozen so Vue does not build watchers for every bone of a big model on each refresh
         ui.tree = Object.freeze(nodes);
     }
-    // ---- controls ----
-    setKind(kind) {
-        const name = ui.selected;
-        if (!name || kind === ui.kind)
-            return;
-        if (kind === 'none') {
-            this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(this.doc, name), `kind:${name}`);
+    // ---- controls: every edit applies to all the selected bones ----
+    /** The bones the controls act on: all the selected ones, or just the picked one */
+    targets() {
+        return ui.targets.length > 0 ? ui.targets : ui.selected ? [ui.selected] : [];
+    }
+    /** The parts of the targets that are of {@code kind}: one per spring bone, chain, cloth or flesh (two bones of one chain are one part). Each is named by one of its bones */
+    partsOf(doc, kind) {
+        const seen = new Set();
+        const out = [];
+        for (const bone of this.targets()) {
+            if ((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(doc, bone) !== kind)
+                continue;
+            const id = kind === 'chain' ? (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainNameOf)(doc, bone) : kind === 'flesh' ? (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshEntryName)(doc, bone) : bone;
+            if (id === null || seen.has(id))
+                continue;
+            seen.add(id);
+            out.push(bone);
         }
-        else if (kind === 'spring') {
-            this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSpring)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(this.doc, name), name, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.SPRING_DEFAULTS, 'jiggle-soft')), `kind:${name}`);
+        return out;
+    }
+    /** The controls of one part, whatever its kind */
+    controlsOf(doc, kind, bone) {
+        switch (kind) {
+            case 'spring': return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.springControls)(doc, bone);
+            case 'chain': return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainControls)(doc, bone);
+            case 'cloth': return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softControls)(doc, bone, 'cloth');
+            default: return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshControls)(doc, bone);
         }
-        else if (kind === 'cloth' || kind === 'flesh') {
-            if (!ui.hasMesh) {
-                ui.notice = 'This bone has no mesh. Cloth and flesh are made from the vertices of a mesh, not from cubes.';
-                return;
+    }
+    withControls(doc, kind, bone, c) {
+        switch (kind) {
+            case 'spring': return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSpring)(doc, bone, c);
+            case 'chain': {
+                const name = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainNameOf)(doc, bone);
+                return name === null ? doc : (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setChain)(doc, doc.chains[name].bones, c);
             }
-            const look = kind === 'cloth' ? 'cloth' : 'flesh-soft';
-            this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSoft)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(this.doc, name), name, kind, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softLook)(look, name)), `kind:${name}`);
+            case 'cloth': return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSoft)(doc, bone, 'cloth', c);
+            default: return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setFlesh)(doc, bone, c);
         }
-        else {
-            const bones = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainFrom)(name, n => childGroups(groups().find(x => x.name === n)).map(c => c.name));
-            ui.notice = bones.length === 1 ? 'This bone has no child bones, so the chain is only its tip. A chain needs child bones to swing along.' : `Chain of ${bones.length} bones: ${bones.join(' > ')}`;
-            this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setChain)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(this.doc, name), bones, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.CHAIN_DEFAULTS, 'hair')), `kind:${name}`);
-        }
+    }
+    /** Changes the controls of every selected part of the picked kind, each from its own, and puts the result in the project as one undo step */
+    edit(change, key) {
+        const kind = ui.kind;
+        if (kind === 'none')
+            return;
+        let doc = this.doc;
+        for (const bone of this.partsOf(doc, kind))
+            doc = this.withControls(doc, kind, bone, change(this.controlsOf(doc, kind, bone), bone));
+        if (doc !== this.doc)
+            this.commit(doc, `${key}:${this.targets().join(',')}`);
+    }
+    /** The picked part's controls on screen, whatever its kind */
+    model() {
+        return ui.kind === 'flesh' ? ui.flesh : ui.kind === 'cloth' ? ui.soft : ui.controls;
+    }
+    /** One number or tick of the controls, for every selected part */
+    setField(key, value) {
+        this.model()[key] = value;
+        this.edit(c => (Object.assign(Object.assign({}, c), { [key]: value })), `field:${key}`);
+    }
+    /** Changes some of a flesh's controls together, for every selected flesh */
+    setFleshPatch(patch) {
+        ui.flesh = Object.assign(Object.assign({}, ui.flesh), patch);
+        this.edit(c => (Object.assign(Object.assign({}, c), patch)), `patch:${Object.keys(patch).join('+')}`);
+    }
+    /** A look on every selected part: it sets the numbers, and keeps what is the bone's own (its zone, the pieces it carries, its collisions, its bones) */
+    applyAnyLook(look) {
+        const kind = ui.kind;
+        this.edit((c, bone) => {
+            if (kind === 'flesh') {
+                const next = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshLook)(look, bone);
+                return Object.assign(Object.assign({}, next), { softCenter: c.softCenter, softRadius: c.softRadius, carry: c.carry, collideBody: c.collideBody, collideWorld: c.collideWorld, collideOthers: c.collideOthers, bones: c.bones, nestedSoft: c.nestedSoft, pivotMode: c.pivotMode, pivot: c.pivot, tip: c.tip, up: c.up, presses: c.presses });
+            }
+            if (kind === 'cloth')
+                return Object.assign(Object.assign({}, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softLook)(look, bone)), { softCenter: c.softCenter, softRadius: c.softRadius, carry: c.carry });
+            return (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(c, look);
+        }, `look:${look}:${performance.now()}`);
         this.refreshSelection();
     }
-    applyControls() {
-        const name = ui.selected;
-        if (!name)
-            return;
-        if (ui.kind === 'spring')
-            this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSpring)(this.doc, name, ui.controls), `controls:${name}`);
-        else if (ui.kind === 'chain') {
-            const chain = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainNameOf)(this.doc, name);
-            if (chain !== null)
-                this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setChain)(this.doc, this.doc.chains[chain].bones, ui.controls), `controls:${name}`);
-        }
-    }
-    applySoft() {
-        const name = ui.selected;
-        if (!name || (ui.kind !== 'cloth' && ui.kind !== 'flesh'))
-            return;
-        this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSoft)(this.doc, name, ui.kind, ui.soft), `soft:${name}`);
-    }
-    applySoftLook(look) {
-        if (!ui.selected || (ui.kind !== 'cloth' && ui.kind !== 'flesh'))
-            return;
-        const next = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softLook)(look, ui.selected);
-        // the zone, the carried bones and the collisions are the bone's own choices, a look does not undo them
-        ui.soft = Object.assign(Object.assign({}, next), { softCenter: ui.soft.softCenter, softRadius: ui.soft.softRadius, carry: ui.soft.carry });
-        this.history.record(physicsText(), `softlook:${look}:${performance.now()}`, performance.now());
-        this.applySoft();
-    }
-    /** Puts the soft zone's middle at the middle of the bone's meshes and its radius at half their reach */
-    softZoneFromMesh() {
-        const own = meshInputs().filter(m => m.bone === ui.selected);
-        const all = own.flatMap(m => m.rest);
-        if (all.length === 0) {
-            ui.notice = 'This bone has no mesh to take a soft zone from.';
-            return;
-        }
-        const lo = [Infinity, Infinity, Infinity];
-        const hi = [-Infinity, -Infinity, -Infinity];
-        for (const v of all)
-            for (let a = 0; a < 3; a++) {
-                lo[a] = Math.min(lo[a], v[a]);
-                hi[a] = Math.max(hi[a], v[a]);
+    /** Puts each soft zone at the middle of its own bone's meshes, with half their reach as the radius */
+    zoneFromMesh() {
+        const inputs = meshInputs();
+        let missing = false;
+        this.edit((c, bone) => {
+            const own = inputs.filter(m => m.bone === bone);
+            // a flesh with no mesh of its own is all of what is under it
+            const under = bonesUnder(bone);
+            const all = (own.length > 0 || ui.kind !== 'flesh' ? own : inputs.filter(m => under.has(m.bone))).flatMap(m => m.rest);
+            if (all.length === 0) {
+                missing = true;
+                return c;
             }
-        const centre = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2];
-        ui.soft = Object.assign(Object.assign({}, ui.soft), { softCenter: centre, softRadius: Math.max(0.05, Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) / 4) });
-        this.applySoft();
+            const lo = [Infinity, Infinity, Infinity];
+            const hi = [-Infinity, -Infinity, -Infinity];
+            for (const v of all)
+                for (let a = 0; a < 3; a++) {
+                    lo[a] = Math.min(lo[a], v[a]);
+                    hi[a] = Math.max(hi[a], v[a]);
+                }
+            return Object.assign(Object.assign({}, c), { softCenter: [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2], softRadius: Math.max(0.05, Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) / 4) });
+        }, `zone:${performance.now()}`);
+        if (missing)
+            ui.notice = 'No mesh to take a soft zone from.';
+        this.refreshSelection();
     }
-    setSoftCentre(axis, value) {
-        const c = [...ui.soft.softCenter];
-        c[axis] = value;
-        ui.soft = Object.assign(Object.assign({}, ui.soft), { softCenter: c });
-        this.applySoft();
+    setCentre(axis, value) {
+        const centre = [...this.model().softCenter];
+        centre[axis] = value;
+        this.model().softCenter = centre;
+        this.edit(c => {
+            const next = [...c.softCenter];
+            next[axis] = value;
+            return Object.assign(Object.assign({}, c), { softCenter: next });
+        }, `centre:${axis}`);
     }
-    setSoftValue(key, value) {
-        ui.soft[key] = value;
-        this.applySoft();
-    }
+    /** Ticks or unticks a bone whose meshes ride on every selected part */
     toggleCarry(bone, on) {
-        const carry = ui.soft.carry.filter(b => b !== bone);
+        const carry = this.model().carry.filter((b) => b !== bone);
         if (on)
             carry.push(bone);
-        ui.soft = Object.assign(Object.assign({}, ui.soft), { carry });
-        this.applySoft();
+        this.model().carry = carry;
+        this.edit(c => (Object.assign(Object.assign({}, c), { carry: on ? [...c.carry.filter((b) => b !== bone), bone] : c.carry.filter((b) => b !== bone) })), `carry:${bone}`);
     }
-    applyLook(look) {
-        ui.controls = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(ui.controls, look);
-        this.history.record(physicsText(), `look:${look}:${performance.now()}`, performance.now());
-        this.applyControls();
+    /** Pairs the picked flesh with another bone (or makes it one bone again): a pair presses on each other */
+    setFleshPartner(other) {
+        if (!ui.selected || ui.kind !== 'flesh' || this.targets().length > 1)
+            return;
+        const bones = ui.flesh.bones;
+        const second = bones.indexOf(ui.selected) === 1;
+        const first = second ? bones[0] : ui.selected;
+        const next = other ? (second ? [other, ui.selected] : [first, other]) : [first];
+        this.commit((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setFleshBones)(this.doc, ui.selected, next), `pair:${ui.selected}`);
+        this.refreshSelection();
+    }
+    setKind(kind) {
+        const names = this.targets();
+        if (names.length === 0 || (kind === ui.kind && !ui.mixed))
+            return;
+        ui.notice = '';
+        const withMesh = new Set(meshElements().map(m => m.bone));
+        const withShape = new Set([...withMesh, ...cubeElements().map(c => c.bone)]);
+        const left = [];
+        let doc = this.doc;
+        for (const name of names) {
+            if ((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(doc, name) === kind)
+                continue;
+            if (kind === 'none') {
+                doc = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(doc, name);
+            }
+            else if (kind === 'spring') {
+                doc = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSpring)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(doc, name), name, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.SPRING_DEFAULTS, 'jiggle-soft'));
+            }
+            else if (kind === 'cloth' || kind === 'flesh') {
+                if (kind === 'cloth' ? !withMesh.has(name) : ![...bonesUnder(name)].some(u => withShape.has(u))) {
+                    left.push(name);
+                    continue;
+                }
+                doc = kind === 'cloth' ? (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setSoft)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(doc, name), name, 'cloth', (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.softLook)('cloth', name)) : (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setFlesh)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(doc, name), name, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.fleshLook)('pouch', name));
+            }
+            else {
+                const bones = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.chainFrom)(name, n => childGroups(groups().find(x => x.name === n)).map(c => c.name));
+                if (names.length === 1)
+                    ui.notice = bones.length === 1 ? 'This bone has no child bones, so the chain is only its tip. A chain needs child bones to swing along.' : `Chain of ${bones.length} bones: ${bones.join(' > ')}`;
+                doc = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.setChain)((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.removePart)(doc, name), bones, (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.withLook)(_physics_edit__WEBPACK_IMPORTED_MODULE_0__.CHAIN_DEFAULTS, 'hair'));
+            }
+        }
+        if (left.length > 0) {
+            ui.notice = kind === 'cloth' ? `No mesh on ${left.join(', ')}. Cloth is made from the vertices of a mesh, not from cubes.` : `No mesh or cube on ${left.join(', ')} to make flesh from.`;
+        }
+        if (doc !== this.doc)
+            this.commit(doc, `kind:${names.join(',')}`);
+        this.refreshSelection();
     }
     setAuto(value) {
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setAutoEnabled)(this.doc, value), 'auto');
+        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.setAutoEnabled)(this.doc, value), 'auto');
     }
     // ---- the selected bone's collision shapes ----
     /** Lists the selected bone's own shapes and keeps the one being edited if it is still there */
     refreshShapes() {
         var _a, _b;
-        const own = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.collidersOn)(this.doc, ui.selected) : [];
+        const own = ui.selected ? (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.collidersOn)(this.doc, ui.selected) : [];
         const counts = {};
         ui.shapes = own.map(c => {
             var _a;
@@ -14152,7 +18005,7 @@ class Session {
     addShape(shape) {
         if (!ui.selected)
             return;
-        const added = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.addColliderForm)(this.doc, ui.selected, (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.fitForm)(shape, autoBones().find(b => b.name === ui.selected)));
+        const added = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.addColliderForm)(this.doc, ui.selected, (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.fitForm)(shape, autoBones().find(b => b.name === ui.selected)));
         ui.shapeIndex = added.index;
         this.commit(added.doc, `shape:${performance.now()}`);
         this.refreshSelection();
@@ -14167,27 +18020,27 @@ class Session {
         else
             form[key][axis] = value;
         ui.form = form;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.updateColliderAt)(this.doc, ui.shapeIndex, form), `collider:${ui.shapeIndex}:${key}${axis}`);
+        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.updateColliderAt)(this.doc, ui.shapeIndex, form), `collider:${ui.shapeIndex}:${key}${axis}`);
         this.refreshShapes();
     }
     setShapeKind(shape) {
         if (!ui.form || ui.form.shape === shape)
             return;
-        const fitted = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.fitForm)(shape, autoBones().find(b => b.name === ui.selected));
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.updateColliderAt)(this.doc, ui.shapeIndex, Object.assign(Object.assign({}, fitted), { center: ui.form.center })), `collider:${ui.shapeIndex}:kind`);
+        const fitted = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.fitForm)(shape, autoBones().find(b => b.name === ui.selected));
+        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.updateColliderAt)(this.doc, ui.shapeIndex, Object.assign(Object.assign({}, fitted), { center: ui.form.center })), `collider:${ui.shapeIndex}:kind`);
         this.refreshShapes();
     }
     fitShape() {
         if (!ui.form)
             return;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.updateColliderAt)(this.doc, ui.shapeIndex, (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.fitForm)(ui.form.shape, autoBones().find(b => b.name === ui.selected))), `collider:${performance.now()}`);
+        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.updateColliderAt)(this.doc, ui.shapeIndex, (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.fitForm)(ui.form.shape, autoBones().find(b => b.name === ui.selected))), `collider:${performance.now()}`);
         this.refreshShapes();
     }
     duplicateShape() {
         if (!ui.form || !ui.selected)
             return;
         const moved = Object.assign(Object.assign({}, ui.form), { center: [ui.form.center[0] + 1, ui.form.center[1], ui.form.center[2]] });
-        const added = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.addColliderForm)(this.doc, ui.selected, moved);
+        const added = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.addColliderForm)(this.doc, ui.selected, moved);
         ui.shapeIndex = added.index;
         this.commit(added.doc, `shape:${performance.now()}`);
         this.refreshShapes();
@@ -14195,56 +18048,236 @@ class Session {
     deleteShape() {
         if (ui.shapeIndex < 0)
             return;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.removeColliderAt)(this.doc, ui.shapeIndex), `shape:${performance.now()}`);
+        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.removeColliderAt)(this.doc, ui.shapeIndex), `shape:${performance.now()}`);
         ui.shapeIndex = -1;
         this.refreshShapes();
     }
     setMode(mode) {
-        if (!ui.selected)
+        const names = this.targets();
+        if (names.length === 0)
             return;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setAutoMode)(this.doc, ui.selected, mode), `mode:${ui.selected}:${performance.now()}`);
+        let doc = this.doc;
+        for (const name of names)
+            doc = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.setAutoMode)(doc, name, mode);
+        this.commit(doc, `mode:${names.join(',')}:${performance.now()}`);
         ui.autoMode = mode;
     }
-    // ---- which of its own bones the selected part bumps into ----
+    // ---- which of its own bones the selected parts bump into ----
+    /** Whether the picked part bumps into the shapes of {@code bone} (by its allow and deny lists) */
     isTicked(bone) {
-        return ui.onlyTicked ? ui.filter.only.includes(bone) : !ui.filter.ignore.includes(bone);
+        return ui.filter.only.length > 0 ? ui.filter.only.includes(bone) : !ui.filter.ignore.includes(bone);
+    }
+    /** Puts one allow or deny list on every selected part */
+    setFilter(filter) {
+        let doc = this.doc;
+        for (const name of this.targets())
+            doc = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.setBoneFilter)(doc, name, filter);
+        this.commit(doc, `filter:${performance.now()}`);
+    }
+    /** The bones it bumps into, as the shortest list that says it: nothing written when it is all of them, an allow list when it is a few, a deny list otherwise */
+    setCollideSet(keep) {
+        const all = ui.candidates;
+        const filter = keep.length >= all.length ? { only: [], ignore: [] }
+            : keep.length > 0 && keep.length <= all.length / 2 ? { only: keep, ignore: [] } : { only: [], ignore: all.filter(b => !keep.includes(b)) };
+        this.setFilter(filter);
+        this.refreshSelection();
     }
     tick(bone, ticked) {
         if (!ui.selected)
             return;
-        if (ui.onlyTicked && !ticked && ui.filter.only.length === 1 && ui.filter.only[0] === bone) {
-            ui.notice = 'At least one bone stays ticked here. To bump into none of its own body, untick "Bumps into its own body".';
-            this.refreshSelection();
+        this.setCollideSet(ui.candidates.filter(b => (b === bone ? ticked : this.isTicked(b))));
+    }
+    setCollide(how) {
+        if (!ui.selected)
+            return;
+        this.setCollideSet(how === 'all' ? [...ui.candidates] : how === 'none' ? [] : ui.candidates.filter(b => !this.isTicked(b)));
+    }
+    // ---- picking bones in the view for a list ----
+    startPicking(kind) {
+        var _a;
+        const text = {
+            collide: 'Click bones in the view to add or remove them from what it reacts to.',
+            carry: 'Click bones in the view to add or remove them from the pieces that ride on it.',
+            pair: 'Click the bone in the view to pair it with.',
+        };
+        // the bones that can be picked for this list: the rest are greyed out in the Bones window and do nothing in the view
+        const valid = kind === 'collide' ? [...ui.candidates] : kind === 'carry' && ui.kind === 'cloth' ? [...ui.meshBones] : [...ui.shapeBones];
+        ui.picking = { kind, text: `${(_a = text[kind]) !== null && _a !== void 0 ? _a : 'Click bones.'} Click them in the view or in the Bones window; the greyed ones cannot be picked here. Esc or Done when finished.`, valid };
+        ui.notice = '';
+        this.drawOverlay();
+    }
+    /** Why {@code bone} cannot go in the list being picked: what the user needs to know to make it so */
+    whyNot(kind, bone) {
+        const info = autoBones().find(b => b.name === bone);
+        const hasGeometry = !!info && (info.cubes.length > 0 || info.meshVertices.length > 0);
+        if (!hasGeometry)
+            return kind === 'collide' ? 'has no cubes or meshes, so it has no shape for this to react to.' : 'has no mesh or cube.';
+        if (kind !== 'collide')
+            return 'cannot be picked here.';
+        const parents = new Map(groups().map(g => [g.name, groupName(g.parent)]));
+        if (this.targets().some(t => (0,_physics_autoColliders__WEBPACK_IMPORTED_MODULE_6__.isRelated)(bone, t, parents))) {
+            return 'is above or below this part in the bone tree, so the shape made from it is left out: a part does not bump into what it is built on. Give it a shape of your own in Shapes to use it.';
+        }
+        if ((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.autoModeOf)(this.doc, bone) === 'off')
+            return 'has its shape switched off in Shapes.';
+        return 'has no shape for this part to react to (turn on Make shapes from the model in Shapes, or give it a shape of your own).';
+    }
+    /** The bones in the list being picked for now */
+    pickedList() {
+        var _a;
+        const kind = (_a = ui.picking) === null || _a === void 0 ? void 0 : _a.kind;
+        return kind === 'collide' ? ui.candidates.filter(b => this.isTicked(b)) : kind === 'carry' ? [...(ui.kind === 'cloth' ? ui.soft : ui.flesh).carry]
+            : kind === 'pair' ? ui.flesh.bones.filter(b => b !== ui.selected) : [];
+    }
+    /** A row of the Bones window clicked while picking */
+    pickRow(bone) {
+        if (ui.picking)
+            this.pickedBone(bone);
+    }
+    stopPicking() {
+        ui.picking = null;
+        this.drawOverlay();
+    }
+    /** A bone was clicked in the view while a list is being picked */
+    pickedBone(bone) {
+        var _a, _b;
+        const kind = (_a = ui.picking) === null || _a === void 0 ? void 0 : _a.kind;
+        if (!((_b = ui.picking) === null || _b === void 0 ? void 0 : _b.valid.includes(bone))) {
+            ui.notice = `${bone} ${this.whyNot(kind, bone)}`;
             return;
         }
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setBoneFilter)(this.doc, ui.selected, (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.tickBone)(ui.filter, bone, ticked, ui.onlyTicked)), `filter:${performance.now()}`);
-        this.refreshSelection();
+        if (kind === 'collide') {
+            this.tick(bone, !this.isTicked(bone));
+        }
+        else if (kind === 'carry') {
+            const list = (ui.kind === 'cloth' ? ui.soft : ui.flesh).carry;
+            if (!this.targets().includes(bone))
+                this.toggleCarry(bone, !list.includes(bone));
+        }
+        else if (kind === 'pair') {
+            if (bone !== ui.selected)
+                this.setFleshPartner(bone);
+            ui.picking = null;
+        }
+        this.drawOverlay();
     }
-    setOnlyTicked(onlyTicked) {
-        if (!ui.selected || onlyTicked === ui.onlyTicked)
+    // ---- the bone list ----
+    expandAll(open) {
+        ui.open = Object.fromEntries(ui.tree.map(n => [n.name, open]));
+    }
+    /** Picks every bone that has physics */
+    pickPhysics() {
+        const names = ui.tree.filter(n => n.kind !== 'none').map(n => n.name);
+        try {
+            names.forEach((name, i) => {
+                var _a, _b;
+                const g = groups().find(x => x.name === name);
+                if (i === 0)
+                    (_a = g === null || g === void 0 ? void 0 : g.select) === null || _a === void 0 ? void 0 : _a.call(g);
+                else
+                    (_b = g === null || g === void 0 ? void 0 : g.multiSelect) === null || _b === void 0 ? void 0 : _b.call(g);
+            });
+        }
+        catch ( /* not selectable right now */_a) { /* not selectable right now */ }
+        this.queueRefresh();
+    }
+    pickNone() {
+        var _a;
+        try {
+            (_a = G.unselectAllElements) === null || _a === void 0 ? void 0 : _a.call(G);
+        }
+        catch ( /* nothing was picked */_b) { /* nothing was picked */ }
+        this.queueRefresh();
+    }
+    /** Shows the model's physics as text, unless the text is being typed in */
+    syncJson(force = false) {
+        if (!force && ui.jsonFocused)
             return;
-        const next = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.switchFilterMode)(ui.filter, ui.candidates, onlyTicked);
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setBoneFilter)(this.doc, ui.selected, next), `filter:${performance.now()}`);
-        this.refreshSelection();
-        ui.onlyTicked = onlyTicked;
+        const text = physicsText();
+        try {
+            ui.json = text.trim() ? JSON.stringify(JSON.parse(text), null, 2) : '{\n  "bones": {}\n}';
+        }
+        catch (_a) {
+            ui.json = text;
+        }
+        this.checkJson(ui.json);
+    }
+    checkJson(text) {
+        const check = (0,_physics_config__WEBPACK_IMPORTED_MODULE_7__.checkPhysics)(text, groups().map(g => g.name));
+        ui.jsonOk = check.document !== null && check.warnings.length === 0;
+        ui.jsonProblems = check.document === null ? [] : [...check.warnings];
+        ui.jsonStatus = check.document === null ? 'Not valid JSON yet' : check.warnings.length === 0
+            ? `OK: ${check.bones} bones, ${check.chains} chains, ${check.colliders} colliders` : `${check.warnings.length} problem${check.warnings.length === 1 ? '' : 's'}`;
+        return check.document !== null;
+    }
+    jsonFocus(on) {
+        ui.jsonFocused = on;
+        // typing stops: what was typed is laid out as the game's text now
+        if (!on) {
+            this.applyJson();
+            this.syncJson(true);
+        }
+    }
+    /** Text typed in the window: it is applied after a pause, when it is valid */
+    editJson(text) {
+        ui.json = text;
+        this.checkJson(text);
+        clearTimeout(this.jsonTimer);
+        this.jsonTimer = window.setTimeout(() => this.applyJson(), 700);
+    }
+    applyJson() {
+        clearTimeout(this.jsonTimer);
+        if (!this.checkJson(ui.json))
+            return;
+        const doc = (0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.readDoc)(ui.json);
+        if ((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.writeDoc)(doc) !== physicsText())
+            this.commit(doc, 'json');
+    }
+    formatJson() {
+        try {
+            ui.json = JSON.stringify(JSON.parse(ui.json), null, 2);
+            this.checkJson(ui.json);
+        }
+        catch (_a) {
+            ui.notice = 'The text is not valid JSON, so it cannot be laid out yet.';
+        }
+    }
+    revertJson() {
+        clearTimeout(this.jsonTimer);
+        this.syncJson(true);
+    }
+    fillJson() {
+        ui.json = (0,_physics_config__WEBPACK_IMPORTED_MODULE_7__.starterPhysics)(groups().map(g => g.name));
+        this.applyJson();
+        this.syncJson(true);
     }
     // ---- limits ----
+    /** Changes the angle limits of every selected spring bone, each from its own */
+    editLimits(change, key) {
+        let doc = this.doc;
+        for (const name of this.targets()) {
+            if ((0,_physics_edit__WEBPACK_IMPORTED_MODULE_0__.kindOf)(doc, name) === 'spring')
+                doc = (0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.setSpringLimits)(doc, name, change((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_8__.springLimits)(doc, name)));
+        }
+        this.commit(doc, key);
+        this.refreshSelection();
+    }
     toggleLimit(axis, on) {
         if (!ui.selected || ui.kind !== 'spring')
             return;
-        const limits = Object.assign(Object.assign({}, ui.limits), { [axis]: on ? [-30, 30] : null });
-        ui.limits = limits;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setSpringLimits)(this.doc, ui.selected, limits), `limits:${performance.now()}`);
+        this.editLimits(l => (Object.assign(Object.assign({}, l), { [axis]: on ? [-30, 30] : null })), `limits:${performance.now()}`);
     }
     setLimit(axis, end, value) {
-        const current = ui.limits[axis];
-        if (!ui.selected || !current || !Number.isFinite(value))
+        if (!ui.selected || !Number.isFinite(value) || !ui.limits[axis])
             return;
-        const next = [current[0], current[1]];
-        next[end] = value;
-        const limits = Object.assign(Object.assign({}, ui.limits), { [axis]: next });
-        ui.limits = limits;
-        this.commit((0,_physics_colliderEdit__WEBPACK_IMPORTED_MODULE_7__.setSpringLimits)(this.doc, ui.selected, limits), `limits:${ui.selected}:${axis}${end}`);
+        this.editLimits(l => {
+            const current = l[axis];
+            if (!current)
+                return l;
+            const next = [current[0], current[1]];
+            next[end] = value;
+            return Object.assign(Object.assign({}, l), { [axis]: next });
+        }, `limits:${this.targets().join(',')}:${axis}${end}`);
     }
     poke() {
         if (!ui.running || !ui.selected || !this.rig)
@@ -14256,33 +18289,109 @@ class Session {
     addProp(kind) {
         const frame = ui.selected ? this.captureFrames().get(ui.selected) : undefined;
         const at = frame ? [frame.origin[0] + 0.45, frame.origin[1], frame.origin[2]] : [0.6, 0.8, 0];
-        ui.props.push({ id: this.nextProp++, kind, x: at[0], y: at[1], z: at[2], size: kind === 'wall' ? 1.5 : kind === 'capsule' ? 1.2 : 0.5, sweep: false });
+        const id = this.nextProp++;
+        ui.props.push({
+            id, kind, x: at[0], y: at[1], z: at[2], rx: 0, ry: 0, rz: 0, size: kind === 'wall' ? 1.5 : kind === 'capsule' ? 1.2 : 0.5, sweep: false, sweepAxis: 'x', sweepRange: 0.7, sweepSpeed: 2.2,
+        });
         this.syncProps();
+        this.selectProp(id);
+    }
+    duplicateProp(id) {
+        const p = ui.props.find(x => x.id === id);
+        if (!p)
+            return;
+        const copy = Object.assign(Object.assign({}, p), { id: this.nextProp++, x: p.x + 0.3 });
+        ui.props.push(copy);
+        this.syncProps();
+        this.selectProp(copy.id);
     }
     removeProp(id) {
         ui.props = ui.props.filter(p => p.id !== id);
+        if (ui.selectedProp === id)
+            ui.selectedProp = null;
         this.syncProps();
+        this.updateGizmo();
     }
     clearProps() {
         ui.props = [];
+        ui.selectedProp = null;
         this.syncProps();
+        this.updateGizmo();
+    }
+    /** Picks a test shape (or none) in the panel or the view: it gets the move gizmo, and no bone stays picked */
+    selectProp(id) {
+        var _a;
+        ui.selectedProp = id;
+        if (id !== null) {
+            try {
+                (_a = G.unselectAllElements) === null || _a === void 0 ? void 0 : _a.call(G);
+            }
+            catch ( /* nothing was picked */_b) { /* nothing was picked */ }
+            ui.selected = '';
+            ui.targets = [];
+            ui.kind = 'none';
+        }
+        this.styleProps();
+        this.updateGizmo();
+        this.queueRefresh();
+    }
+    /** Shows the picked test shape brighter than the others */
+    styleProps() {
+        for (const m of this.propMeshes) {
+            const picked = m.userData.propId === ui.selectedProp;
+            const material = m.userData.material;
+            if (!material)
+                continue;
+            material.color.setHex(picked ? 0xffe066 : 0xffaa33);
+            material.opacity = picked ? 0.6 : 0.35;
+        }
+        this.render();
+    }
+    /** Puts the move gizmo at the picked test shape (or takes it away) */
+    updateGizmo() {
+        var _a, _b;
+        try {
+            (_b = (_a = G.Transformer) === null || _a === void 0 ? void 0 : _a.updateSelection) === null || _b === void 0 ? void 0 : _b.call(_a);
+        }
+        catch ( /* the view is not ready */_c) { /* the view is not ready */ }
+        this.render();
+    }
+    /** Where the picked test shape is in the scene (pixels), for the gizmo */
+    propPosition() {
+        const mesh = this.propMeshes.find(m => m.userData.propId === ui.selectedProp);
+        return mesh ? mesh.position : null;
+    }
+    /** How far a test shape is from where it is set, at time {@code t}: its sweep (held where it was while the gizmo has it) */
+    offsetOf(p, t) {
+        if (this.frozen && this.frozen.id === p.id)
+            return this.frozen.offset;
+        const out = [0, 0, 0];
+        if (p.sweep)
+            out['xyz'.indexOf(p.sweepAxis)] = Math.sin(t * p.sweepSpeed) * p.sweepRange;
+        return out;
     }
     /** The physics shape of a test shape at time {@code t}, in blocks */
     propShape(p, t) {
-        const x = p.x + (p.sweep ? Math.sin(t * 2.2) * 0.7 : 0);
-        const axes = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+        const off = this.offsetOf(p, t);
+        const c = [p.x + off[0], p.y + off[1], p.z + off[2]];
+        const turn = (0,_physics_math__WEBPACK_IMPORTED_MODULE_9__.qfromEulerDegrees)([p.rx, p.ry, p.rz]);
+        const axes = [(0,_physics_math__WEBPACK_IMPORTED_MODULE_9__.qrotate)(turn, [1, 0, 0]), (0,_physics_math__WEBPACK_IMPORTED_MODULE_9__.qrotate)(turn, [0, 1, 0]), (0,_physics_math__WEBPACK_IMPORTED_MODULE_9__.qrotate)(turn, [0, 0, 1])];
         switch (p.kind) {
             case 'sphere':
-                return { shape: 'sphere', p: [x, p.y, p.z], q: [0, 0, 0], radius: p.size / 2, half: [0, 0, 0], axes };
+                return { shape: 'sphere', p: c, q: [0, 0, 0], radius: p.size / 2, half: [0, 0, 0], axes };
             case 'capsule': {
                 const r = p.size * 0.15;
                 const half = Math.max(0, p.size / 2 - r);
-                return { shape: 'capsule', p: [x, p.y - half, p.z], q: [x, p.y + half, p.z], radius: r, half: [0, 0, 0], axes };
+                const along = axes[1];
+                return {
+                    shape: 'capsule', p: [c[0] - along[0] * half, c[1] - along[1] * half, c[2] - along[2] * half], q: [c[0] + along[0] * half, c[1] + along[1] * half, c[2] + along[2] * half],
+                    radius: r, half: [0, 0, 0], axes,
+                };
             }
             case 'wall':
-                return { shape: 'box', p: [x, p.y, p.z], q: [0, 0, 0], radius: 0, half: [p.size * 0.6, p.size / 2, 0.04], axes };
+                return { shape: 'box', p: c, q: [0, 0, 0], radius: 0, half: [p.size * 0.6, p.size / 2, 0.04], axes };
             default:
-                return { shape: 'box', p: [x, p.y, p.z], q: [0, 0, 0], radius: 0, half: [p.size / 2, p.size / 2, p.size / 2], axes };
+                return { shape: 'box', p: c, q: [0, 0, 0], radius: 0, half: [p.size / 2, p.size / 2, p.size / 2], axes };
         }
     }
     clearPropMeshes() {
@@ -14325,6 +18434,7 @@ class Session {
                     mesh = new THREE.Mesh(new THREE.BoxGeometry(w * U, h * U, d * U), material);
                 }
                 mesh.userData.propId = p.id;
+                mesh.userData.material = material;
                 mesh.renderOrder = 9000;
                 G.Canvas.scene.add(mesh);
                 this.propMeshes.push(mesh);
@@ -14333,14 +18443,83 @@ class Session {
         this.placePropMeshes(0);
         if (this.rig)
             this.rig.props = ui.props.map(p => this.propShape(p, 0));
-        this.render();
+        this.styleProps();
     }
     placePropMeshes(t) {
         for (const m of this.propMeshes) {
             const p = ui.props.find(x => x.id === m.userData.propId);
-            if (p)
-                m.position.set((p.x + (p.sweep ? Math.sin(t * 2.2) * 0.7 : 0)) * U, p.y * U, p.z * U);
+            if (!p)
+                continue;
+            const off = this.offsetOf(p, t);
+            m.position.set((p.x + off[0]) * U, (p.y + off[1]) * U, (p.z + off[2]) * U);
+            m.rotation.order = 'ZYX';
+            m.rotation.set(p.rx * Math.PI / 180, p.ry * Math.PI / 180, p.rz * Math.PI / 180);
         }
+    }
+    /** The picked test shape's object in the scene, for the gizmo's axes */
+    propObject() {
+        var _a;
+        return (_a = this.propMeshes.find(m => m.userData.propId === ui.selectedProp)) !== null && _a !== void 0 ? _a : null;
+    }
+    /** The gizmo takes hold of the picked test shape: a sweeping one stays where it is until it is let go */
+    beginDrag() {
+        const p = ui.props.find(x => x.id === ui.selectedProp);
+        if (p)
+            this.frozen = { id: p.id, offset: this.offsetOf(p, this.simTime) };
+    }
+    /** The gizmo moved, turned or scaled the picked test shape: {@code amount} is in blocks, degrees or a share of its size */
+    dragProp(tool, axis, amount) {
+        const p = ui.props.find(x => x.id === ui.selectedProp);
+        if (!p || !Number.isFinite(amount))
+            return;
+        if (tool === 'rotate_tool') {
+            if (!['x', 'y', 'z'].includes(axis) || Math.abs(amount) > 120)
+                return;
+            const key = ('r' + axis);
+            p[key] = Math.round(((p[key] + amount + 540) % 360 - 180) * 1000) / 1000;
+        }
+        else if (tool === 'resize_tool') {
+            p.size = Math.max(0.05, Math.min(6, p.size * (1 + amount)));
+        }
+        else if (['x', 'y', 'z'].includes(axis)) {
+            p[axis] += amount / U;
+        }
+        this.refreshProps();
+    }
+    /** The gizmo let go: the shape's sweep carries on from where it is, not from where its centre was */
+    endDrag() {
+        const frozen = this.frozen;
+        this.frozen = null;
+        const p = frozen ? ui.props.find(x => x.id === frozen.id) : undefined;
+        if (p && frozen) {
+            const now = this.offsetOf(p, this.simTime);
+            p.x += frozen.offset[0] - now[0];
+            p.y += frozen.offset[1] - now[1];
+            p.z += frozen.offset[2] - now[2];
+        }
+        this.refreshProps();
+    }
+    /** Puts the test shapes where they are now: in the scene, in the physics and under the gizmo */
+    refreshProps() {
+        this.placePropMeshes(this.simTime);
+        if (this.rig)
+            this.rig.props = ui.props.map(x => this.propShape(x, this.simTime));
+        this.updateGizmo();
+    }
+    /** Puts the gizmo back where the picked test shape is, if it was lost or the shape moved (a sweeping one, or one moved from the panel) */
+    keepGizmo() {
+        var _a, _b;
+        const T = G.Transformer;
+        if (ui.selectedProp === null || ((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) !== MODE_ID || !T || T.dragging)
+            return;
+        const at = this.propPosition();
+        if (!at)
+            return;
+        try {
+            if (!T.visible || !T.position.equals(at))
+                T.center();
+        }
+        catch ( /* the view is not ready */_c) { /* the view is not ready */ }
     }
     // ---- pose ----
     captureFrames() {
@@ -14412,7 +18591,7 @@ class Session {
     }
     /** Draws the colliders, and the springs and chains as lines, at the pose the model is in now */
     drawOverlay() {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g;
         if (!this.rig || ((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) !== MODE_ID)
             return;
         const overlay = this.ensureOverlay();
@@ -14457,7 +18636,7 @@ class Session {
         if (ui.showLimits && ui.selected) {
             const f = frames.get(ui.selected);
             if (ui.kind === 'spring' && f) {
-                const r = (0,_physics_preview__WEBPACK_IMPORTED_MODULE_8__.resolveSpring)((_d = (_c = this.doc.bones) === null || _c === void 0 ? void 0 : _c[ui.selected]) !== null && _d !== void 0 ? _d : {});
+                const r = (0,_physics_preview__WEBPACK_IMPORTED_MODULE_10__.resolveSpring)((_d = (_c = this.doc.bones) === null || _c === void 0 ? void 0 : _c[ui.selected]) !== null && _d !== void 0 ? _d : {});
                 const lever = [r.params.tip[0] * r.params.length, r.params.tip[1] * r.params.length, r.params.tip[2] * r.params.length];
                 const colours = [0xff5050, 0x50e050, 0x5080ff];
                 ['x', 'y', 'z'].forEach((axis, i) => {
@@ -14475,6 +18654,18 @@ class Session {
                             push(seg, 0xc080ff);
             }
         }
+        if (ui.picking) {
+            const listed = this.pickedList();
+            for (const bone of listed) {
+                const o = (_e = frames.get(bone)) === null || _e === void 0 ? void 0 : _e.origin;
+                if (!o)
+                    continue;
+                const s = 0.06;
+                push([[o[0] - s, o[1], o[2]], [o[0] + s, o[1], o[2]]], 0x40ffa0);
+                push([[o[0], o[1] - s, o[2]], [o[0], o[1] + s, o[2]]], 0x40ffa0);
+                push([[o[0], o[1], o[2] - s], [o[0], o[1], o[2] + s]], 0x40ffa0);
+            }
+        }
         if (ui.showDebug) {
             for (const l of this.rig.debugLines())
                 push([l.a, l.b], l.kind === 'rest' ? 0x40e040 : 0xf04040);
@@ -14482,7 +18673,7 @@ class Session {
         const THREE = G.THREE;
         overlay.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
         overlay.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        (_f = (_e = overlay.geometry).computeBoundingSphere) === null || _f === void 0 ? void 0 : _f.call(_e);
+        (_g = (_f = overlay.geometry).computeBoundingSphere) === null || _g === void 0 ? void 0 : _g.call(_f);
         this.render();
     }
     // ---- simulation ----
@@ -14525,58 +18716,197 @@ class Session {
                 return [p.x / U, p.y / U, p.z / U];
             }));
         }
+        for (const { element } of cubeElements()) {
+            const key = String(element.uuid);
+            const object = element.mesh;
+            if (!wanted.has(key) || !object)
+                continue;
+            object.updateMatrixWorld(true);
+            out.set(key, cubeLocal(element).map((v) => {
+                const p = new THREE.Vector3(v[0], v[1], v[2]).applyMatrix4(object.matrixWorld);
+                return [p.x / U, p.y / U, p.z / U];
+            }));
+        }
         return out;
+    }
+    /**
+     * The mesh that draws one simulated element with the model's own texture: a mesh element keeps its own geometry (its texture coordinates, triangles and
+     * material groups) and only its points move; a cube is drawn as the grid the simulation moves, its texture coordinates taken from the cube's own faces
+     */
+    makeDisplay(input, element) {
+        var _a, _b, _c, _d, _e;
+        const THREE = G.THREE;
+        const original = element === null || element === void 0 ? void 0 : element.mesh;
+        const place = (0,_physics_display__WEBPACK_IMPORTED_MODULE_11__.groupsByPlace)(input.rest);
+        let geometry = null;
+        let material = null;
+        let slots = null;
+        let groupOf = place;
+        if (element instanceof G.Mesh && ((_b = (_a = original === null || original === void 0 ? void 0 : original.geometry) === null || _a === void 0 ? void 0 : _a.attributes) === null || _b === void 0 ? void 0 : _b.position)) {
+            const list = input.faces.flat();
+            // one point for each corner of each face, in the order the faces are: the order of the scene's own geometry
+            if (original.geometry.attributes.position.count === list.length) {
+                geometry = original.geometry.clone();
+                material = original.material;
+                slots = list;
+                groupOf = list.map(v => place[v]);
+            }
+        }
+        else if (element instanceof G.Cube && ((_d = (_c = original === null || original === void 0 ? void 0 : original.geometry) === null || _c === void 0 ? void 0 : _c.attributes) === null || _d === void 0 ? void 0 : _d.position) && original.geometry.attributes.uv) {
+            const o = ((_e = element.origin) !== null && _e !== void 0 ? _e : [0, 0, 0]);
+            const grid = (0,_physics_cubeMesh__WEBPACK_IMPORTED_MODULE_3__.cubeGrid)(element.from.map((v, a) => v - o[a]), element.to.map((v, a) => v - o[a]));
+            if (grid) {
+                const textured = CUBE_FACES.filter(f => { var _a, _b; return ((_b = (_a = element.faces) === null || _a === void 0 ? void 0 : _a[f]) === null || _b === void 0 ? void 0 : _b.texture) !== null; });
+                const display = (0,_physics_display__WEBPACK_IMPORTED_MODULE_11__.cubeDisplay)(grid, original.geometry.attributes.position.array, original.geometry.attributes.uv.array, face => textured.includes(CUBE_FACES[face]));
+                const many = Array.isArray(original.material);
+                geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(grid.local.length * 3), 3));
+                geometry.setAttribute('uv', new THREE.BufferAttribute(display.uv, 2));
+                geometry.setIndex(display.index);
+                for (const g of display.groups) {
+                    const j = textured.indexOf(CUBE_FACES[g.face]);
+                    geometry.addGroup(g.start, g.count, many ? Math.max(0, Math.min(original.material.length - 1, j)) : 0);
+                }
+                material = original.material;
+            }
+        }
+        let own = false;
+        if (!geometry || !material) {
+            // no texture to borrow: the welded surface in one plain colour
+            const index = [];
+            for (const face of input.faces)
+                for (let k = 1; k + 1 < face.length; k++)
+                    index.push(face[0], face[k], face[k + 1]);
+            geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(input.rest.length * 3), 3));
+            geometry.setIndex(index);
+            material = new THREE.MeshLambertMaterial({ color: 0xe9b7a5, side: THREE.DoubleSide });
+            slots = null;
+            groupOf = place;
+            own = true;
+        }
+        geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.frustumCulled = false;
+        return { mesh, slots, groupOf, own };
     }
     /** Draws the simulated cloth and flesh as meshes in the scene, in place of the originals (which are hidden while the simulation runs) */
     drawCloth() {
-        var _a, _b;
+        var _a, _b, _c, _d;
         if (!this.rig || !G.THREE || !((_a = G.Canvas) === null || _a === void 0 ? void 0 : _a.scene))
             return;
-        const THREE = G.THREE;
         const inputs = new Map(meshInputs().map(m => [m.key, m]));
-        const elements = new Map(meshElements().map(m => [String(m.element.uuid), m.element]));
+        const elements = new Map([...meshElements(), ...cubeElements()].map(m => [String(m.element.uuid), m.element]));
         for (const key of this.rig.clothKeys()) {
             const verts = this.rig.clothVertices(key);
             const input = inputs.get(key);
             if (!verts || !input)
                 continue;
-            let mesh = this.clothObjects.get(key);
-            if (!mesh) {
-                const geometry = new THREE.BufferGeometry();
-                const index = [];
-                for (const face of input.faces)
-                    for (let k = 1; k + 1 < face.length; k++)
-                        index.push(face[0], face[k], face[k + 1]);
-                geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts.length * 3), 3));
-                geometry.setIndex(index);
-                mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: 0xe9b7a5, side: THREE.DoubleSide }));
-                mesh.frustumCulled = false;
-                G.Canvas.scene.add(mesh);
-                this.clothObjects.set(key, mesh);
+            let display = this.clothObjects.get(key);
+            if (!display) {
+                display = this.makeDisplay(input, elements.get(key));
+                G.Canvas.scene.add(display.mesh);
+                this.clothObjects.set(key, display);
                 const original = (_b = elements.get(key)) === null || _b === void 0 ? void 0 : _b.mesh;
                 if (original && original.visible !== false) {
                     original.visible = false;
                     this.hiddenMeshes.push(original);
                 }
             }
-            const position = mesh.geometry.getAttribute('position');
-            verts.forEach((v, i) => position.setXYZ(i, v[0] * U, v[1] * U, v[2] * U));
+            const geometry = display.mesh.geometry;
+            const position = geometry.getAttribute('position');
+            const array = position.array;
+            const slots = display.slots;
+            for (let i = 0; i < position.count; i++) {
+                const v = verts[slots ? slots[i] : i];
+                if (!v)
+                    continue;
+                array[i * 3] = v[0] * U;
+                array[i * 3 + 1] = v[1] * U;
+                array[i * 3 + 2] = v[2] * U;
+            }
             position.needsUpdate = true;
-            mesh.geometry.computeVertexNormals();
-            mesh.geometry.computeBoundingSphere();
+            const normal = geometry.getAttribute('normal');
+            normal.array.set((0,_physics_display__WEBPACK_IMPORTED_MODULE_11__.smoothNormals)(array, (_d = (_c = geometry.index) === null || _c === void 0 ? void 0 : _c.array) !== null && _d !== void 0 ? _d : [], display.groupOf));
+            normal.needsUpdate = true;
+            geometry.computeBoundingSphere();
         }
     }
     removeCloth() {
         var _a, _b, _c;
-        for (const mesh of this.clothObjects.values()) {
-            (_a = mesh.parent) === null || _a === void 0 ? void 0 : _a.remove(mesh);
-            (_b = mesh.geometry) === null || _b === void 0 ? void 0 : _b.dispose();
-            (_c = mesh.material) === null || _c === void 0 ? void 0 : _c.dispose();
+        for (const display of this.clothObjects.values()) {
+            (_a = display.mesh.parent) === null || _a === void 0 ? void 0 : _a.remove(display.mesh);
+            (_b = display.mesh.geometry) === null || _b === void 0 ? void 0 : _b.dispose();
+            // the model's own materials are not ours to dispose
+            if (display.own)
+                (_c = display.mesh.material) === null || _c === void 0 ? void 0 : _c.dispose();
         }
         this.clothObjects.clear();
         for (const original of this.hiddenMeshes)
             original.visible = true;
         this.hiddenMeshes = [];
+    }
+    setCamMode(mode) {
+        ui.camMode = mode;
+        // the point it follows is a different one now: the next step starts from it, with no jump
+        if (this.camLock)
+            this.camLock.prev = null;
+    }
+    /** A turn about the vertical axis, the way the scene turns its models */
+    static turnY(v, angle) {
+        const c = Math.cos(angle);
+        const s = Math.sin(angle);
+        return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c];
+    }
+    /**
+     * Moves the camera and what it looks at the way the followed point moved and turned this step, so the model stays where it is on screen: only the axes and the
+     * turning that are switched on. {@code anchor} is where the model (or the picked bone) is, in the scene, {@code yaw} how far the move has turned it
+     */
+    followCamera(anchor, yaw) {
+        var _a, _b, _c, _d;
+        const preview = (_a = G.Preview) === null || _a === void 0 ? void 0 : _a.selected;
+        if (!(preview === null || preview === void 0 ? void 0 : preview.camera) || !((_b = preview.controls) === null || _b === void 0 ? void 0 : _b.target))
+            return;
+        if (!this.camLock || this.camLock.preview !== preview)
+            this.camLock = { preview, theta: 0, shift: [0, 0, 0], prev: null, prevYaw: yaw };
+        const lock = this.camLock;
+        const before = lock.prev;
+        const beforeYaw = lock.prevYaw;
+        lock.prev = anchor;
+        lock.prevYaw = yaw;
+        if (!before)
+            return;
+        const d = ui.camTurn ? yaw - beforeYaw : 0;
+        const move = [ui.camX ? anchor[0] - before[0] : 0, ui.camY ? anchor[1] - before[1] : 0, ui.camZ ? anchor[2] - before[2] : 0];
+        if (d === 0 && move[0] === 0 && move[1] === 0 && move[2] === 0)
+            return;
+        const apply = (p) => {
+            const turned = Session.turnY([p.x - before[0], p.y - before[1], p.z - before[2]], d);
+            p.set(before[0] + turned[0] + move[0], before[1] + turned[1] + move[1], before[2] + turned[2] + move[2]);
+        };
+        apply(preview.camera.position);
+        apply(preview.controls.target);
+        // what has been done, as one turn and one move, to be undone
+        const rotated = Session.turnY(lock.shift, d);
+        const own = Session.turnY(before, d);
+        lock.theta += d;
+        lock.shift = [rotated[0] + before[0] - own[0] + move[0], rotated[1] + before[1] - own[1] + move[1], rotated[2] + before[2] - own[2] + move[2]];
+        (_d = (_c = preview.controls).update) === null || _d === void 0 ? void 0 : _d.call(_c);
+    }
+    /** Puts the camera back where the model is again, after the simulation: the turn and the move it was given are taken off */
+    releaseCamera() {
+        var _a, _b, _c, _d;
+        const lock = this.camLock;
+        this.camLock = null;
+        if (!lock || !((_a = lock.preview) === null || _a === void 0 ? void 0 : _a.camera) || !((_b = lock.preview.controls) === null || _b === void 0 ? void 0 : _b.target))
+            return;
+        const undo = (p) => {
+            const back = Session.turnY([p.x - lock.shift[0], p.y - lock.shift[1], p.z - lock.shift[2]], -lock.theta);
+            p.set(back[0], back[1], back[2]);
+        };
+        undo(lock.preview.camera.position);
+        undo(lock.preview.controls.target);
+        (_d = (_c = lock.preview.controls).update) === null || _d === void 0 ? void 0 : _d.call(_c);
     }
     stop() {
         var _a, _b, _c, _d, _e;
@@ -14585,6 +18915,7 @@ class Session {
         cancelAnimationFrame(this.raf);
         this.raf = 0;
         ui.running = false;
+        this.releaseCamera();
         try {
             const model = (_a = G.Project) === null || _a === void 0 ? void 0 : _a.model_3d;
             if (model && this.modelSnapshot) {
@@ -14596,6 +18927,7 @@ class Session {
             (_c = (_b = G.Canvas).updateAllBones) === null || _c === void 0 ? void 0 : _c.call(_b);
             if (ui.animation)
                 (_e = (_d = G.Animator) === null || _d === void 0 ? void 0 : _d.showDefaultPose) === null || _e === void 0 ? void 0 : _e.call(_d);
+            this.simTime = 0;
             this.placePropMeshes(0);
             if (this.rig)
                 this.rig.props = ui.props.map(p => this.propShape(p, 0));
@@ -14614,7 +18946,7 @@ class Session {
             return;
         try {
             const t = (performance.now() - this.started) / 1000 * ui.speed;
-            const m = (0,_physics_motion__WEBPACK_IMPORTED_MODULE_1__.motionAt)(ui.motion, t);
+            const m = (0,_physics_motion__WEBPACK_IMPORTED_MODULE_1__.motionAt)(ui.motion, t, ui.motionOpts[ui.motion]);
             const model = (_a = G.Project) === null || _a === void 0 ? void 0 : _a.model_3d;
             if (model) {
                 model.position.set(this.modelSnapshot.p.x + m.pos[0] * U, this.modelSnapshot.p.y + m.pos[1] * U, this.modelSnapshot.p.z + m.pos[2] * U);
@@ -14630,10 +18962,18 @@ class Session {
                 (_h = (_g = G.Animator) === null || _g === void 0 ? void 0 : _g.preview) === null || _h === void 0 ? void 0 : _h.call(_g);
             }
             model === null || model === void 0 ? void 0 : model.updateMatrixWorld(true);
+            this.simTime = t;
             this.placePropMeshes(t);
             this.rig.props = ui.props.map(p => this.propShape(p, t));
+            this.keepGizmo();
             const frames = this.captureFrames();
             const root = (0,_physics_math__WEBPACK_IMPORTED_MODULE_9__.qaxisY)(m.yaw);
+            if (ui.camMode !== 'off') {
+                const bone = ui.camMode === 'bone' && ui.selected ? frames.get(ui.selected) : undefined;
+                const at = bone ? [bone.origin[0] * U, bone.origin[1] * U, bone.origin[2] * U] : model ? [model.position.x, model.position.y, model.position.z] : null;
+                if (at)
+                    this.followCamera(at, m.yaw);
+            }
             this.rig.clothAnimated = this.captureCloth();
             const results = this.rig.update(frames, { pos: m.pos, yaw: m.yaw }, root, t);
             for (const g of groups()) {
@@ -14664,419 +19004,32 @@ class Session {
     }
 }
 const session = new Session();
-/** The four sliders that matter most; everything else is under "More" */
-const MAIN_FIELDS = [
-    { key: 'stiffness', label: 'Stiffness', min: 0, max: 1, step: 0.01, kinds: ['spring', 'chain'], hint: 'How hard it pulls back to where the animation puts it' },
-    { key: 'bounce', label: 'Bounciness', min: 0, max: 1, step: 0.01, kinds: ['spring', 'chain'], hint: 'How long it keeps wobbling' },
-    { key: 'weight', label: 'Amount', min: 0, max: 1, step: 0.01, kinds: ['spring', 'chain'], hint: 'How much of the physics shows. 0 is the animation alone' },
-    { key: 'inertia', label: 'Lag', min: 0, max: 1, step: 0.01, kinds: ['spring', 'chain'], hint: 'How much it trails behind when the model moves or turns' },
-];
-const MORE_FIELDS = [
-    { key: 'gravity', label: 'Gravity', min: 0, max: 15, step: 0.1, kinds: ['spring', 'chain'], hint: '0 for jiggle, about 10 for hair' },
-    { key: 'length', label: 'Reach', min: 0.02, max: 1.2, step: 0.01, kinds: ['spring', 'chain'], hint: 'Spring: distance from the pivot to the swinging mass. Chain: how far the last bone reaches (blocks)' },
-    { key: 'radius', label: 'Thickness', min: 0, max: 0.5, step: 0.01, kinds: ['spring', 'chain'], hint: 'Its size when it bumps into things (blocks)' },
-    { key: 'squish', label: 'Squish', min: 0, max: 1, step: 0.01, kinds: ['spring'], hint: 'How much it flattens when pressed' },
-    { key: 'friction', label: 'Grip', min: 0, max: 1, step: 0.01, kinds: ['chain'], hint: 'How much it grips what it lies on' },
-];
-const SOFT_FIELDS = [
-    { key: 'stiffness', label: 'Stretch', min: 0, max: 1, step: 0.01, kinds: ['cloth', 'flesh'], hint: 'How firmly each edge keeps its length. 1 does not stretch at all' },
-    { key: 'bend', label: 'Fold', min: 0, max: 1, step: 0.01, kinds: ['cloth'], hint: 'How much a fold resists: 0 is silk, 1 is card' },
-    { key: 'anchor', label: 'Pull back', min: 0, max: 30, step: 0.5, kinds: ['cloth', 'flesh'], hint: 'How firmly it is pulled back to the animated shape, per second. 0 lets cloth hang free' },
-    { key: 'volume', label: 'Keeps volume', min: 0, max: 1, step: 0.01, kinds: ['flesh'], hint: 'A closed mesh bulges where it is pressed in' },
-    { key: 'pinHeight', label: 'Sewn on at top', min: 0, max: 1, step: 0.01, kinds: ['cloth'], hint: 'The share of the mesh height, from the top, that is sewn to the bone' },
-    { key: 'damping', label: 'Settling', min: 0, max: 8, step: 0.1, kinds: ['cloth', 'flesh'], hint: 'How quickly it stops moving' },
-    { key: 'inertia', label: 'Lag', min: 0, max: 1, step: 0.01, kinds: ['cloth', 'flesh'], hint: 'How much it trails behind when the model moves or turns' },
-    { key: 'gravity', label: 'Gravity', min: 0, max: 15, step: 0.1, kinds: ['cloth', 'flesh'], hint: '9.8 for cloth, about 2 for flesh' },
-    { key: 'radius', label: 'Thickness', min: 0, max: 0.2, step: 0.005, kinds: ['cloth', 'flesh'], hint: 'How thick it is when it bumps into things (blocks)' },
-    { key: 'weight', label: 'Amount', min: 0, max: 1, step: 0.01, kinds: ['cloth', 'flesh'], hint: 'How much of the physics shows. 0 is the mesh as modelled' },
-];
-const TEMPLATE = `
-<div class="strut-phys">
-  <div class="strut-phys-banner" :class="ui.running ? 'on' : 'off'">
-    <div class="strut-phys-banner-text" v-if="ui.running"><b>Simulating.</b> The model is moving on its own. Edit settings and watch it change.</div>
-    <div class="strut-phys-banner-text" v-else><b>Not simulating.</b> The model is standing still. Press Simulate to see the physics.</div>
-    <div class="strut-phys-row">
-      <button class="strut-phys-btn" :disabled="!ui.canUndo" @click="undo" title="Undo the last change to the physics (Ctrl+Z)">Undo</button>
-      <button class="strut-phys-btn" :disabled="!ui.canRedo" @click="redo" title="Redo (Ctrl+Y)">Redo</button>
-    </div>
-    <div class="strut-phys-row">
-      <button class="strut-phys-btn strut-phys-big" :class="ui.running ? 'stop' : 'go'" @click="toggle">{{ ui.running ? 'Stop' : 'Simulate' }}</button>
-      <button class="strut-phys-btn" :disabled="!ui.running" @click="reset" title="Start the motion again from the beginning">Restart</button>
-      <button class="strut-phys-btn" :disabled="!ui.running || !ui.selected" @click="poke" title="Kick the selected bone while it is simulating">Poke</button>
-    </div>
-  </div>
-  <div class="strut-phys-notice" v-if="ui.notice">{{ ui.notice }}</div>
-
-  <div class="strut-phys-h" @click="tog('test')"><span>{{ ui.sections.test ? '▾' : '▸' }}</span> Test motion</div>
-  <div v-if="ui.sections.test" class="strut-phys-body">
-    <div class="strut-phys-row"><label>Move</label>
-      <select v-model="ui.motion"><option v-for="m in ui.motions" :value="m.id">{{ m.label }}</option></select></div>
-    <div class="strut-phys-row"><label>Animation</label>
-      <select v-model="ui.animation"><option value="">None (rest pose)</option><option v-for="a in ui.animations" :value="a">{{ a }}</option></select></div>
-    <div class="strut-phys-row"><label>Speed</label>
-      <input type="range" min="0.1" max="1.5" step="0.05" v-model.number="ui.speed"><span class="strut-phys-num">{{ ui.speed.toFixed(2) }}x</span></div>
-  </div>
-
-  <div class="strut-phys-h" @click="tog('bones')"><span>{{ ui.sections.bones ? '▾' : '▸' }}</span> Bones</div>
-  <div v-if="ui.sections.bones" class="strut-phys-body">
-    <input class="strut-phys-search" type="text" v-model="ui.query" placeholder="Search bones">
-    <div class="strut-phys-tree">
-      <div v-for="n in visibleTree" :key="n.name" class="strut-phys-node" :class="{ sel: n.name === ui.selected }" :style="{ paddingLeft: (6 + n.depth * 12) + 'px' }" @click="pick(n.name)">
-        <span class="strut-phys-twist" @click.stop="fold(n)">{{ n.hasKids && !ui.query ? (ui.open[n.name] ? '▾' : '▸') : '' }}</span>
-        <span class="strut-phys-name">{{ n.name }}</span>
-        <span class="strut-phys-pill spring" v-if="n.kind === 'spring'">spring</span>
-        <span class="strut-phys-pill chain" v-if="n.kind === 'chain'">chain</span>
-        <span class="strut-phys-pill spring" v-if="n.kind === 'cloth'">cloth</span>
-        <span class="strut-phys-pill chain" v-if="n.kind === 'flesh'">flesh</span>
-        <span class="strut-phys-pill tag" v-if="n.auto !== 'auto'" :title="'Shape made from the model: ' + n.auto">{{ n.auto === 'off' ? 'no shape' : n.auto }}</span>
-      </div>
-      <div class="strut-phys-hint" v-if="!visibleTree.length">No bones match.</div>
-    </div>
-  </div>
-
-  <div class="strut-phys-h" @click="tog('feel')"><span>{{ ui.sections.feel ? '▾' : '▸' }}</span> {{ ui.selected ? ui.selected : 'Selected bone' }}</div>
-  <div v-if="ui.sections.feel" class="strut-phys-body">
-    <div class="strut-phys-hint" v-if="!ui.selected">Pick a bone in the list above.</div>
-    <div v-else>
-      <div class="strut-phys-seg">
-        <button :class="{ on: ui.kind === 'none' }" @click="kind('none')" title="This bone just follows the animation">None</button>
-        <button :class="{ on: ui.kind === 'spring' }" @click="kind('spring')" title="One bone that jiggles: pouches, jowls, belly">Spring</button>
-        <button :class="{ on: ui.kind === 'chain' }" @click="kind('chain')" title="This bone and the bones under it swing like rope: hair, tails, ears">Chain</button>
-        <button v-if="ui.hasMesh || ui.kind === 'cloth'" :class="{ on: ui.kind === 'cloth' }" @click="kind('cloth')" title="The vertices of this bone mesh hang and swing like cloth: a skirt, a cape">Cloth</button>
-        <button v-if="ui.hasMesh || ui.kind === 'flesh'" :class="{ on: ui.kind === 'flesh' }" @click="kind('flesh')" title="The vertices of this bone mesh are soft: pulled back to shape, bulging when pressed. Pouches, belly">Flesh</button>
-      </div>
-      <div v-if="ui.kind === 'spring' || ui.kind === 'chain'">
-        <div class="strut-phys-chips"><button class="strut-phys-chip" v-for="l in looksFor" :key="l.id" @click="look(l.id)">{{ l.label }}</button></div>
-        <div class="strut-phys-slider" v-for="f in mainFields" :key="f.key" :title="f.hint">
-          <label>{{ f.label }}</label>
-          <input type="range" :min="f.min" :max="f.max" :step="f.step" v-model.number="ui.controls[f.key]" @input="apply">
-          <span class="strut-phys-num">{{ Number(ui.controls[f.key]).toFixed(2) }}</span>
-        </div>
-        <div class="strut-phys-sub" @click="tog('more')">{{ ui.sections.more ? '▾' : '▸' }} More settings</div>
-        <div v-if="ui.sections.more">
-          <div class="strut-phys-slider" v-for="f in moreFields" :key="f.key" :title="f.hint">
-            <label>{{ f.label }}</label>
-            <input type="range" :min="f.min" :max="f.max" :step="f.step" v-model.number="ui.controls[f.key]" @input="apply">
-            <span class="strut-phys-num">{{ Number(ui.controls[f.key]).toFixed(2) }}</span>
-          </div>
-          <div class="strut-phys-checks">
-            <label><input type="checkbox" v-model="ui.controls.collideBody" @change="apply"> Bumps into its own body</label>
-            <label><input type="checkbox" v-model="ui.controls.collideWorld" @change="apply"> Bumps into the floor and test shapes</label>
-            <label><input type="checkbox" v-model="ui.controls.collideOthers" @change="apply"> Bumps into other models and players (in game)</label>
-          </div>
-          <div class="strut-phys-hint" v-if="ui.controls.collideBody && !ui.candidates.length">No other bone has a shape for it to bump into yet: turn on "Make shapes from the model" under Collision shapes, or add shapes of your own.</div>
-          <div v-if="ui.controls.collideBody && ui.candidates.length">
-            <div class="strut-phys-hint">Which bones of its own body it bumps into:</div>
-            <div class="strut-phys-seg">
-              <button :class="{ on: !ui.onlyTicked }" @click="onlyTicked(false)" title="Every bone with a shape, except the ones you untick (new bones are included)">All but unticked</button>
-              <button :class="{ on: ui.onlyTicked }" @click="onlyTicked(true)" title="Only the bones you tick (new bones are left out)">Only ticked</button>
-            </div>
-            <div class="strut-phys-bonelist">
-              <label v-for="b in ui.candidates" :key="b"><input type="checkbox" :checked="isTicked(b)" @change="tick(b, $event)"> {{ b }}</label>
-            </div>
-          </div>
-        </div>
-        <div class="strut-phys-sub" @click="tog('limits')">{{ ui.sections.limits ? '▾' : '▸' }} Angle limits</div>
-        <div v-if="ui.sections.limits">
-          <label class="strut-phys-inline"><input type="checkbox" v-model="ui.showLimits" @change="redraw"> Show them on the model</label>
-          <div v-if="ui.kind === 'spring'">
-            <div class="strut-phys-hint">How far the physics may turn this bone about each of its axes, in degrees. The arcs show the range (x red, y green, z blue).</div>
-            <div v-for="axis in ['x', 'y', 'z']" :key="axis" class="strut-phys-limit">
-              <label class="strut-phys-inline"><input type="checkbox" :checked="!!ui.limits[axis]" @change="limitOn(axis, $event)"> Limit {{ axis.toUpperCase() }}</label>
-              <div v-if="ui.limits[axis]">
-                <phys-num label="From" :min="-180" :max="0" :step="1" :value="ui.limits[axis][0]" @input="setLimit(axis, 0, $event)"></phys-num>
-                <phys-num label="To" :min="0" :max="180" :step="1" :value="ui.limits[axis][1]" @input="setLimit(axis, 1, $event)"></phys-num>
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <div class="strut-phys-hint">How far each segment may swing away from where the animation puts it. The cones show it. 0 is no limit.</div>
-            <phys-num label="Bend limit" :min="0" :max="150" :step="1" :value="ui.controls.maxAngle" @input="setControl('maxAngle', $event)"></phys-num>
-          </div>
-        </div>
-      </div>
-      <div v-if="ui.kind === 'cloth' || ui.kind === 'flesh'">
-        <div class="strut-phys-hint" v-if="ui.kind === 'cloth'">The vertices of this bone mesh are the cloth: the top is sewn on, the rest hangs and swings. Pick the look, then press Simulate.</div>
-        <div class="strut-phys-hint" v-else>The vertices of this bone mesh are soft flesh: pulled back to the animated shape, keeping their volume. A soft zone keeps the rest firm. Press Simulate to see it.</div>
-        <div class="strut-phys-chips"><button class="strut-phys-chip" v-for="l in softLooksFor" :key="l.id" @click="softLook(l.id)">{{ l.label }}</button></div>
-        <div class="strut-phys-slider" v-for="f in softFields" :key="f.key" :title="f.hint">
-          <label>{{ f.label }}</label>
-          <input type="range" :min="f.min" :max="f.max" :step="f.step" v-model.number="ui.soft[f.key]" @input="applySoft">
-          <span class="strut-phys-num">{{ Number(ui.soft[f.key]).toFixed(2) }}</span>
-        </div>
-        <div class="strut-phys-sub" @click="tog('zone')">{{ ui.sections.zone ? '▾' : '▸' }} Soft zone</div>
-        <div v-if="ui.sections.zone">
-          <div class="strut-phys-hint">Only the vertices inside the zone are soft; they blend to sewn on beyond it. Radius 0 makes all of the mesh soft. Blocks, in the game mesh space.</div>
-          <phys-num label="Radius" :min="0" :max="1.5" :step="0.01" :value="ui.soft.softRadius" @input="setSoft('softRadius', $event)"></phys-num>
-          <phys-num label="Centre x" :min="-2" :max="2" :step="0.01" :value="ui.soft.softCenter[0]" @input="softCentre(0, $event)"></phys-num>
-          <phys-num label="Centre y" :min="-1" :max="3" :step="0.01" :value="ui.soft.softCenter[1]" @input="softCentre(1, $event)"></phys-num>
-          <phys-num label="Centre z" :min="-2" :max="2" :step="0.01" :value="ui.soft.softCenter[2]" @input="softCentre(2, $event)"></phys-num>
-          <button class="strut-phys-btn" @click="softZone" title="Put the zone in the middle of this bone mesh, with half its reach as the radius">Zone from the mesh</button>
-        </div>
-        <div class="strut-phys-sub" @click="tog('carry')">{{ ui.sections.carry ? '▾' : '▸' }} Meshes that ride on it</div>
-        <div v-if="ui.sections.carry">
-          <div class="strut-phys-hint">Other bones whose meshes move with this one as a rigid piece: a tip on a pouch. They are drawn with it in the preview and in the game.</div>
-          <div class="strut-phys-bonelist">
-            <label v-for="b in ui.meshBones" :key="b"><input type="checkbox" :checked="ui.soft.carry.includes(b)" @change="carryOn(b, $event)"> {{ b }}</label>
-          </div>
-        </div>
-        <div class="strut-phys-checks">
-          <label><input type="checkbox" v-model="ui.soft.collideBody" @change="applySoft"> Bumps into its own body</label>
-          <label><input type="checkbox" v-model="ui.soft.collideWorld" @change="applySoft"> Bumps into the floor and test shapes</label>
-          <label><input type="checkbox" v-model="ui.soft.collideOthers" @change="applySoft"> Bumps into other models and players (in game)</label>
-        </div>
-        <div class="strut-phys-hint">The preview draws the simulated mesh in one plain colour, without its texture, in place of the original while it runs.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="strut-phys-h" @click="tog('shapes')"><span>{{ ui.sections.shapes ? '▾' : '▸' }}</span> Collision shapes</div>
-  <div v-if="ui.sections.shapes" class="strut-phys-body">
-    <div class="strut-phys-checks">
-      <label><input type="checkbox" :checked="ui.autoColliders !== false" @change="auto($event)"> Make shapes from the model</label>
-      <label><input type="checkbox" v-model="ui.showColliders" @change="redraw"> Show shapes</label>
-      <label><input type="checkbox" v-model="ui.showDebug" @change="redraw"> Show springs and chains</label>
-      <label><input type="checkbox" v-model="ui.showAllShapes" @change="redraw"> Show every shape (otherwise only those the picked bone bumps into)</label>
-    </div>
-    <div class="strut-phys-hint" v-if="!ui.selected">Pick a bone to tag it or give it its own shapes.</div>
-    <div v-else>
-      <div class="strut-phys-title">{{ ui.selected }}</div>
-      <div class="strut-phys-hint">Shape made from this bone's cubes:</div>
-      <div class="strut-phys-seg">
-        <button :class="{ on: ui.autoMode === 'auto' }" @click="setMode('auto')" title="By the rules: a box per cube for a few cubes, one simple shape for many">Auto</button>
-        <button :class="{ on: ui.autoMode === 'exact' }" @click="setMode('exact')" title="A box around every cube">Exact</button>
-        <button :class="{ on: ui.autoMode === 'simple' }" @click="setMode('simple')" title="One capsule or box around the whole bone">Simple</button>
-        <button :class="{ on: ui.autoMode === 'off' }" @click="setMode('off')" title="No shape for this bone">None</button>
-      </div>
-      <div class="strut-phys-hint" v-if="ui.shapes.length">It has shapes of its own below, so none is made for it.</div>
-      <div class="strut-phys-hint">Its own shapes:</div>
-      <div class="strut-phys-chips">
-        <button class="strut-phys-chip" v-for="s in ui.shapes" :key="s.index" :class="{ on: s.index === ui.shapeIndex }" @click="selectShape(s.index)">{{ s.label }}</button>
-        <button class="strut-phys-chip" @click="shape('sphere')">+ Sphere</button>
-        <button class="strut-phys-chip" @click="shape('capsule')">+ Capsule</button>
-        <button class="strut-phys-chip" @click="shape('box')">+ Box</button>
-      </div>
-      <div class="strut-phys-prop" v-if="ui.form">
-        <div class="strut-phys-seg">
-          <button v-for="k in ['sphere', 'capsule', 'box']" :key="k" :class="{ on: ui.form.shape === k }" @click="shapeKind(k)">{{ k[0].toUpperCase() + k.slice(1) }}</button>
-        </div>
-        <div class="strut-phys-hint">Position (from the bone's pivot, in pixels)</div>
-        <phys-num v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'c' + i" :label="axis" :min="-32" :max="32" :step="0.1" :value="ui.form.center[i]" @input="val('center', i, $event)"></phys-num>
-        <template v-if="ui.form.shape === 'box'">
-          <div class="strut-phys-hint">Size</div>
-          <phys-num v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'s' + i" :label="axis" :min="0.1" :max="32" :step="0.1" :value="ui.form.size[i]" @input="val('size', i, $event)"></phys-num>
-          <div class="strut-phys-hint">Turn (degrees)</div>
-          <phys-num v-for="(axis, i) in ['X', 'Y', 'Z']" :key="'r' + i" :label="axis" :min="-180" :max="180" :step="1" :value="ui.form.rotation[i]" @input="val('rotation', i, $event)"></phys-num>
-        </template>
-        <template v-if="ui.form.shape === 'sphere'">
-          <phys-num label="Radius" :min="0.1" :max="16" :step="0.1" :value="ui.form.radius" @input="val('radius', 0, $event)"></phys-num>
-        </template>
-        <template v-if="ui.form.shape === 'capsule'">
-          <phys-num label="Length" :min="0" :max="32" :step="0.1" :value="ui.form.length" @input="val('length', 0, $event)"></phys-num>
-          <phys-num label="Radius" :min="0.1" :max="16" :step="0.1" :value="ui.form.radius" @input="val('radius', 0, $event)"></phys-num>
-          <div class="strut-phys-hint">Tilt (degrees)</div>
-          <phys-num label="X" :min="-180" :max="180" :step="1" :value="ui.form.rotation[0]" @input="val('rotation', 0, $event)"></phys-num>
-          <phys-num label="Z" :min="-180" :max="180" :step="1" :value="ui.form.rotation[2]" @input="val('rotation', 2, $event)"></phys-num>
-        </template>
-        <div class="strut-phys-chips">
-          <button class="strut-phys-chip" @click="fitShape" title="Wrap it around this bone's cubes again">Fit to bone</button>
-          <button class="strut-phys-chip" @click="duplicateShape">Duplicate</button>
-          <button class="strut-phys-chip" @click="deleteShape">Delete</button>
-        </div>
-      </div>
-    </div>
-    <div class="strut-phys-hint">Lines: dim cyan are shapes made from the model, yellow are your own, white is the one you are editing.</div>
-  </div>
-
-  <div class="strut-phys-h" @click="tog('props')"><span>{{ ui.sections.props ? '▾' : '▸' }}</span> Test shapes</div>
-  <div v-if="ui.sections.props" class="strut-phys-body">
-    <div class="strut-phys-hint">Things to bump into, only on this screen (not part of the model). Parts that bump into the floor and test shapes feel them.</div>
-    <div class="strut-phys-chips">
-      <button class="strut-phys-chip" @click="prop('sphere')">+ Ball</button>
-      <button class="strut-phys-chip" @click="prop('box')">+ Block</button>
-      <button class="strut-phys-chip" @click="prop('capsule')">+ Pole</button>
-      <button class="strut-phys-chip" @click="prop('wall')">+ Wall</button>
-      <button class="strut-phys-chip" v-if="ui.props.length" @click="clearProps">Clear all</button>
-    </div>
-    <div class="strut-phys-prop" v-for="p in ui.props" :key="p.id">
-      <div class="strut-phys-prop-head"><b>{{ p.kind === 'sphere' ? 'Ball' : p.kind === 'box' ? 'Block' : p.kind === 'capsule' ? 'Pole' : 'Wall' }}</b>
-        <label><input type="checkbox" v-model="p.sweep" @change="propsChanged"> Sweeps</label>
-        <button class="strut-phys-x" @click="dropProp(p.id)">Remove</button></div>
-      <div class="strut-phys-slider"><label>Left / right</label><input type="range" min="-3" max="3" step="0.02" v-model.number="p.x" @input="propsChanged"><span class="strut-phys-num">{{ p.x.toFixed(2) }}</span></div>
-      <div class="strut-phys-slider"><label>Up / down</label><input type="range" min="-1" max="4" step="0.02" v-model.number="p.y" @input="propsChanged"><span class="strut-phys-num">{{ p.y.toFixed(2) }}</span></div>
-      <div class="strut-phys-slider"><label>Forward / back</label><input type="range" min="-3" max="3" step="0.02" v-model.number="p.z" @input="propsChanged"><span class="strut-phys-num">{{ p.z.toFixed(2) }}</span></div>
-      <div class="strut-phys-slider"><label>Size</label><input type="range" min="0.1" max="2.5" step="0.02" v-model.number="p.size" @input="propsChanged"><span class="strut-phys-num">{{ p.size.toFixed(2) }}</span></div>
-    </div>
-  </div>
-
-  <div class="strut-phys-footer">
-    <div class="strut-phys-hint">{{ ui.summary }}</div>
-    <div class="strut-phys-problems" v-if="ui.problems.length"><div v-for="p in ui.problems.slice(0, 6)">{{ p }}</div></div>
-    <button class="strut-phys-chip" @click="json">Edit as JSON...</button>
-  </div>
-</div>`;
-const CSS = `
-.strut-phys { padding: 6px 8px 12px; font-size: 12px; max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; }
-#panel_strut_physics_panel .panel_vue_wrapper, #panel_strut_physics_panel .panel_inside { overflow-y: auto; }
-.strut-phys-numbox { width: 100%; box-sizing: border-box; text-align: right; }
-.strut-phys-slider.num { grid-template-columns: 70px 1fr 56px; }
-.strut-phys-chip.on { background: var(--color-accent); color: var(--color-light); }
-.strut-phys-inline { display: block; margin: 4px 0; }
-.strut-phys-limit { margin: 4px 0 6px; }
-.strut-phys-pill.tag { background: #6b6f7a; }
-.strut-phys-bonelist { display: flex; flex-direction: column; gap: 2px; max-height: 180px; overflow-y: auto; background: var(--color-back); padding: 4px 6px; }
-.strut-phys-banner { border-left: 4px solid var(--color-border); background: var(--color-back); padding: 6px 8px; margin-bottom: 6px; }
-.strut-phys-banner.on { border-left-color: #43c463; }
-.strut-phys-banner.off { border-left-color: #7a7f8a; }
-.strut-phys-banner-text { margin-bottom: 6px; line-height: 1.35; }
-.strut-phys-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
-.strut-phys-row > label { min-width: 62px; opacity: .8; }
-.strut-phys-row select { flex: 1; min-width: 0; }
-.strut-phys-row input[type=range] { flex: 1; }
-.strut-phys-h { font-weight: bold; padding: 6px 2px; margin-top: 4px; border-top: 1px solid var(--color-border); cursor: pointer; user-select: none; }
-.strut-phys-h span { display: inline-block; width: 14px; opacity: .7; }
-.strut-phys-body { padding: 0 2px 4px; }
-.strut-phys-btn, .strut-phys-chip, .strut-phys-x { background: var(--color-button); color: var(--color-text); border: 0; padding: 4px 10px; cursor: pointer; }
-.strut-phys-btn:hover, .strut-phys-chip:hover, .strut-phys-x:hover { background: var(--color-accent); color: var(--color-light); }
-.strut-phys-btn:disabled, .strut-phys-chip:disabled { opacity: .35; cursor: default; background: var(--color-button); color: var(--color-text); }
-.strut-phys-big { flex: 1; padding: 7px 10px; font-weight: bold; font-size: 13px; }
-.strut-phys-big.go { background: #2f9e4f; color: #fff; }
-.strut-phys-big.stop { background: #c2453f; color: #fff; }
-.strut-phys-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
-.strut-phys-chip { padding: 3px 8px; }
-.strut-phys-seg { display: flex; margin: 4px 0 6px; }
-.strut-phys-seg button { flex: 1; background: var(--color-button); color: var(--color-text); border: 0; padding: 5px 0; cursor: pointer; }
-.strut-phys-seg button.on { background: var(--color-accent); color: var(--color-light); }
-.strut-phys-slider { display: grid; grid-template-columns: 78px 1fr 38px; align-items: center; gap: 6px; margin: 3px 0; }
-.strut-phys-slider input { width: 100%; min-width: 0; }
-.strut-phys-num { text-align: right; opacity: .8; }
-.strut-phys-sub { margin: 6px 0 2px; opacity: .8; cursor: pointer; user-select: none; }
-.strut-phys-checks { display: flex; flex-direction: column; gap: 3px; margin: 4px 0; }
-.strut-phys-search { width: 100%; box-sizing: border-box; margin-bottom: 4px; }
-.strut-phys-tree { max-height: 240px; overflow-y: auto; background: var(--color-back); }
-.strut-phys-node { display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 6px; cursor: pointer; white-space: nowrap; }
-.strut-phys-node:hover { background: var(--color-button); }
-.strut-phys-node.sel { background: var(--color-accent); color: var(--color-light); }
-.strut-phys-twist { display: inline-block; width: 12px; opacity: .8; }
-.strut-phys-name { overflow: hidden; text-overflow: ellipsis; }
-.strut-phys-pill { font-size: 10px; padding: 0 5px; border-radius: 8px; color: #fff; margin-left: auto; }
-.strut-phys-pill.spring { background: #d0559a; }
-.strut-phys-pill.chain { background: #4d8fd6; }
-.strut-phys-prop { background: var(--color-back); padding: 4px 6px; margin: 4px 0; }
-.strut-phys-prop-head { display: flex; align-items: center; gap: 8px; }
-.strut-phys-x { margin-left: auto; padding: 1px 6px; }
-.strut-phys-hint { opacity: .65; margin: 4px 0; line-height: 1.35; }
-.strut-phys-notice { color: var(--color-accent); margin: 4px 0; }
-.strut-phys-problems { color: #e0a040; margin: 4px 0; line-height: 1.35; }
-.strut-phys-footer { border-top: 1px solid var(--color-border); margin-top: 6px; padding-top: 4px; }
-`;
+// ---------------- the mode and the panel ----------------
 let mode = null;
-let panel = null;
+let panels = [];
 let css = null;
 let onSelection = null;
 let onProject = null;
 let onKey = null;
+let onPointerDown = null;
+let onPointerUp = null;
+let onPointerMove = null;
+let propModule = null;
 function loadPhysicsTab() {
     var _a, _b, _c;
     if (!G.Mode || !G.Panel)
         return;
-    css = G.Blockbench.addCSS(CSS);
-    panel = new G.Panel(PANEL_ID, {
-        name: 'Physics',
-        icon: 'waves',
+    css = G.Blockbench.addCSS(_physicsPanels__WEBPACK_IMPORTED_MODULE_12__.CSS);
+    // each window is a panel of its own, all showing the same state
+    panels = _physicsComponents__WEBPACK_IMPORTED_MODULE_13__.WINDOWS.map(w => new G.Panel(w.panel, {
+        name: w.name,
+        icon: w.icon,
         growable: true,
         resizable: true,
         condition: { modes: [MODE_ID] },
-        default_position: { slot: 'right_bar', float_position: [0, 0], float_size: [340, 720], height: 720 },
-        component: {
-            template: TEMPLATE,
-            data() {
-                return { ui };
-            },
-            computed: {
-                looksFor() {
-                    return ui.looks.filter(l => l.kind === ui.kind);
-                },
-                mainFields() {
-                    return MAIN_FIELDS.filter(f => f.kinds.includes(ui.kind));
-                },
-                moreFields() {
-                    return MORE_FIELDS.filter(f => f.kinds.includes(ui.kind));
-                },
-                softFields() {
-                    return SOFT_FIELDS.filter(f => f.kinds.includes(ui.kind));
-                },
-                softLooksFor() {
-                    return ui.softLooks.filter(l => l.kind === ui.kind);
-                },
-                /** The bones shown: all whose parents are open, or every match while searching */
-                visibleTree() {
-                    const q = ui.query.trim().toLowerCase();
-                    if (q)
-                        return ui.tree.filter(n => n.name.toLowerCase().includes(q));
-                    const byName = new Map(ui.tree.map(n => [n.name, n]));
-                    return ui.tree.filter(n => {
-                        var _a, _b;
-                        for (let p = n.parent; p; p = (_b = (_a = byName.get(p)) === null || _a === void 0 ? void 0 : _a.parent) !== null && _b !== void 0 ? _b : null)
-                            if (!ui.open[p])
-                                return false;
-                        return true;
-                    });
-                },
-            },
-            methods: {
-                toggle() { if (ui.running)
-                    session.stop();
-                else
-                    session.start(); },
-                reset() { session.resetSim(); },
-                poke() { session.poke(); },
-                tog(section) { this.$set(ui.sections, section, !ui.sections[section]); },
-                pick(name) { session.pick(name); },
-                fold(n) { this.$set(ui.open, n.name, !ui.open[n.name]); },
-                kind(k) { session.setKind(k); },
-                look(id) { session.applyLook(id); },
-                softLook(id) { session.applySoftLook(id); },
-                applySoft() { session.applySoft(); },
-                setSoft(key, value) { session.setSoftValue(key, value); },
-                softCentre(axis, value) { session.setSoftCentre(axis, value); },
-                softZone() { session.softZoneFromMesh(); },
-                carryOn(bone, event) { session.toggleCarry(bone, event.target.checked); },
-                apply() { session.applyControls(); },
-                auto(event) { session.setAuto(event.target.checked ? null : false); },
-                redraw() { session.drawOverlay(); },
-                shape(s) { session.addShape(s); },
-                prop(kind) { session.addProp(kind); },
-                propsChanged() { session.syncProps(); },
-                dropProp(id) { session.removeProp(id); },
-                clearProps() { session.clearProps(); },
-                undo() { session.undo(); },
-                redo() { session.redo(); },
-                json() { session.noteExternalEdit(); (0,_physicsUi__WEBPACK_IMPORTED_MODULE_10__.openPhysicsDialog)(); session.reload(); },
-                selectShape(index) { session.selectShape(index); },
-                shapeKind(k) { session.setShapeKind(k); },
-                val(key, axis, value) { session.setShapeValue(key, axis, value); },
-                fitShape() { session.fitShape(); },
-                duplicateShape() { session.duplicateShape(); },
-                deleteShape() { session.deleteShape(); },
-                setMode(m) { session.setMode(m); },
-                limitOn(axis, event) { session.toggleLimit(axis, event.target.checked); },
-                setLimit(axis, end, value) { session.setLimit(axis, end, value); },
-                isTicked(bone) { return session.isTicked(bone); },
-                tick(bone, event) { session.tick(bone, event.target.checked); },
-                onlyTicked(v) { session.setOnlyTicked(v); },
-                setControl(key, value) { ui.controls[key] = value; session.applyControls(); },
-            },
-            components: {
-                'phys-num': {
-                    props: ['label', 'min', 'max', 'step', 'value'],
-                    template: `<div class="strut-phys-slider num"><label>{{ label }}</label>
-                        <input type="range" :min="min" :max="max" :step="step" :value="value" @input="$emit('input', Number($event.target.value))">
-                        <input class="strut-phys-numbox" type="number" :step="step" :value="Math.round(value * 100) / 100" @change="$emit('input', Number($event.target.value))"></div>`,
-                },
-            },
-        },
-    });
+        default_position: Object.assign({ float_position: [0, 0], float_size: [340, w.position.height] }, w.position),
+        component: (0,_physicsComponents__WEBPACK_IMPORTED_MODULE_13__.windowComponent)(w.id, ui, session),
+    }));
     mode = new G.Mode(MODE_ID, {
         name: 'Physics',
         icon: 'waves',
@@ -15111,8 +19064,12 @@ function loadPhysicsTab() {
             session.reload();
     };
     onKey = (event) => {
-        var _a, _b;
-        if (((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) !== MODE_ID || !(event.ctrlKey || event.metaKey))
+        var _a, _b, _c, _d;
+        if (((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) === MODE_ID && event.key === 'Escape' && ui.picking) {
+            session.stopPicking();
+            return;
+        }
+        if (((_d = (_c = G.Mode) === null || _c === void 0 ? void 0 : _c.selected) === null || _d === void 0 ? void 0 : _d.id) !== MODE_ID || !(event.ctrlKey || event.metaKey))
             return;
         const target = event.target;
         // typing in a text box keeps its own undo
@@ -15131,26 +19088,110 @@ function loadPhysicsTab() {
         }
     };
     document.addEventListener('keydown', onKey, true);
+    // a click in the view picks a bone (the bone of the cube or mesh under it) or a test shape; a drag is the camera, and the gizmo keeps its own clicks
+    let down = null;
+    onPointerDown = (event) => {
+        var _a, _b, _c, _d;
+        const preview = ((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) === MODE_ID && event.button === 0 ? ((_d = (_c = G.Preview) === null || _c === void 0 ? void 0 : _c.all) !== null && _d !== void 0 ? _d : []).find(p => p.canvas === event.target) : null;
+        down = preview ? { x: event.clientX, y: event.clientY, preview } : null;
+    };
+    onPointerUp = (event) => {
+        var _a, _b, _c, _d, _e;
+        const start = down;
+        down = null;
+        if (!start || ((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) !== MODE_ID || event.button !== 0)
+            return;
+        if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4 || ((_c = G.Transformer) === null || _c === void 0 ? void 0 : _c.dragging) || ((_d = G.Transformer) === null || _d === void 0 ? void 0 : _d.hoverAxis) || ((_e = G.Transformer) === null || _e === void 0 ? void 0 : _e.axis))
+            return;
+        session.pickInView(start.preview, event);
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointerup', onPointerUp, true);
+    // the gizmo for a picked test shape: move, rotate and scale tools act on it
+    onPointerMove = () => session.keepGizmo();
+    document.addEventListener('pointermove', onPointerMove, true);
+    if (G.TransformerModule) {
+        const tools = ['move_tool', 'rotate_tool', 'resize_tool'];
+        const tool = () => { var _a, _b, _c; return (_c = (_b = (_a = G.Toolbox) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) !== null && _c !== void 0 ? _c : ''; };
+        propModule = new G.TransformerModule('strut_physics_props', {
+            priority: 5,
+            condition: () => { var _a, _b; return ((_b = (_a = G.Mode) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.id) === MODE_ID && ui.selectedProp !== null; },
+            use_condition: () => tools.includes(tool()),
+            updateGizmo() {
+                const at = session.propPosition();
+                if (!at || !tools.includes(tool()))
+                    return false;
+                G.Transformer.position.copy(at);
+                if (tool() === 'move_tool')
+                    delete G.Transformer.rotation_ref;
+                else
+                    G.Transformer.rotation_ref = session.propObject();
+                return true;
+            },
+            calculateOffset(context) {
+                var _a;
+                const e = (_a = context.event) !== null && _a !== void 0 ? _a : {};
+                const grid = typeof G.canvasGridSize === 'function' ? G.canvasGridSize(!!e.shiftKey, !!(e.ctrlKey || e.metaKey)) : 0.25;
+                if (tool() === 'rotate_tool') {
+                    const interval = typeof G.getRotationInterval === 'function' ? G.getRotationInterval(e) : 1;
+                    const trim = Math.trimDeg;
+                    return Math.round((trim ? trim(context.angle) : context.angle) / interval) * interval;
+                }
+                if (tool() === 'resize_tool') {
+                    const raw = context.axis === 'e' ? context.point.length() * Math.sign(context.point.y || context.point.x) : context.point[context.axis];
+                    const step = grid * 0.1;
+                    return Math.round(raw * context.direction * 0.1 / step) * step;
+                }
+                if (!['x', 'y', 'z'].includes(context.axis))
+                    return 0;
+                return Math.round(context.point[context.axis] / grid) * grid;
+            },
+            onStart() {
+                session.beginDrag();
+            },
+            onMove(context) {
+                session.dragProp(tool(), context.axis, context.value - (this.previous_value || 0));
+            },
+            onEnd() {
+                session.endDrag();
+            },
+            onCancel() {
+                session.endDrag();
+            },
+        });
+    }
     G.Blockbench.on('update_selection', onSelection);
     G.Blockbench.on('select_project', onProject);
 }
 function unloadPhysicsTab() {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (onSelection)
         (_b = (_a = G.Blockbench).removeListener) === null || _b === void 0 ? void 0 : _b.call(_a, 'update_selection', onSelection);
     if (onProject)
         (_d = (_c = G.Blockbench).removeListener) === null || _d === void 0 ? void 0 : _d.call(_c, 'select_project', onProject);
     if (onKey)
         document.removeEventListener('keydown', onKey, true);
+    if (onPointerDown)
+        document.removeEventListener('pointerdown', onPointerDown, true);
+    if (onPointerUp)
+        document.removeEventListener('pointerup', onPointerUp, true);
+    if (onPointerMove)
+        document.removeEventListener('pointermove', onPointerMove, true);
+    onPointerMove = null;
+    (_e = propModule === null || propModule === void 0 ? void 0 : propModule.delete) === null || _e === void 0 ? void 0 : _e.call(propModule);
+    propModule = null;
+    onPointerDown = null;
+    onPointerUp = null;
     onSelection = null;
     onProject = null;
     onKey = null;
     session.dispose();
-    (_e = mode === null || mode === void 0 ? void 0 : mode.delete) === null || _e === void 0 ? void 0 : _e.call(mode);
-    (_f = panel === null || panel === void 0 ? void 0 : panel.delete) === null || _f === void 0 ? void 0 : _f.call(panel);
-    (_g = css === null || css === void 0 ? void 0 : css.delete) === null || _g === void 0 ? void 0 : _g.call(css);
+    (_f = mode === null || mode === void 0 ? void 0 : mode.delete) === null || _f === void 0 ? void 0 : _f.call(mode);
+    for (const p of panels)
+        (_g = p === null || p === void 0 ? void 0 : p.delete) === null || _g === void 0 ? void 0 : _g.call(p);
+    (_h = css === null || css === void 0 ? void 0 : css.delete) === null || _h === void 0 ? void 0 : _h.call(css);
     mode = null;
-    panel = null;
+    panels = [];
     css = null;
 }
 

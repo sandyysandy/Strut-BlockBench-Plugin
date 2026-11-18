@@ -8,7 +8,7 @@ It adds the Strut model format to Blockbench and the tools a Strut model needs, 
   and event instructions on the timeline that a mod's event bindings react to.
 
 **Physics**
-- A Strut Physics tab: springs, chains, cloth, flesh and ragdoll, colliders, a response-curve preview and presets, saved with the model.
+- A Strut Physics tab: springs, chains, cloth, flesh (a cage a mesh or a bone of cubes follows, with a preview of its swing) and ragdoll, colliders, a response-curve preview and presets, saved with the model.
 
 **Projects**
 - Choose what the model is for (entity, item, block, armour), set the mod id, and keep your export locations in the project.

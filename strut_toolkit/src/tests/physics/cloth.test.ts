@@ -26,32 +26,6 @@ function curtain(key = 'curtain', bone = 'skirt'): ClothMeshInput {
     return { key, bone, rest, faces };
 }
 
-/** A closed ball, 12 around and 6 from pole to pole; the quads at the poles repeat the pole as a corner */
-function ball(key: string, bone: string, cx: number, cy: number, cz: number, radius: number): ClothMeshInput {
-    const around = 12;
-    const rows = 6;
-    const rest: V3[] = [];
-    const faces: number[][] = [];
-
-    for (let j = 0; j <= rows; j++) {
-        for (let i = 0; i < around; i++) {
-            const lat = Math.PI * j / rows;
-            const angle = Math.PI * 2 * i / around;
-
-            rest.push([cx + Math.sin(angle) * Math.sin(lat) * radius, cy + Math.cos(lat) * radius, cz + Math.cos(angle) * Math.sin(lat) * radius]);
-        }
-    }
-
-    for (let j = 0; j < rows; j++) for (let i = 0; i < around; i++) {
-        const a = j * around + i;
-        const b = j * around + (i + 1) % around;
-
-        faces.push([a, a + around, b + around, b]);
-    }
-
-    return { key, bone, rest, faces };
-}
-
 function frames(): ReadonlyMap<string, BoneFrame> {
     const map = new Map<string, BoneFrame>();
 
@@ -69,7 +43,7 @@ describe('cloth and flesh in the rig', () => {
         expect(rig.problems).toEqual([]);
         expect(weld(mesh.rest, mesh.faces).rest.length).toBe(49);
 
-        const bad = new PhysicsRig(BONES, { cloth: { a: { bone: 'plain' }, b: { bone: 'nope' } }, flesh: { c: { bone: 'skirt', maxParticles: 10 } } }, noAuto, [mesh]);
+        const bad = new PhysicsRig(BONES, { cloth: { a: { bone: 'plain' }, b: { bone: 'nope' }, c: { bone: 'skirt', maxParticles: 10 } } }, noAuto, [mesh]);
 
         expect(bad.clothCount).toBe(0);
         expect(bad.problems.length).toBe(3);
@@ -103,68 +77,6 @@ describe('cloth and flesh in the rig', () => {
         expect(lag).toBeLessThan(-0.15);
         // within a step of the animation (3 blocks a second is 5 cm a step)
         expect(topError).toBeLessThan(0.07);
-    });
-
-    test('a jelly ball wobbles with a carried tip that stays one rigid piece', () => {
-        const pouch = ball('pouch', 'skirt', 0, 0.6, 0.3, 0.12);
-        const tip = ball('tip', 'tip', 0, 0.6, 0.18, 0.03);
-        const rig = new PhysicsRig(BONES, { flesh: { skirt: { bone: 'skirt', preset: 'jelly', carry: ['tip'], collidesWith: [] } } }, noAuto, [pouch, tip]);
-
-        expect(rig.problems).toEqual([]);
-
-        const motion = (t: number): number => 0.5 * Math.sin(t * 7);
-        let worstSpread = 0;
-
-        for (let i = 0; i <= 180; i++) {
-            const t = i / 60;
-            const pos: V3 = [0, 0, motion(t)];
-
-            rig.clothAnimated = new Map([[pouch.key, pouch.rest.map(v => add(v, pos))], [tip.key, tip.rest.map(v => add(v, pos))]]);
-            rig.update(frames(), { pos, yaw: 0 }, qaxisY(0), t);
-
-            const moved = rig.clothVertices('tip');
-
-            if (moved && i > 10) {
-                // a rigid piece: every distance between its vertices is what it was
-                for (const [a, b] of [[0, 5], [3, 40], [20, 60]]) {
-                    worstSpread = Math.max(worstSpread, Math.abs(length(sub(moved[a], moved[b])) - length(sub(tip.rest[a], tip.rest[b]))));
-                }
-            }
-        }
-
-        expect(worstSpread).toBeLessThan(0.005);
-        expect(rig.clothKeys().sort()).toEqual(['pouch', 'tip']);
-        expect(rig.clothReport()[0].flesh).toBe(true);
-    });
-});
-
-describe('a mesh of two merged parts', () => {
-    test('is two bodies: pressing one leaves the other where it is and as big as it was', () => {
-        const a = ball('a', 'skirt', -0.3, 0.6, 0.3, 0.12);
-        const b = ball('b', 'skirt', 0.3, 0.6, 0.3, 0.12);
-        const merged: ClothMeshInput = { key: 'both', bone: 'skirt', rest: [...a.rest, ...b.rest], faces: [...a.faces, ...b.faces.map(f => f.map(i => i + a.rest.length))] };
-        const rig = new PhysicsRig(BONES, { flesh: { skirt: { bone: 'skirt', preset: 'jelly', volume: 0.9, collidesWith: [] } } }, noAuto, [merged]);
-
-        expect(rig.clothCount).toBe(1);
-        expect(weld(merged.rest, merged.faces).rest.length).toBeGreaterThan(100);
-
-        // ball A is squeezed in from above by hand: its top vertices are pulled down, the animation keeps ball B as modelled
-        for (let i = 0; i <= 120; i++) {
-            const t = i / 60;
-            const animated = merged.rest.map((v): V3 => (v[0] < 0 && v[1] > 0.66 ? [v[0], v[1] - 0.08, v[2]] : v));
-
-            rig.clothAnimated = new Map([['both', animated]]);
-            rig.update(frames(), { pos: [0, 0, 0], yaw: 0 }, qaxisY(0), t);
-        }
-
-        const now = rig.clothVertices('both')!;
-        const bVerts = now.filter((v, i) => merged.rest[i][0] > 0);
-        const cx = bVerts.reduce((sum, v) => sum + v[0], 0) / bVerts.length;
-        const wide = Math.max(...bVerts.map(v => Math.abs(v[0] - cx)));
-
-        expect(cx).toBeGreaterThan(0.29);
-        expect(cx).toBeLessThan(0.31);
-        expect(wide).toBeLessThan(0.13);
     });
 });
 
@@ -212,23 +124,12 @@ describe('editing cloth and flesh', () => {
         expect(doc.cloth.skirt.pinHeight).toBeDefined();
         expect(softControls(doc, 'skirt', 'cloth').stiffness).toBeCloseTo(1, 6);
 
-        // switching to flesh moves the entry
-        doc = setSoft(doc, 'skirt', 'flesh', { ...softLook('jelly', 'skirt'), carry: ['tip'], softRadius: 0.2, softCenter: [0, 1, 0] });
-        expect(kindOf(doc, 'skirt')).toBe('flesh');
-        expect(doc.cloth).toBeUndefined();
-        expect(doc.flesh.skirt.carry).toEqual(['tip']);
-        expect(doc.flesh.skirt.softRadius).toBe(0.2);
-        expect(doc.flesh.skirt.volume).toBeCloseTo(0.9, 6);
+        expect(Object.keys(SOFT_LOOKS).length).toBe(3);
+        expect(removePart(doc, 'skirt').cloth).toBeUndefined();
         expect(summarise(doc)).toMatch(/1 cloth or flesh/);
 
-        // a soft zone of 0 leaves no zone in the document
-        doc = setSoft(doc, 'skirt', 'flesh', { ...softControls(doc, 'skirt', 'flesh'), softRadius: 0 });
-        expect(doc.flesh.skirt.softRadius).toBeUndefined();
-        expect(removePart(doc, 'skirt').flesh).toBeUndefined();
-        expect(Object.keys(SOFT_LOOKS).length).toBe(6);
-
         // what the controls write is what the game reads: no warnings from the checker, with the bones known
-        const full = setSoft(setSoft({}, 'skirt', 'cloth', softLook('cloth', 'skirt')), 'tip', 'flesh', { ...softLook('jelly', 'tip'), carry: ['skirt'], softRadius: 0.2, softCenter: [0, 1, 0] });
+        const full = setSoft({}, 'skirt', 'cloth', softLook('cloth', 'skirt'));
 
         expect(checkPhysics(JSON.stringify(full), ['skirt', 'tip']).warnings).toEqual([]);
     });

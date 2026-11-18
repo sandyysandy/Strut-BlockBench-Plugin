@@ -97,7 +97,7 @@ describe('checking physics text', () => {
 
         const all = checkPhysics(JSON.stringify({ flesh: { a: { bone: 'belly', preset: 'cloth' } } }), ['belly']).warnings.join('\n');
 
-        expect(all).toMatch(/unknown flesh preset "cloth"/);
+        expect(all).toMatch(/unknown soft preset "cloth"/);
     });
 
     test('an empty document writes no section, and the starter lists every bone', () => {

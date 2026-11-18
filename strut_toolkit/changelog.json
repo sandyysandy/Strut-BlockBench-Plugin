@@ -1,6 +1,49 @@
 {
+  "1.1.0": {
+    "title": "1.1.0 (Physics tab overhaul)",
+    "author": "sandyymandy",
+    "categories": [
+      {
+        "title": "New Features",
+        "list": [
+          "Flesh in the Physics tab is now a cage: a small shell fitted to the bone's mesh that swings as one lump about the bone's pivot, lags at its free end, keeps its volume, and that every vertex follows. A pair of bones, or one mesh that holds two parts, press on each other. Looks: pouch, seat, belly, thigh, jelly, soft flesh, firm flesh",
+          "New flesh controls: softness, firmness, meat (how heavy and fleshy it feels), reach, lag, settling of the swing and of the jiggle, turn about the base, volume, swell, the soft zone and the meshes that ride on it",
+          "Flesh works on a bone of cubes as it does on a mesh: the game cuts each cube face into a grid and moves that, and the preview does the same (a flat cube is left as it is, and cloth still needs a mesh)",
+          "The checker reads the flesh section the way the game does, names the keys of the old per-vertex flesh that no longer apply, and reads the old name of the section",
+          "The Physics panel is redone to sit in Blockbench: a toolbar with Simulate, Restart, Poke, Undo and Redo, collapsible sections, one slider and number box for every value, a bone list that can show only the bones with physics, and the type of a bone (spring, chain, cloth, flesh) picked from buttons that say why one is not available",
+          "Flesh now has every option the game reads: pair it with a second bone, choose whether the bones under it are soft or ride on it, the pivot (the bone, the cage or a point), the free end and the side it hangs from, how it is held, walking bounce and sway, how a pair squeezes, how it behaves under clothes, which of the model's bones press it, and an allow or deny list of bones. Values are written to the file only when they differ from the look",
+          "The Physics tab is now six windows, each a Blockbench panel that can be docked, floated or tabbed where you like, as in an editor: Physics (simulate and test motion), Bones (the hierarchy), Properties (type, looks and settings of the picked bones), Shapes (collision shapes), Test Objects, and JSON (the text the game reads, kept in step with every change, and editable with a check as you type)",
+          "Every slider has a small button that puts it back to its default (the default of the look it started from, or of the move), shown when it has been changed",
+          "When a bone cannot be picked for a list, the message and the tooltip of its greyed row say why (no geometry, above or below the part in the bone tree, shape switched off)",
+          "The camera can be held on the model, or on the picked bone, while it simulates, so the physics can be watched without a walk, a spin or a jump in the way; walking left and right, forward and back, going up and down and turning can each be switched off, and the camera goes back to where it was when the simulation stops",
+          "The collision shapes and the lines of springs, chains and flesh can be shown or hidden from two buttons on the toolbar of the Physics window, without opening Shapes",
+          "Fourteen test moves instead of six, each with settings of its own (distance, pace, direction, height, how hard it stops and so on): walk, run, turn, spin, jump, bounce, crouch, shake, walk in a circle, figure of eight, start and stop, knock and dance",
+          "Choosing bones is the same everywhere: lists of bones (the pieces that ride on a flesh or cloth, the bones it reacts to, a flesh's pair) are chips with one Pick bones button that takes clicks in the 3D view or in the Bones window, where the bones that cannot be picked for that list are greyed out and do nothing; the scrolling lists of ticks are gone",
+          "Settings are laid out for reading: the name and value on one line, the slider under it, and a description of what it does under that (the question mark in Properties hides the descriptions); each group says what it is for",
+          "Lists of bones (the pieces that ride on a flesh, the bones it reacts to, its pair) can be filled by clicking bones in the 3D view; the bones it reacts to is one list with ticks (all, none, invert) instead of two modes that meant the same thing",
+          "Pick several bones at once (ctrl-click in the list or the view, shift-click for a run of the list): the type, the look and every slider you change are changed on all of them, each keeping its own other values",
+          "Test shapes are objects: each has a position, a turn and a size, can be duplicated, and is moved, turned and scaled with the gizmo in the view (the move, rotate and scale tools); the gizmo follows a shape that sweeps and comes back if it was lost",
+          "A test shape can sweep along the axis you choose (X, Y or Z), as far and as fast as you set",
+          "Opening and closing a branch of the bone list shows at once",
+          "Cloth meshes of up to 2000 welded vertices are simulated by default (it was 600), so a dressed model's top is no longer left as modelled with a warning",
+          "A click in the view picks the bone of the cube or mesh under it, as in the Animate tab",
+          "Test shapes can be picked in the panel or the view and moved with the move gizmo in 3D; a bone and a test shape are never picked together",
+          "Simulated flesh and cloth keep the model's texture (a mesh keeps its own texture coordinates and materials; a bone of cubes is drawn as the grid the simulation moves, with the cubes' texture), and are shaded smoothly",
+          "A mesh that rides on a pair of flesh bones moves with the one of the pair nearest it only, as in the game",
+          "Flesh is pressed in by test shapes, the floor and the model's own shapes on the bones it is pressed by, with the volume pressed in swelling out elsewhere, so a dent can be seen without opening the game"
+        ]
+      },
+      {
+        "title": "Changes",
+        "list": [
+          "Flesh made for the old per-vertex solver keeps its entry; the numbers that no longer apply are dropped the first time its controls are edited",
+          "What presses on flesh in the game from outside the model (other models, players and blocks) is not drawn in the preview"
+        ]
+      }
+    ]
+  },
   "1.0.0": {
-    "title": "1.0.0",
+    "title": "1.0.0 (Initial release)",
     "author": "sandyymandy",
     "categories": [
       {

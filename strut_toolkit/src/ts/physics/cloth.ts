@@ -53,7 +53,7 @@ export function resolveCloth(entry: Record<string, any>, flesh: boolean): ClothP
     const p: ClothParams = {
         stiffness: flesh ? 0.95 : 0.9, bend: flesh ? 0 : 0.15, damping: flesh ? 3 : 0.6, inertia: flesh ? 0.9 : 0.6, gravity: flesh ? 2 : 9.8, radius: 0.02,
         pinHeight: flesh ? 0 : 0.1, anchor: flesh ? 12 : 0, weight: 1, collidesWith: flesh ? ['other', 'players', 'mobs', 'world'] : ['body', 'world'], friction: 0.3,
-        iterations: flesh ? 4 : 6, maxParticles: 600, volume: flesh ? 0.6 : 0, softCenter: null, softRadius: 0, carry: [], mesh: -1, bone: String(entry.bone ?? ''),
+        iterations: flesh ? 4 : 6, maxParticles: 2000, volume: flesh ? 0.6 : 0, softCenter: null, softRadius: 0, carry: [], mesh: -1, bone: String(entry.bone ?? ''),
     };
 
     Object.assign(p, presets[entry.preset as string] ?? {});

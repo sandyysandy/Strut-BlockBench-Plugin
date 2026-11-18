@@ -84,7 +84,7 @@ describe('convertAnimationFile', () => {
         expect(findings.items.filter(f => f.severity === 'lossy').map(f => f.message).join('|')).toContain('notAnEasing');
     });
 
-    it('an easing name used as a vector value is written as 0 and reported (the doggy scene data)', () => {
+    it('an easing name used as a vector value is written as 0 and reported (scene data)', () => {
         const { animation, findings } = convert({
             a: { bones: { pouchR: { position: { vector: ['easeInOutSine', 'easeInOutSine', 'easeInOutSine'] } } } },
         });
@@ -191,13 +191,13 @@ describe('convertAnimationFile', () => {
     });
 
     it('the event hook can replace and split events', () => {
-        const { animation } = convert({ a: { sound_effects: { '1': { effect: 'aMSG1, thrust' } } } }, {
+        const { animation } = convert({ a: { sound_effects: { '1': { effect: 'aMSG1, strike' } } } }, {
             mapEvent: (event: { time: number; payload: string }) => event.payload.split(',').map(token => ({
                 time: event.time, kind: 'instruction', payload: token.trim(), authority: 0,
             })),
         });
 
-        expect(animation.clips[0].events.map(e => e.payload)).toEqual(['aMSG1', 'thrust']);
+        expect(animation.clips[0].events.map(e => e.payload)).toEqual(['aMSG1', 'strike']);
     });
 
     it('unknown fields are reported, not silently dropped', () => {

@@ -9,6 +9,7 @@ import {
     add, cross, dot, length, normalize, Q4, qaxisY, qfromEulerDegrees, qfromRotationVector, qinv, qmul, qnormalize, qrotate, qrotationTo, qslerp, scale, sub, V3,
 } from './math';
 import { applyRotation, ClothMesh, ClothParams, clothStep, ClothState, fitParticles, resolveCloth, rigidFit, Topology, weld } from './cloth';
+import { FleshRig } from './fleshRig';
 import { resolveChain, resolveSpring, ResolvedChain, ResolvedSpring } from './preview';
 import { ChainState, chainStep, Placed, pushOut, SpringState, springStep, STEP } from './solvers';
 
@@ -32,6 +33,8 @@ export interface ClothMeshInput {
     readonly bone: string;
     readonly rest: readonly V3[];
     readonly faces: readonly (readonly number[])[];
+    /** Made from a cube: flesh moves it (the game cuts the cubes of a flesh bone into meshes), cloth does not */
+    readonly cube?: boolean;
 }
 
 export interface DebugLine { readonly a: V3; readonly b: V3; readonly kind: 'chain' | 'rest' | 'moved' }
@@ -156,6 +159,7 @@ export class PhysicsRig {
     private readonly springs: SpringPart[] = [];
     private readonly chains: ChainPart[] = [];
     private readonly cloths: ClothPart[] = [];
+    private readonly fleshRig: FleshRig;
     /** Where the animation puts every vertex of every mesh in the world now (blocks), by the mesh's key: the caller sets it before each update or observe */
     clothAnimated: ReadonlyMap<string, readonly V3[]> = new Map();
     private readonly authored: ColliderSpec[] = [];
@@ -232,8 +236,8 @@ export class PhysicsRig {
             });
         }
 
-        for (const flesh of [false, true]) {
-            for (const [name, entry] of Object.entries((flesh ? doc.flesh : doc.cloth) ?? {})) {
+        for (const flesh of [false]) {
+            for (const [name, entry] of Object.entries(doc.cloth ?? {})) {
                 const params = resolveCloth({ bone: name, ...((entry ?? {}) as Record<string, any>) }, flesh);
                 const where = `${flesh ? 'flesh' : 'cloth'} "${name}"`;
 
@@ -243,10 +247,10 @@ export class PhysicsRig {
                     continue;
                 }
 
-                const own = meshes.filter(m => m.bone === params.bone);
+                const own = meshes.filter(m => m.bone === params.bone && !m.cube);
 
                 if (own.length === 0) {
-                    this.problems.push(`${where}: bone "${params.bone}" has no mesh (cloth and flesh are made from a mesh, not from cubes)`);
+                    this.problems.push(`${where}: bone "${params.bone}" has no mesh (cloth is made from a mesh, not from cubes)`);
 
                     continue;
                 }
@@ -279,7 +283,7 @@ export class PhysicsRig {
                             continue;
                         }
 
-                        for (const other of meshes.filter(m => m.bone === boneName)) carried.push({ input: other, fit: fitParticles(welded.rest, other.rest) });
+                        for (const other of meshes.filter(m => m.bone === boneName && !m.cube)) carried.push({ input: other, fit: fitParticles(welded.rest, other.rest) });
                     }
 
                     this.cloths.push({
@@ -289,6 +293,10 @@ export class PhysicsRig {
                 });
             }
         }
+
+        // flesh: a cage fitted to the mesh on each bone, that every vertex follows
+        this.fleshRig = new FleshRig(names, this.parents, doc, meshes);
+        this.problems.push(...this.fleshRig.problems);
 
         for (const c of Array.isArray(doc.colliders) ? doc.colliders : []) {
             if (c && names.has(c.bone) && ['sphere', 'capsule', 'box'].includes(c.shape)) {
@@ -320,7 +328,7 @@ export class PhysicsRig {
 
     get springCount(): number { return this.springs.length; }
     get chainCount(): number { return this.chains.length; }
-    get clothCount(): number { return this.cloths.length; }
+    get clothCount(): number { return this.cloths.length + this.fleshRig.count; }
     get colliderCount(): number { return this.authored.length + this.auto.length; }
 
     /** The shapes made from the model, for drawing them apart from the authored ones */
@@ -349,6 +357,7 @@ export class PhysicsRig {
 
         for (const c of this.cloths) c.state.initialised = false;
 
+        this.fleshRig.reset();
         this.kinematics.reset();
         this.last = null;
         this.history = [];
@@ -383,6 +392,8 @@ export class PhysicsRig {
         if (chain && chain.state.initialised) {
             for (let k = 1; k <= chain.n; k++) for (let a = 0; a < 3; a++) chain.state.prev[k][a] -= v[a] * STEP;
         }
+
+        this.fleshRig.impulse(name, v);
 
         for (const c of this.cloths) {
             if (c.bone !== name || !c.state.initialised) continue;
@@ -586,7 +597,7 @@ export class PhysicsRig {
     }
 
     /** The spring bone or chain that {@code bone} is part of: its name, its bones and the layers it collides with, or null */
-    partOf(bone: string): { name: string; bones: readonly string[]; layers: readonly string[] } | null {
+    partOf(bone: string): { name: string; bones: readonly string[]; layers: readonly string[]; presses?: readonly string[] } | null {
         const spring = this.springs.find(s => s.name === bone);
 
         if (spring) return { name: spring.name, bones: [spring.name], layers: spring.settings.collidesWith };
@@ -594,6 +605,10 @@ export class PhysicsRig {
         const chain = this.chains.find(c => c.bones.includes(bone));
 
         if (chain) return { name: chain.name, bones: chain.bones, layers: chain.settings.collidesWith };
+
+        const flesh = this.fleshRig.partOf(bone);
+
+        if (flesh) return flesh;
 
         const soft = this.cloths.find(c => c.bone === bone);
 
@@ -608,6 +623,9 @@ export class PhysicsRig {
         const part = this.partOf(bone);
 
         if (!part || !part.layers.includes(spec.layer)) return false;
+
+        // a flesh rests against the body of the bones that do not press it
+        if (part.presses && spec.layer === 'body' && !part.presses.some(p => matches(p, spec.bone))) return false;
 
         if (generated && part.bones.some(b => isRelated(spec.bone, b, this.parents))) return false;
 
@@ -624,6 +642,8 @@ export class PhysicsRig {
         const look = (spec: ColliderSpec, generated: boolean): void => {
             if (!part.layers.includes(spec.layer) || out.includes(spec.bone)) return;
 
+            if (part.presses && spec.layer === 'body' && !part.presses.some(p => matches(p, spec.bone))) return;
+
             if (generated && part.bones.some(b => isRelated(spec.bone, b, this.parents))) return;
 
             out.push(spec.bone);
@@ -631,6 +651,33 @@ export class PhysicsRig {
 
         this.authored.forEach(s => look(s, false));
         this.auto.forEach(s => look(s, true));
+
+        return out;
+    }
+
+    /**
+     * The shapes that press into a flesh, in the world: the model's own shapes on the bones its {@code presses} list names (an arm, a hand), shapes of the layers it
+     * is pressed by (other models, players), and the floor and test shapes when blocks press it. Its own bones never do, and its allow and deny lists are kept
+     */
+    private pressersFor(name: string, params: { bones: string[]; collidesWith: string[]; presses: string[] }): Placed[] {
+        const out: Placed[] = [];
+        const layers = params.collidesWith;
+
+        for (const { spec, shape } of this.placed) {
+            if (params.bones.some(b => b === spec.bone || isRelated(spec.bone, b, this.parents)) || !this.allows(name, spec.bone)) continue;
+
+            const pressing = spec.layer === 'body' ? layers.includes('body') && params.presses.some(p => matches(p, spec.bone)) : layers.includes(spec.layer);
+
+            if (pressing) out.push(shape);
+        }
+
+        if (layers.includes('world')) {
+            const floor = this.floorShape();
+
+            if (floor) out.push(floor);
+
+            out.push(...this.props);
+        }
 
         return out;
     }
@@ -840,6 +887,8 @@ export class PhysicsRig {
     // ---------------- cloth and flesh ----------------
 
     private prepareCloth(): void {
+        this.fleshRig.prepare(this.clothAnimated);
+
         for (const c of this.cloths) {
             const now = this.clothAnimated.get(c.input.key);
 
@@ -850,6 +899,8 @@ export class PhysicsRig {
     private stepCloth(stepPos: V3, stepYaw: number, entityDelta: V3): void {
         const turn = qaxisY(stepYaw - this.entity.yaw);
         const place = (p: V3): V3 => add(stepPos, qrotate(turn, sub(p, this.entity.pos)));
+
+        this.fleshRig.step(stepPos, place, bone => this.frames.get(bone)?.origin ?? null, 1, (name, params) => this.pressersFor(name, params));
 
         for (const c of this.cloths) {
             if (c.animNow.length === 0) continue;
@@ -878,6 +929,15 @@ export class PhysicsRig {
      * one, or has not been simulated yet. For a carried mesh: the animated vertices moved by the one rigid motion of the particles around it
      */
     clothVertices(key: string): V3[] | null {
+        const animated = this.clothAnimated.get(key);
+
+        if (animated) {
+            const turn = qaxisY(this.entity.yaw - this.stepYaw);
+            const flesh = this.fleshRig.vertices(key, animated as V3[], d => (this.stepKnown ? qrotate(turn, d) : d));
+
+            if (flesh) return flesh;
+        }
+
         for (const c of this.cloths) {
             if (!c.state.initialised) continue;
 
@@ -898,12 +958,14 @@ export class PhysicsRig {
 
     /** Which input meshes are simulated or carried (their keys), for hiding the originals while the preview runs */
     clothKeys(): string[] {
-        return this.cloths.flatMap(c => [c.input.key, ...c.carried.map(k => k.input.key)]);
+        return [...this.cloths.flatMap(c => [c.input.key, ...c.carried.map(k => k.input.key)]), ...this.fleshRig.keys()];
     }
 
     /** A line per cloth or flesh for the panel: how many particles, and how far the worst edge has stretched */
     clothReport(): { name: string; flesh: boolean; particles: number; worstEdge: number }[] {
-        return this.cloths.map(c => {
+        const flesh = this.fleshRig.report().map(f => ({ name: f.name, flesh: true, particles: f.particles, worstEdge: f.swing }));
+
+        return [...flesh, ...this.cloths.map(c => {
             let worst = 0;
 
             if (c.state.initialised) {
@@ -915,7 +977,7 @@ export class PhysicsRig {
             }
 
             return { name: c.name, flesh: c.flesh, particles: c.welded.rest.length, worstEdge: worst };
-        });
+        })];
     }
 
     // ---------------- output ----------------

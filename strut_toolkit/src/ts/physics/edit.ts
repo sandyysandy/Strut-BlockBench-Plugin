@@ -6,7 +6,8 @@
 import { checkPhysics } from './config';
 import { ColliderSpec } from './autoColliders';
 import { V3 } from './math';
-import { CLOTH_PRESET_VALUES, FLESH_PRESET_VALUES, resolveCloth } from './cloth';
+import { CLOTH_PRESET_VALUES, resolveCloth } from './cloth';
+import { FLESH_PRESETS, resolveFlesh } from './flesh';
 
 export type PartKind = 'none' | 'spring' | 'chain' | 'cloth' | 'flesh';
 
@@ -90,7 +91,7 @@ export function kindOf(doc: Doc, bone: string): PartKind {
 
     if (doc.cloth && doc.cloth[bone]) return 'cloth';
 
-    return doc.flesh && doc.flesh[bone] ? 'flesh' : 'none';
+    return fleshEntryName(doc, bone) !== null ? 'flesh' : 'none';
 }
 
 export function chainNameOf(doc: Doc, bone: string): string | null {
@@ -209,7 +210,20 @@ export function removePart(doc: Doc, bone: string): Doc {
         delete next.chains[chain];
     }
 
-    for (const section of ['cloth', 'flesh']) {
+    const flesh = fleshEntryName(doc, bone);
+
+    if (flesh !== null) {
+        for (const section of ['flesh', 'soft']) {
+            if (next[section] && next[section][flesh]) {
+                next[section] = { ...next[section] };
+                delete next[section][flesh];
+
+                if (Object.keys(next[section]).length === 0) delete next[section];
+            }
+        }
+    }
+
+    for (const section of ['cloth']) {
         if (next[section] && next[section][bone]) {
             next[section] = { ...next[section] };
             delete next[section][bone];
@@ -284,7 +298,7 @@ export function summarise(doc: Doc): string {
     const bones = Object.keys(doc.bones ?? {}).length;
     const chains = Object.keys(doc.chains ?? {}).length;
     const colliders = (doc.colliders ?? []).length;
-    const soft = Object.keys(doc.cloth ?? {}).length + Object.keys(doc.flesh ?? {}).length;
+    const soft = Object.keys(doc.cloth ?? {}).length + Object.keys(doc.flesh ?? {}).length + Object.keys(doc.soft ?? {}).length;
 
     return `${bones} spring bone${bones === 1 ? '' : 's'}, ${chains} chain${chains === 1 ? '' : 's'}, ${soft > 0 ? `${soft} cloth or flesh, ` : ''}${colliders} collider${colliders === 1 ? '' : 's'}`;
 }
@@ -321,9 +335,9 @@ export interface SoftControls {
     carry: string[];
 }
 
-export function softControls(doc: Doc, bone: string, kind: 'cloth' | 'flesh'): SoftControls {
-    const entry = ((kind === 'cloth' ? doc.cloth : doc.flesh)?.[bone] ?? { bone }) as Record<string, any>;
-    const p = resolveCloth(entry, kind === 'flesh');
+export function softControls(doc: Doc, bone: string, kind: 'cloth'): SoftControls {
+    const entry = (doc[kind]?.[bone] ?? { bone }) as Record<string, any>;
+    const p = resolveCloth(entry, false);
 
     return {
         stiffness: p.stiffness, bend: p.bend, damping: p.damping, inertia: p.inertia, gravity: p.gravity, radius: p.radius, pinHeight: p.pinHeight, anchor: p.anchor,
@@ -333,14 +347,11 @@ export function softControls(doc: Doc, bone: string, kind: 'cloth' | 'flesh'): S
     };
 }
 
-/** Ready-made looks for cloth and flesh, one click each; they set the controls, which then stay editable */
-export const SOFT_LOOKS: Record<string, { label: string; kind: 'cloth' | 'flesh'; preset: string }> = {
+/** Ready-made looks for cloth, one click each; they set the controls, which then stay editable */
+export const SOFT_LOOKS: Record<string, { label: string; kind: 'cloth'; preset: string }> = {
     cloth: { label: 'Cloth', kind: 'cloth', preset: 'cloth' },
     'cloth-silk': { label: 'Silk', kind: 'cloth', preset: 'cloth-silk' },
     'cloth-stiff': { label: 'Stiff cloth', kind: 'cloth', preset: 'cloth-stiff' },
-    'flesh-soft': { label: 'Soft flesh', kind: 'flesh', preset: 'flesh-soft' },
-    'flesh-firm': { label: 'Firm flesh', kind: 'flesh', preset: 'flesh-firm' },
-    jelly: { label: 'Jelly', kind: 'flesh', preset: 'jelly' },
 };
 
 /** The controls a look means for a bone: the kind's defaults with the preset's numbers over them */
@@ -351,11 +362,11 @@ export function softLook(look: string, bone: string): SoftControls {
 }
 
 /** The preset values, for tests and the panel's hints */
-export const SOFT_PRESETS = { cloth: CLOTH_PRESET_VALUES, flesh: FLESH_PRESET_VALUES };
+export const SOFT_PRESETS = { cloth: CLOTH_PRESET_VALUES };
 
-/** Makes {@code bone} cloth or flesh with these controls (keys the entry already had that the controls do not cover, such as {@code mesh}, are kept) */
-export function setSoft(doc: Doc, bone: string, kind: 'cloth' | 'flesh', c: SoftControls): Doc {
-    const other = kind === 'cloth' ? 'flesh' : 'cloth';
+/** Makes {@code bone} cloth with these controls (keys the entry already had that the controls do not cover, such as {@code mesh}, are kept) */
+export function setSoft(doc: Doc, bone: string, kind: 'cloth', c: SoftControls): Doc {
+    const other = 'flesh';
     const next: Doc = { ...doc, [kind]: { ...(doc[kind] ?? {}) } };
     const old = (next[kind][bone] ?? {}) as Record<string, any>;
     const layers: string[] = [];
@@ -374,8 +385,7 @@ export function setSoft(doc: Doc, bone: string, kind: 'cloth' | 'flesh', c: Soft
         collidesWith: layers,
     };
 
-    if (kind === 'cloth') entry.pinHeight = round(c.pinHeight);
-    else entry.volume = round(c.volume);
+    entry.pinHeight = round(c.pinHeight);
 
     if (c.softRadius > 0) {
         entry.softRadius = round(c.softRadius);
@@ -399,4 +409,259 @@ export function setSoft(doc: Doc, bone: string, kind: 'cloth' | 'flesh', c: Soft
     }
 
     return next;
+}
+
+// ---------------- flesh ----------------
+
+/** What the controls show for one flesh: a cage fitted to the bone's mesh that swings, lags and keeps its volume */
+export interface FleshControls {
+    /** The look: one of the presets */
+    preset: string;
+    /** 1 is the preset; more is softer and slower, less firmer */
+    softness: number;
+    /** The farthest the flesh moves from where the animation puts it, blocks */
+    limit: number;
+    /** A frequency scale: more is quicker and tighter */
+    firmness: number;
+    /** How heavy and fleshy it feels: damped more, sagging more, a dent fading slowly */
+    meat: number;
+    /** How much of the volume pressed in swells out elsewhere */
+    bulge: number;
+    /** How much the swing stretches it, keeping its volume */
+    volume: number;
+    weight: number;
+    /** The swing's damping ratio, and the nodes': below 1 it wobbles */
+    lumpDamping: number;
+    nodeDamping: number;
+    /** How much the whole swings with the body's motion */
+    inertia: number;
+    /** How much the swing turns about the pivot rather than sliding */
+    rigid: number;
+    softCenter: V3;
+    softRadius: number;
+    carry: string[];
+    collideBody: boolean;
+    collideWorld: boolean;
+    collideOthers: boolean;
+    /** The bones of the flesh: one, or two for a pair that presses on each other */
+    bones: string[];
+    /** The meshes on bones under the root are soft like the root's, rather than riding on it */
+    nestedSoft: boolean;
+    /** What the swing turns about: the root bone's own pivot, the base of the fitted cage, or a point in the bone's space (blocks) */
+    pivotMode: 'bone' | 'auto' | 'custom';
+    pivot: V3;
+    /** The free end and the side it hangs from: "auto" or an axis of the root bone ("+z", "-y") */
+    tip: string;
+    up: string;
+    /** The model's own bones that press into it (names may start or end with *) */
+    presses: string[];
+    reach: number;
+    lumpShare: number;
+    sideStiffness: number;
+    stiffen: number;
+    anchorFrom: number;
+    anchorHold: number;
+    anchorFull: number;
+    shapeSoftness: number;
+    shape: number;
+    link: number;
+    gravity: number;
+    squeezeIn: number;
+    squeezeOut: number;
+    squeezeStiffness: number;
+    rim: number;
+    rise: number;
+    sway: number;
+    turn: number;
+    dressedStiffness: number;
+    dressedLimit: number;
+    dressedCouple: number;
+}
+
+/** The numbers of a flesh the panel has beyond the main ones, by the key they are written under (flat), and the group and name they may also be found under */
+export const FLESH_EXTRA: { key: keyof FleshControls & string; group?: string; inner?: string }[] = [
+    { key: 'reach' }, { key: 'lumpShare', group: 'lump', inner: 'share' }, { key: 'sideStiffness', group: 'lump', inner: 'side' }, { key: 'stiffen', group: 'lump', inner: 'stiffen' },
+    { key: 'anchorFrom', group: 'anchor', inner: 'from' }, { key: 'anchorHold', group: 'anchor', inner: 'hold' }, { key: 'anchorFull', group: 'anchor', inner: 'full' },
+    { key: 'shapeSoftness' }, { key: 'shape', group: 'node', inner: 'shape' }, { key: 'link', group: 'node', inner: 'link' }, { key: 'gravity', group: 'node', inner: 'gravity' },
+    { key: 'squeezeIn', group: 'squeeze', inner: 'in' }, { key: 'squeezeOut', group: 'squeeze', inner: 'out' }, { key: 'squeezeStiffness', group: 'squeeze', inner: 'k' },
+    { key: 'rim', group: 'squeeze', inner: 'rim' }, { key: 'rise', group: 'step', inner: 'rise' }, { key: 'sway', group: 'step', inner: 'sway' }, { key: 'turn' },
+    { key: 'dressedStiffness', group: 'dressed', inner: 'stiff' }, { key: 'dressedLimit', group: 'dressed', inner: 'limit' }, { key: 'dressedCouple', group: 'dressed', inner: 'couple' },
+];
+
+/** An axis as the file writes it: "+z", "-y", or "auto" when it is not one of the six */
+export function axisName(v: V3 | null): string {
+    if (!v) return 'auto';
+
+    for (let a = 0; a < 3; a++) {
+        if (Math.abs(Math.abs(v[a]) - 1) < 1e-6 && v.every((x, i) => i === a || Math.abs(x) < 1e-6)) return `${v[a] < 0 ? '-' : '+'}${'xyz'[a]}`;
+    }
+
+    return 'auto';
+}
+
+/** The name of the flesh entry that has {@code bone} as its bone (or one of its pair), or null; an entry named for the bone comes first */
+export function fleshEntryName(doc: Doc, bone: string): string | null {
+    const all: Record<string, any> = { ...(doc.soft ?? {}), ...(doc.flesh ?? {}) };
+
+    if (all[bone] && typeof all[bone] === 'object') return bone;
+
+    for (const [name, entry] of Object.entries(all)) {
+        const e = entry as Record<string, any>;
+
+        if (e && (e.bone === bone || (Array.isArray(e.bones) && e.bones.map(String).includes(bone)))) return name;
+    }
+
+    return null;
+}
+
+export const FLESH_LOOKS: Record<string, string> = {
+    pouch: 'Pouch', seat: 'Seat', belly: 'Belly', thigh: 'Thigh', jelly: 'Jelly', 'flesh-soft': 'Soft flesh', 'flesh-firm': 'Firm flesh',
+};
+
+export function fleshControls(doc: Doc, bone: string): FleshControls {
+    const name = fleshEntryName(doc, bone);
+    const entry = (name ? { ...(doc.soft ?? {}), ...(doc.flesh ?? {}) }[name] : { bone }) as Record<string, any>;
+    // read without the meat's own scaling of the damping, so the sliders show what the file says
+    return fleshControlsOf(resolveFlesh({ bone, ...entry }, [], 'flesh', false), typeof entry.preset === 'string' ? entry.preset : 'pouch');
+}
+
+/** The controls for a resolved flesh */
+function fleshControlsOf(p: ReturnType<typeof resolveFlesh>, preset: string): FleshControls {
+    return {
+        preset, softness: p.softness, limit: p.limit, firmness: p.firmness, meat: p.meat, bulge: p.bulge, volume: p.volume,
+        weight: p.weight, lumpDamping: p.lumpDamping, nodeDamping: p.nodeDamping, inertia: p.inertia, rigid: p.rigid, softCenter: p.softCenter ?? [0, 0, 0],
+        softRadius: p.softRadius, carry: [...p.carry], collideBody: p.collidesWith.includes('body'), collideWorld: p.collidesWith.includes('world'),
+        collideOthers: p.collidesWith.includes('other') || p.collidesWith.includes('players'),
+        bones: [...p.bones], nestedSoft: p.nestedSoft, pivotMode: p.pivot ? 'custom' : p.bonePivot ? 'bone' : 'auto', pivot: p.pivot ?? [0, 0, 0], tip: axisName(p.tip), up: axisName(p.up),
+        presses: [...p.presses], reach: p.reach, lumpShare: p.lumpShare, sideStiffness: p.sideStiffness, stiffen: p.stiffen, anchorFrom: p.anchorFrom, anchorHold: p.anchorHold,
+        anchorFull: p.anchorFull, shapeSoftness: p.shapeSoftness, shape: p.shape, link: p.link, gravity: p.gravity, squeezeIn: p.squeezeIn, squeezeOut: p.squeezeOut,
+        squeezeStiffness: p.squeezeStiffness, rim: p.rim, rise: p.rise, sway: p.sway, turn: p.turn, dressedStiffness: p.dressedStiffness, dressedLimit: p.dressedLimit,
+        dressedCouple: p.dressedCouple,
+    };
+}
+
+/** The controls a look means for a bone: the preset's numbers over the defaults */
+export function fleshLook(look: string, bone: string): FleshControls {
+    return fleshControls({ flesh: { [bone]: { bone, preset: look } } }, bone);
+}
+
+/** Makes {@code bone} flesh with these controls (keys the entry already had that the controls do not cover, such as a pair of bones or the tip axis, are kept) */
+export function setFlesh(doc: Doc, bone: string, c: FleshControls): Doc {
+    const name = fleshEntryName(doc, bone) ?? bone;
+    const next: Doc = { ...doc, flesh: { ...(doc.flesh ?? {}) } };
+    const old = ({ ...(doc.soft ?? {}), ...(doc.flesh ?? {}) }[name] ?? {}) as Record<string, any>;
+    const layers: string[] = [];
+
+    if (c.collideBody) layers.push('body');
+    if (c.collideWorld) layers.push('world');
+    if (c.collideOthers) layers.push('other', 'players', 'mobs');
+
+    const rest = { ...old };
+
+    // the keys of the old per-vertex flesh mean nothing now, and these are written as the cage's own
+    for (const key of ['stiffness', 'bend', 'damping', 'gravity', 'radius', 'anchor', 'friction', 'iterations', 'maxParticles', 'pinHeight', 'mesh']) {
+        if (typeof rest[key] !== 'object') delete rest[key];
+    }
+
+    delete rest.inertia;
+    delete rest.lumpDamping;
+    delete rest.nodeDamping;
+
+    const entry: Record<string, any> = {
+        ...rest, ...(old.bones ? {} : { bone }), preset: c.preset, softness: round(c.softness), limit: round(c.limit, 3), firmness: round(c.firmness), meat: round(c.meat),
+        bulge: round(c.bulge), volume: round(c.volume), weight: round(c.weight), rigid: round(c.rigid),
+        lump: { ...(typeof old.lump === 'object' ? old.lump : {}), damping: round(c.lumpDamping, 3), inertia: round(c.inertia) },
+        node: { ...(typeof old.node === 'object' ? old.node : {}), damping: round(c.nodeDamping, 3) },
+        collidesWith: layers,
+    };
+
+    if (c.softRadius > 0) {
+        entry.softRadius = round(c.softRadius);
+        entry.softCenter = c.softCenter.map(v => round(v)) as V3;
+    }
+    else {
+        delete entry.softRadius;
+        delete entry.softCenter;
+    }
+
+    if (c.carry.length > 0) entry.carry = [...c.carry];
+    else delete entry.carry;
+
+    // what the panel has beyond the main numbers is written only when it differs from the look, so the file stays short and a look still means something
+    const base = fleshControlsOf(resolveFlesh({ bone, preset: c.preset }, [], 'flesh', false), c.preset);
+
+    for (const { key, group, inner } of FLESH_EXTRA) {
+        const grouped = group ? entry[group] : undefined;
+
+        if (group && inner && grouped && typeof grouped === 'object' && !Array.isArray(grouped)) {
+            entry[group] = { ...grouped };
+            delete entry[group][inner];
+
+            if (Object.keys(entry[group]).length === 0) delete entry[group];
+        }
+
+        const value = c[key] as number;
+
+        if (Math.abs(value - (base[key] as number)) > 1e-5) entry[key] = round(value, 4);
+        else delete entry[key];
+    }
+
+    if (c.tip !== 'auto') entry.tip = c.tip;
+    else delete entry.tip;
+
+    if (c.up !== 'auto') entry.up = c.up;
+    else delete entry.up;
+
+    if (c.pivotMode === 'custom') entry.pivot = c.pivot.map(v => round(v)) as V3;
+    else if (c.pivotMode === 'auto') entry.pivot = 'auto';
+    else delete entry.pivot;
+
+    if (c.nestedSoft) entry.nested = 'soft';
+    else delete entry.nested;
+
+    if (c.presses.join('|') !== base.presses.join('|')) entry.presses = [...c.presses];
+    else delete entry.presses;
+
+    next.flesh[name] = entry;
+
+    // the old name of the section is read as this one: the entry is not kept twice
+    if (next.soft) {
+        next.soft = { ...next.soft };
+        delete next.soft[name];
+
+        if (Object.keys(next.soft).length === 0) delete next.soft;
+    }
+
+    if (next.cloth) {
+        next.cloth = { ...next.cloth };
+        delete next.cloth[bone];
+
+        if (Object.keys(next.cloth).length === 0) delete next.cloth;
+    }
+
+    return next;
+}
+
+/** The presets a flesh may name, for the panel */
+export const FLESH_PRESET_NAMES = Object.keys(FLESH_PRESETS);
+
+/** Names the bones of a flesh: one bone, or two (a pair that presses on each other). The rest of the entry stays */
+export function setFleshBones(doc: Doc, bone: string, bones: string[]): Doc {
+    const name = fleshEntryName(doc, bone);
+
+    if (name === null || bones.length === 0) return doc;
+
+    const section = doc.flesh?.[name] ? 'flesh' : 'soft';
+    const entry: Record<string, any> = { ...doc[section][name] };
+
+    if (bones.length > 1) {
+        entry.bones = bones.slice(0, 2);
+        delete entry.bone;
+    }
+    else {
+        entry.bone = bones[0];
+        delete entry.bones;
+    }
+
+    return { ...doc, [section]: { ...doc[section], [name]: entry } };
 }

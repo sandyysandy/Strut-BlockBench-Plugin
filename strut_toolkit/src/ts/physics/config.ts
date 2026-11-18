@@ -4,15 +4,17 @@
  * the game log) and turns it into the section payload. No Blockbench globals
  */
 
+import { resolveFlesh } from './flesh';
+
 /** The extension section the game looks for */
 export const PHYSICS_SECTION = 'strut_physics:physics';
 
 export const SPRING_PRESETS = ['jiggle-soft', 'jiggle-firm', 'hair', 'tail', 'ear', 'soft-bone'] as const;
 export const CHAIN_PRESETS = ['hair', 'tail', 'ear'] as const;
 export const CLOTH_PRESETS = ['cloth', 'cloth-silk', 'cloth-stiff'] as const;
-export const FLESH_PRESETS = ['flesh-soft', 'flesh-firm', 'jelly'] as const;
+export { FLESH_PRESETS } from './flesh';
 
-const TOP_KEYS = ['defaults', 'bones', 'version', 'chains', 'cloth', 'flesh', 'colliders', 'autoColliders', 'ragdoll'];
+const TOP_KEYS = ['defaults', 'bones', 'version', 'chains', 'cloth', 'flesh', 'soft', 'colliders', 'autoColliders', 'ragdoll'];
 const BONE_KEYS = ['preset', 'frequency', 'damping', 'inertia', 'gravity', 'rotate', 'translate', 'tip', 'length', 'limit', 'maxTranslate', 'translateScale',
     'weight', 'collidesWith', 'radius', 'squish', 'collideBones', 'ignoreBones'];
 const CHAIN_KEYS = ['bones', 'preset', 'frequency', 'damping', 'inertia', 'gravity', 'radius', 'maxAngle', 'tipLength', 'weight', 'friction', 'collidesWith', 'collideBones', 'ignoreBones'];
@@ -70,7 +72,11 @@ export function checkPhysics(text: string, boneNames?: readonly string[]): Physi
     const bones = isObject(document.bones) ? document.bones : {};
     const chains = isObject(document.chains) ? document.chains : {};
     const cloth = isObject(document.cloth) ? document.cloth : {};
-    const flesh = isObject(document.flesh) ? document.flesh : {};
+    // "soft" is the old name of the flesh section, and still read by the game, with a warning
+    const flesh = { ...(isObject(document.soft) ? document.soft : {}), ...(isObject(document.flesh) ? document.flesh : {}) };
+
+    if (isObject(document.soft)) warnings.push('the "soft" section is now called "flesh"; it is read as flesh');
+
     const colliders = Array.isArray(document.colliders) ? document.colliders : [];
 
     if (document.bones !== undefined && !isObject(document.bones)) warnings.push('"bones" must be an object of bone name to settings');
@@ -132,7 +138,6 @@ export function checkPhysics(text: string, boneNames?: readonly string[]): Physi
 
     const soft: [string, any, string, readonly string[]][] = [
         ...Object.entries(cloth).map(([name, value]) => [name, value, 'cloth', CLOTH_PRESETS] as [string, any, string, readonly string[]]),
-        ...Object.entries(flesh).map(([name, value]) => [name, value, 'flesh', FLESH_PRESETS] as [string, any, string, readonly string[]]),
     ];
 
     for (const [name, value, kind, presets] of soft) {
@@ -153,6 +158,24 @@ export function checkPhysics(text: string, boneNames?: readonly string[]): Physi
 
         if (value.preset !== undefined && !presets.includes(value.preset))
             warnings.push(`${where}: unknown ${kind} preset "${value.preset}" (known: ${presets.join(', ')})`);
+    }
+
+    for (const [name, value] of Object.entries(flesh)) {
+        const where = `flesh "${name}"`;
+
+        if (!isObject(value)) {
+            warnings.push(`${where} must be an object`);
+
+            continue;
+        }
+
+        const own: string[] = Array.isArray(value.bones) ? value.bones.map(String) : typeof value.bone === 'string' ? [value.bone] : [];
+
+        if (own.length === 0 || own.length > 2) warnings.push(`${where}: needs "bones", one bone or a left and right pair`);
+
+        own.forEach(b => known(b, where));
+        // the same reading the game does: unknown keys and presets, and the keys of the old per-vertex flesh, are named
+        resolveFlesh(value, warnings, where);
     }
 
     colliders.forEach((c, i) => {
