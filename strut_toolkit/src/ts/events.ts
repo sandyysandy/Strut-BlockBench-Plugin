@@ -1,7 +1,8 @@
+import { workspaceSettingsDialog } from './stage/stageUi';
 import {
     addCodecCallback,
     addEventListener,
-    addMonkeypatch, hasModelDisplaySettings, isGeckoLibModel, Monkeypatches,
+    addMonkeypatch, hasModelDisplaySettings, isGeckoLibModel, isStrutWorkspace, Monkeypatches,
     onlyIfGeckoLib,
     removeCodecCallback,
     removeEventListener, removeMonkeypatches
@@ -138,7 +139,11 @@ function onBedrockCompile(e: any) {
  * The project <b><u>may not</u></b> be a GeckoLib project, so check it as necessary
  */
 function monkeypatchProjectWindowClick() {
-    if (isGeckoLibModel()) {
+    if (isStrutWorkspace()) {
+        // a workspace has no model to set up: the scene it is for is all it asks
+        workspaceSettingsDialog();
+    }
+    else if (isGeckoLibModel()) {
         openProjectSettingsDialog();
     }
     else {

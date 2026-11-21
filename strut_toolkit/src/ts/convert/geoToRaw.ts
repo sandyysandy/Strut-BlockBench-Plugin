@@ -1,3 +1,4 @@
+import { encodeSkeletonId, SKELETON_SECTION } from '../binary/skeletonId';
 import { cubeFaceUvRotationSteps } from '../binary/cubeUv';
 import {
     DEFAULT_UNITS_PER_BLOCK, ELEMENT_KIND_CUBE, MODEL_VERSION,
@@ -27,6 +28,8 @@ import { Findings } from './report';
  */
 export interface ConvertModelOptions {
     readonly file?: string;
+    /** The skeleton id to write into the model (its {@code strut:skeleton} section), if it should have one */
+    readonly skeletonId?: string;
 }
 
 export interface ConvertedModel {
@@ -123,6 +126,7 @@ export function convertGeoFile(root: unknown, options: ConvertModelOptions = {})
             // Metadata only: the binary baker does not read it. Bedrock's X is mirrored, so the offset's X is negated
             boundsMin: [-offset[0] - width / 2, offset[1] - height / 2, offset[2] - width / 2],
             boundsMax: [-offset[0] + width / 2, offset[1] + height / 2, offset[2] + width / 2],
+            ...(options.skeletonId ? { extensions: new Map([[SKELETON_SECTION, encodeSkeletonId(options.skeletonId)]]) } : {}),
             strings: strings.entries(),
             textures: [{ name: textureName, width: textureWidth, height: textureHeight, uvWidth: textureWidth, uvHeight: textureHeight }],
             groupBones,

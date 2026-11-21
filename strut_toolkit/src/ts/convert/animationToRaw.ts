@@ -36,6 +36,8 @@ export interface ConvertOptions {
     readonly file?: string;
     /** From {@code skeletonFingerprint()} over the model this file belongs to; 0 when unknown (a mismatch is only a warning in game) */
     readonly skeletonFingerprint?: number;
+    /** The skeleton id the clips are made for; the file is then matched by it instead of by the fingerprint */
+    readonly skeletonId?: string;
     /** Turns one legacy event into the events to write. Default: the same event, authority 0 */
     readonly mapEvent?: EventMapper;
 }
@@ -70,11 +72,15 @@ export function convertAnimationFile(root: unknown, options: ConvertOptions = {}
         clips.push(convertClip(name, data ?? {}, strings, findings, options));
     }
 
+    if (options.skeletonId)
+        strings.intern(options.skeletonId);
+
     return {
         animation: {
             version: ANIMATION_VERSION,
             flags: 0,
             skeletonFingerprint: options.skeletonFingerprint ?? 0,
+            ...(options.skeletonId ? { skeletonId: options.skeletonId } : {}),
             strings: strings.entries(),
             clips,
         },

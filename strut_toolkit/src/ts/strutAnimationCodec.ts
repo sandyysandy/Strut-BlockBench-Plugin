@@ -7,6 +7,7 @@ import {
 } from './binary/animation';
 import { StringTable } from './binary/writer';
 import { skeletonFingerprint } from './binary/fingerprint';
+import { PROPERTY_SKELETON_ID } from './constants';
 import {
     interpolationFromLive, interpolationToLive, loopModeFromLive, loopModeToLive,
     liveChannelName, dataPointFromValue, toVec3,
@@ -81,17 +82,22 @@ export function buildAnimationFile(animations: readonly any[]): RawBinaryAnimati
     const fingerprint = skeletonFingerprint(groupBoneNames, armatureBoneNames);
 
     const clips = animations.map(animation => buildClip(animation, strings));
+    const skeletonId = String((Project as any)?.[PROPERTY_SKELETON_ID] ?? '').trim();
+
+    if (skeletonId !== '')
+        strings.intern(skeletonId);
 
     return {
         version: ANIMATION_VERSION,
         flags: 0,
         skeletonFingerprint: fingerprint,
+        ...(skeletonId !== '' ? { skeletonId } : {}),
         strings: strings.entries(),
         clips,
     };
 }
 
-function buildClip(animation: any, strings: StringTable): RawClip {
+export function buildClip(animation: any, strings: StringTable, nodeFilter?: (node: any) => boolean): RawClip {
     strings.intern(animation.name);
 
     const channels: RawChannel[] = [];
@@ -102,6 +108,9 @@ function buildClip(animation: any, strings: StringTable): RawClip {
 
         if (targetKind === undefined)
             continue; // The effects animator, or any node this format doesn't animate
+
+        if (nodeFilter && !nodeFilter(node))
+            continue;
 
         strings.intern(node.name);
 
@@ -213,7 +222,7 @@ function valueFromKeyframe(kf: any, dataPoint: number, strings: StringTable): Ra
  * own javadoc; a sound event's payload is just its identifier; an instruction (Blockbench's own
  * `'timeline'` channel) event's payload is its script text
  */
-function buildEvents(effects: any, strings: StringTable): RawEvent[] {
+export function buildEvents(effects: any, strings: StringTable): RawEvent[] {
     if (!effects || !Array.isArray(effects.keyframes))
         return [];
 
@@ -288,6 +297,12 @@ export function importBinaryAnimations(): void {
 
         const bytes = new Uint8Array(file.content as ArrayBuffer);
         const raw = decodeAnimation(bytes, file.name || 'imported.strutanim');
+        const mine = String((Project as any)?.[PROPERTY_SKELETON_ID] ?? '').trim();
+
+        if (raw.skeletonId && raw.skeletonId !== mine)
+            Blockbench.showQuickMessage(mine === ''
+                ? `These animations are made for the skeleton ${raw.skeletonId}; this model has no Skeleton ID set`
+                : `These animations are made for the skeleton ${raw.skeletonId}, and this model is ${mine}`, 4500);
 
         buildAnimationsFromFile(raw, file.path);
     });
@@ -315,7 +330,11 @@ function buildAnimationsFromFile(raw: RawBinaryAnimation, path?: string): void {
         created[0].select();
 }
 
-function addChannelsToAnimation(animation: any, clip: RawClip): void {
+/**
+ * Puts the keys of {@code clip} on the animation's animators. With {@code within} only the bones under that group are looked for (a workspace actor: two actors
+ * may have bones of one name)
+ */
+export function addChannelsToAnimation(animation: any, clip: RawClip, within?: any): void {
     const animatorsByTarget = new Map<string, any>();
 
     for (const channel of clip.channels) {
@@ -323,7 +342,7 @@ function addChannelsToAnimation(animation: any, clip: RawClip): void {
         let animator = animatorsByTarget.get(targetKey);
 
         if (animator === undefined) {
-            const node = resolveTargetNode(channel.targetKind, channel.target);
+            const node = resolveTargetNode(channel.targetKind, channel.target, within);
 
             if (!node) {
                 console.warn(`[Strut] animation "${clip.name}" references ${channel.targetKind.toLowerCase()}`
@@ -348,11 +367,18 @@ function addChannelsToAnimation(animation: any, clip: RawClip): void {
     }
 }
 
-function resolveTargetNode(targetKind: TargetKindName, name: string): any {
-    if (targetKind === 'GROUP_BONE')
-        return ((Group as any).all || []).find((group: any) => group.name === name);
+function resolveTargetNode(targetKind: TargetKindName, name: string, within?: any): any {
+    const under = (node: any): boolean => {
+        for (let at = node; at; at = at.parent) {
+            if (at === within)
+                return true;
+        }
 
-    return ((ArmatureBone as any).all || []).find((bone: any) => bone.name === name);
+        return false;
+    };
+    const all: any[] = targetKind === 'GROUP_BONE' ? ((Group as any).all || []) : ((ArmatureBone as any).all || []);
+
+    return all.find(node => node.name === name && (!within || under(node)));
 }
 
 function keyframeOptionsFromRawKey(key: RawKey, channel: string): any {

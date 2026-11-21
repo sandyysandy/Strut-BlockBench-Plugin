@@ -2,7 +2,8 @@ import semverCoerce from 'semver/functions/coerce';
 import semverSatisfies from 'semver/functions/satisfies';
 import packageJson from '../package.json';
 import { loadAnimationUI, unloadAnimationUI } from './animationUi';
-import {hasModelDisplaySettings, isEmpty, isGeckoLibModel, isValidNamespace, make} from './utils';
+import {isValidSkeletonId} from './binary/skeletonId';
+import {hasModelDisplaySettings, isEmpty, isStrutModelProject, isValidNamespace, make} from './utils';
 import { loadKeyframeOverrides, unloadKeyframeOverrides } from './keyframe';
 import {buildDisplaySettingsJson, format} from './codec';
 import {exportBinaryModel, importBinaryModel} from './strutCodec';
@@ -11,8 +12,8 @@ import {exportBinaryAnimations, importBinaryAnimations} from './strutAnimationCo
 import {createStrutJsonAnimationCodec} from './strutJsonAnimationCodec';
 import {
     GeckoFilepathCache,
-    STRUT_MODEL_ID, LEGACY_MODEL_ID,
-    GeckoModelType, PROPERTY_FILEPATH_CACHE, PROPERTY_MODEL_TYPE, PROPERTY_MODID, PROPERTY_PHYSICS,
+    STRUT_MODEL_ID, STRUT_WORKSPACE_ID, LEGACY_MODEL_ID,
+    GeckoModelType, PROPERTY_FILEPATH_CACHE, PROPERTY_MODEL_TYPE, PROPERTY_MODID, PROPERTY_PHYSICS, PROPERTY_SKELETON_ID, PROPERTY_STAGE,
     SETTING_ALWAYS_SHOW_DISPLAY, SETTING_AUTO_PARTICLE_TEXTURE, BAKE_IN_BEZIER_KEYFRAMES,
     SETTING_DEFAULT_MODID,
     SETTING_REMEMBER_EXPORT_LOCATIONS,
@@ -21,7 +22,9 @@ import {addEventListeners, removeEventListeners} from "./events";
 import {openPhysicsDialog} from './physicsUi';
 import {loadPhysicsTab, unloadPhysicsTab} from './physicsTab';
 import {loadArmaturePasteFix, unloadArmaturePasteFix} from './armaturePasteFix';
+import {loadUvBoxSelectFix, unloadUvBoxSelectFix} from './uvBoxSelectFix';
 import {createArmourMenuItems, createArmourProperties} from './armourUi';
+import {createStageMenuItems, loadStageUi, unloadStageUi} from './stage/stageUi';
 
 const { version, blockbenchConfig } = packageJson;
 
@@ -54,6 +57,8 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
           loadKeyframeOverrides();
           loadPhysicsTab();
           loadArmaturePasteFix();
+          loadUvBoxSelectFix();
+          loadStageUi();
 
           // Fixes GeckoLib .animation.json import - live-verified that Blockbench's own "Import
           // Animations" panel button dispatches through AnimationCodec.getCodec(), which falls
@@ -64,7 +69,7 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
 
           pluginSettings = createPluginSettings();
           pluginProperties = [...createPluginProperties(), ...createArmourProperties()];
-          pluginMenuItems = [...createPluginMenuItems(), ...createArmourMenuItems()];
+          pluginMenuItems = [...createPluginMenuItems(), ...createArmourMenuItems(), ...createStageMenuItems()];
 
           for (const menuItem of pluginMenuItems as { action: Action, menuCategory: string }[]) {
             MenuBar.addAction(menuItem.action, menuItem.menuCategory);
@@ -85,6 +90,8 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
             menuItem.action.delete();
           }
 
+          unloadStageUi();
+          unloadUvBoxSelectFix();
           unloadArmaturePasteFix();
           unloadPhysicsTab();
           unloadKeyframeOverrides();
@@ -199,6 +206,33 @@ function createPluginProperties(): Property[] {
           }
       ),
       make(
+          new Property(ModelProject, "string", PROPERTY_SKELETON_ID, {
+              label: "Skeleton ID",
+              condition: {
+                  formats: [STRUT_MODEL_ID]
+              },
+              values: [],
+              merge_validation: (id: string) => id === '' || isValidSkeletonId(id)
+          }),
+          property => {
+              property['placeholder'] = 'my_modid:creature';
+              property['description'] = 'The rig this model is built on. A scene only lets a model fill a role made for its skeleton ID, and animations exported from this project carry it. Leave empty if the model is not used in scenes';
+          }
+      ),
+      make(
+          new Property(ModelProject, "string", PROPERTY_STAGE, {
+              label: "Strut Workspace",
+              condition: {
+                  formats: [STRUT_WORKSPACE_ID]
+              },
+              exposed: false,
+              values: []
+          }),
+          property => {
+              property['description'] = 'The workspace data of the project as JSON (use the Workspace actions under Tools)';
+          }
+      ),
+      make(
           new Property(ModelProject, "string", PROPERTY_PHYSICS, {
               label: "Strut Physics",
               condition: {
@@ -243,7 +277,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "save",
         description: "Export your model geometry as a .strutmodel binary file for Strut.",
         category: "file",
-        condition: () => isGeckoLibModel(),
+        condition: () => isStrutModelProject(),
         click: function () {
           exportBinaryModel();
         },
@@ -256,7 +290,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "shield",
         description: "Select the bones (groups) that hold an armour piece in the outliner first, then pick its slot: exports only their geometry, on top of the bones above them, so it is worn by bone name.",
         category: "file",
-        condition: () => isGeckoLibModel(),
+        condition: () => isStrutModelProject(),
         click: function () {
           exportSelectedSlot();
         },
@@ -283,7 +317,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "icon-bb_interface",
         description: "Export your item/block display settings for Strut.",
         category: "file",
-        condition: () => isGeckoLibModel() && hasModelDisplaySettings(),
+        condition: () => isStrutModelProject() && hasModelDisplaySettings(),
         click: buildDisplaySettingsJson,
       }),
       menuCategory: 'file.export'
@@ -307,7 +341,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "save",
         description: "Export your model animations as a .strutanim binary file for Strut.",
         category: "file",
-        condition: () => isGeckoLibModel() && !isEmpty(AnimationItem.all),
+        condition: () => isStrutModelProject() && !isEmpty(AnimationItem.all),
         click: function () {
           exportBinaryAnimations();
         },
@@ -320,7 +354,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "waves",
         description: "Edit the model's physics as JSON, check it and preview the response curves. The Physics tab is the visual way.",
         category: "edit",
-        condition: () => isGeckoLibModel(),
+        condition: () => isStrutModelProject(),
         click: function () {
           openPhysicsDialog();
         },
@@ -335,7 +369,7 @@ function createPluginMenuItems(): { action: Action, menuCategory: string }[] {
         icon: "movie",
         description: "Import a .strutanim binary file's animations into the current project.",
         category: "file",
-        condition: () => isGeckoLibModel(),
+        condition: () => isStrutModelProject(),
         click: function () {
           importBinaryAnimations();
         },

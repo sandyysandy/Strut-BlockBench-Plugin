@@ -6760,8 +6760,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash_uniq__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/uniq */ "./node_modules/lodash/uniq.js");
 /* harmony import */ var lodash_uniq__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_uniq__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
-/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./easing */ "./ts/easing.ts");
+/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./easing */ "./ts/easing.ts");
 
 
 
@@ -6784,7 +6783,7 @@ const displayAnimationFrameCallback = ( /*...args*/) => {
     // console.log('displayAnimationFrameCallback:', args, 'keyframe:', keyframe); // keyframe is null here
 };
 function renderFrameCallback() {
-    if (Format.id !== _constants__WEBPACK_IMPORTED_MODULE_2__.STRUT_MODEL_ID)
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_1__.isGeckoLibModel)())
         return;
     Timeline.keyframes.forEach((kf) => {
         if (kf.interpolation != "linear" && kf.easing != undefined) {
@@ -6826,7 +6825,7 @@ function updateKeyframeEasingArg(obj) {
         return;
     // console.log('updateKeyframeEasingArg value:', $(obj).val(), 'obj:', obj); 
     Timeline.selected.forEach((kf) => {
-        const value = (0,_easing__WEBPACK_IMPORTED_MODULE_3__.parseEasingArg)(kf, $(obj).val().trim());
+        const value = (0,_easing__WEBPACK_IMPORTED_MODULE_2__.parseEasingArg)(kf, $(obj).val().trim());
         kf.easingArgs = [value];
         // obj.value = value;
     });
@@ -6884,9 +6883,9 @@ const updateKeyframeSelectionCallback = ( /*...args*/) => {
         return acc;
     }, new Map());
     const isFirstInChannel = (kf) => keyframesByChannel.get(kf.animator)[kf.channel].indexOf(kf) < 1;
-    if (Timeline.selected.length && Format.id === _constants__WEBPACK_IMPORTED_MODULE_2__.STRUT_MODEL_ID) {
+    if (Timeline.selected.length && (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isGeckoLibModel)()) {
         if (Timeline.selected.every(kf => kf.animator instanceof BoneAnimator && !isFirstInChannel(kf))) {
-            const displayedEasing = getMultiSelectValue('easing', _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_DEFAULT, 'null');
+            const displayedEasing = getMultiSelectValue('easing', _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_DEFAULT, 'null');
             const convertEasingTypeToId = (easing, easingType, inputEasingOrType) => {
                 const easingTypeToTypeId = type => {
                     let finalEasingType = "In";
@@ -6978,26 +6977,26 @@ const updateKeyframeSelectionCallback = ( /*...args*/) => {
                 document.getElementById("panel_keyframe").querySelector('div.tool.widget.bar_select div.bb-select').innerHTML = "Strut";
             const getEasingArgLabel = (kf) => {
                 switch (kf.easing) {
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInBack:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeOutBack:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInOutBack:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInBack:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeOutBack:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInOutBack:
                         return 'Overshoot';
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInElastic:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeOutElastic:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInOutElastic:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInBounce:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeOutBounce:
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.easeInOutBounce:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInElastic:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeOutElastic:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInOutElastic:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInBounce:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeOutBounce:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.easeInOutBounce:
                         return 'Bounciness';
-                    case _easing__WEBPACK_IMPORTED_MODULE_3__.EASING_OPTIONS.step:
+                    case _easing__WEBPACK_IMPORTED_MODULE_2__.EASING_OPTIONS.step:
                         return 'Steps';
                     default:
                         return 'N/A';
                 }
             };
             const easingArgLabel = getMultiSelectValue(getEasingArgLabel, null, null);
-            if (Timeline.selected.every((kf) => (0,_easing__WEBPACK_IMPORTED_MODULE_3__.isArgsEasing)(kf.easing)) && easingArgLabel !== null) {
-                const argDefault = getMultiSelectValue(_easing__WEBPACK_IMPORTED_MODULE_3__.getEasingArgDefault, null, null);
+            if (Timeline.selected.every((kf) => (0,_easing__WEBPACK_IMPORTED_MODULE_2__.isArgsEasing)(kf.easing)) && easingArgLabel !== null) {
+                const argDefault = getMultiSelectValue(_easing__WEBPACK_IMPORTED_MODULE_2__.getEasingArgDefault, null, null);
                 const [displayedValue] = getMultiSelectValue('easingArgs', [argDefault], [argDefault]);
                 let scaleBar = document.createElement('div');
                 keyframe.appendChild(scaleBar);
@@ -7527,7 +7526,7 @@ function createArmourMenuItems() {
             icon: 'shield',
             description: `Export the groups marked as ${slot} armour as that slot's model, named from the armour set (no selection needed: the marks say which bones)`,
             category: 'file',
-            condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isGeckoLibModel)() && (0,_armourProfile__WEBPACK_IMPORTED_MODULE_0__.slotsWithArmour)(markedGroups()).includes(slot),
+            condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isStrutModelProject)() && (0,_armourProfile__WEBPACK_IMPORTED_MODULE_0__.slotsWithArmour)(markedGroups()).includes(slot),
             click: () => exportMarkedSlot(slot),
         }),
         menuCategory: 'file.export',
@@ -7538,7 +7537,7 @@ function createArmourMenuItems() {
             icon: 'checkroom',
             description: 'Write the wearer profile of this model: its armour set and the groups each slot hides, from the marks on the groups',
             category: 'file',
-            condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isGeckoLibModel)(),
+            condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isStrutModelProject)(),
             click: exportWearerProfile,
         }),
         menuCategory: 'file.export',
@@ -7582,7 +7581,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   fingerprintText: () => (/* binding */ fingerprintText)
 /* harmony export */ });
 /* harmony import */ var _writer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./writer */ "./ts/binary/writer.ts");
-/* harmony import */ var _reader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./reader */ "./ts/binary/reader.ts");
+/* harmony import */ var _reader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./reader */ "./ts/binary/reader.ts");
+/* harmony import */ var _skeletonId__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./skeletonId */ "./ts/binary/skeletonId.ts");
+
 
 
 /**
@@ -7605,6 +7606,8 @@ const ANIMATION_VERSION = 100;
 const ANIMATION_MIN_VERSION = 100;
 const ANIMATION_HEADER_BYTES = 32;
 const ANIMATION_RESERVED_V100 = 12;
+/** The reserved bytes after the skeleton id's two */
+const ANIMATION_RESERVED_AFTER_ID = ANIMATION_RESERVED_V100 - 2;
 /**
  * The smallest a keyframe can be: a time (4), an interpolation (1), flags (2), and three components that are each a 2-byte expression index
  * rather than a 4-byte float (6). Matches {@code StrutBinaryFormats.MIN_KEY_BYTES}; it was 19, which rejected a valid file ending in an
@@ -7679,12 +7682,17 @@ function encodeAnimation(animation) {
     const header = new _writer__WEBPACK_IMPORTED_MODULE_0__.BinaryWriter(ANIMATION_HEADER_BYTES);
     header.fixedString(ANIMATION_MAGIC)
         .u16(ANIMATION_VERSION)
-        .u16(animation.flags)
+        .u16(animation.skeletonId ? animation.flags | _skeletonId__WEBPACK_IMPORTED_MODULE_1__.ANIMATION_FLAG_SKELETON_ID : animation.flags & ~_skeletonId__WEBPACK_IMPORTED_MODULE_1__.ANIMATION_FLAG_SKELETON_ID)
         .u16(strings.length)
         .u32(stringTable.byteLength)
         .u16(animation.clips.length)
-        .i32(animation.skeletonFingerprint)
-        .zeros(ANIMATION_RESERVED_V100);
+        .i32(animation.skeletonFingerprint);
+    if (animation.skeletonId) {
+        header.u16(indexOf(strings, animation.skeletonId, 'skeleton id')).zeros(ANIMATION_RESERVED_AFTER_ID);
+    }
+    else {
+        header.zeros(ANIMATION_RESERVED_V100);
+    }
     if (header.byteLength !== ANIMATION_HEADER_BYTES)
         throw new Error(`wrote a ${header.byteLength}-byte animation header, expected ${ANIMATION_HEADER_BYTES}`);
     return new _writer__WEBPACK_IMPORTED_MODULE_0__.BinaryWriter().append(header).append(stringTable).append(clips).toBytes();
@@ -7761,7 +7769,7 @@ function indexOf(strings, value, what) {
 // Decode
 // ===============================================================
 function decodeAnimation(bytes, source) {
-    return parseAnimation(new _reader__WEBPACK_IMPORTED_MODULE_1__.BinaryReader(bytes, source));
+    return parseAnimation(new _reader__WEBPACK_IMPORTED_MODULE_2__.BinaryReader(bytes, source));
 }
 function parseAnimation(reader) {
     const magic = reader.fixedString(4, 'magic number');
@@ -7780,7 +7788,9 @@ function parseAnimation(reader) {
     const stringTableSize = reader.u32('string table size');
     const clipCount = reader.u16('clip count');
     const fingerprint = reader.i32('skeleton fingerprint');
-    reader.skip(ANIMATION_RESERVED_V100, 'reserved header bytes');
+    // with the flag, the first two of the reserved bytes are the string-table index of the skeleton id; without it they are not read (an older file wrote zeros)
+    const idIndex = (flags & _skeletonId__WEBPACK_IMPORTED_MODULE_1__.ANIMATION_FLAG_SKELETON_ID) !== 0 ? reader.u16('skeleton id index') : -1;
+    reader.skip(idIndex >= 0 ? ANIMATION_RESERVED_AFTER_ID : ANIMATION_RESERVED_V100, 'reserved header bytes');
     if (reader.position() !== ANIMATION_HEADER_BYTES)
         throw reader.fail(`read a ${reader.position()}-byte header for version ${version}; every`
             + ` version's header is exactly ${ANIMATION_HEADER_BYTES} bytes`);
@@ -7794,7 +7804,9 @@ function parseAnimation(reader) {
     for (let i = 0; i < clipCount; i++) {
         clips.push(readClip(reader, strings, i));
     }
-    return { version, flags, skeletonFingerprint: fingerprint, strings, clips };
+    if (idIndex >= 0 && idIndex >= strings.length)
+        throw reader.fail(`names its skeleton id as string ${idIndex}, but has only ${strings.length} strings`);
+    return Object.assign(Object.assign({ version, flags, skeletonFingerprint: fingerprint }, (idIndex >= 0 ? { skeletonId: strings[idIndex] } : {})), { strings, clips });
 }
 function readStringTable(reader, count) {
     reader.plausibleCount(count, 2, 'strings');
@@ -8820,6 +8832,59 @@ class BinaryReader {
 
 /***/ }),
 
+/***/ "./ts/binary/skeletonId.ts":
+/*!*********************************!*\
+  !*** ./ts/binary/skeletonId.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ANIMATION_FLAG_SKELETON_ID: () => (/* binding */ ANIMATION_FLAG_SKELETON_ID),
+/* harmony export */   SKELETON_SECTION: () => (/* binding */ SKELETON_SECTION),
+/* harmony export */   decodeSkeletonId: () => (/* binding */ decodeSkeletonId),
+/* harmony export */   encodeSkeletonId: () => (/* binding */ encodeSkeletonId),
+/* harmony export */   isValidSkeletonId: () => (/* binding */ isValidSkeletonId)
+/* harmony export */ });
+/**
+ * The skeleton id: a string naming the rig a model is built on (a scene checks that whoever fills a role is on the rig the role was made for), stored in a model and
+ * in the animation files made for it. Mirrors {@code StrutBinaryFormats.SKELETON_SECTION}, {@code skeletonIdOfSection} and
+ * {@code ANIMATION_FLAG_SKELETON_ID} on the Java side
+ */
+/** The model extension section that carries the id */
+const SKELETON_SECTION = 'strut:skeleton';
+/** Animation header flag bit 0: the string-table index of the id is in the first two reserved header bytes (offset 20) */
+const ANIMATION_FLAG_SKELETON_ID = 1;
+const SKELETON_ID_PATTERN = /^[a-z0-9_.-]+:[a-z0-9_./-]+$/;
+/** Whether {@code id} is a skeleton id: a namespace, a colon and a path, such as {@code mymod:creature_a} */
+function isValidSkeletonId(id) {
+    return SKELETON_ID_PATTERN.test(id);
+}
+/** The payload of the {@link SKELETON_SECTION}: the id as a little endian {@code u16} length and that many UTF-8 bytes */
+function encodeSkeletonId(id) {
+    const text = new TextEncoder().encode(id);
+    if (text.length > 0xFFFF)
+        throw new Error(`a skeleton id of ${text.length} bytes does not fit the format`);
+    const bytes = new Uint8Array(2 + text.length);
+    bytes[0] = text.length & 0xFF;
+    bytes[1] = text.length >>> 8;
+    bytes.set(text, 2);
+    return bytes;
+}
+/** The id in a {@link SKELETON_SECTION} payload, or null for an empty or cut-short one (read as no id, as the game does) */
+function decodeSkeletonId(payload) {
+    if (payload.length < 2)
+        return null;
+    const length = payload[0] | (payload[1] << 8);
+    if (length === 0 || payload.length < 2 + length)
+        return null;
+    return new TextDecoder().decode(payload.subarray(2, 2 + length));
+}
+
+
+/***/ }),
+
 /***/ "./ts/binary/skinWeights.ts":
 /*!**********************************!*\
   !*** ./ts/binary/skinWeights.ts ***!
@@ -9487,11 +9552,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PROPERTY_MODEL_TYPE: () => (/* binding */ PROPERTY_MODEL_TYPE),
 /* harmony export */   PROPERTY_MODID: () => (/* binding */ PROPERTY_MODID),
 /* harmony export */   PROPERTY_PHYSICS: () => (/* binding */ PROPERTY_PHYSICS),
+/* harmony export */   PROPERTY_SKELETON_ID: () => (/* binding */ PROPERTY_SKELETON_ID),
+/* harmony export */   PROPERTY_STAGE: () => (/* binding */ PROPERTY_STAGE),
 /* harmony export */   SETTING_ALWAYS_SHOW_DISPLAY: () => (/* binding */ SETTING_ALWAYS_SHOW_DISPLAY),
 /* harmony export */   SETTING_AUTO_PARTICLE_TEXTURE: () => (/* binding */ SETTING_AUTO_PARTICLE_TEXTURE),
 /* harmony export */   SETTING_DEFAULT_MODID: () => (/* binding */ SETTING_DEFAULT_MODID),
 /* harmony export */   SETTING_REMEMBER_EXPORT_LOCATIONS: () => (/* binding */ SETTING_REMEMBER_EXPORT_LOCATIONS),
-/* harmony export */   STRUT_MODEL_ID: () => (/* binding */ STRUT_MODEL_ID)
+/* harmony export */   STRUT_MODEL_ID: () => (/* binding */ STRUT_MODEL_ID),
+/* harmony export */   STRUT_WORKSPACE_ID: () => (/* binding */ STRUT_WORKSPACE_ID)
 /* harmony export */ });
 /**
  * Strut plugin model format ID. Used to identify model types generated from this plugin
@@ -9503,6 +9571,11 @@ __webpack_require__.r(__webpack_exports__);
  * it might look like; only the legacy id resolves to both, never the reverse
  */
 const STRUT_MODEL_ID = "strut_model";
+/**
+ * The workspace project type: no model of its own, only the actors a scene is animated with (see {@code stage/workspaceFormat.ts}). It is a Strut project for every
+ * animation tool (the easing set, the keyframe overrides, the binary animation export) but not for the model ones (export a model, armour, physics)
+ */
+const STRUT_WORKSPACE_ID = "strut_workspace";
 /**
  * The format id this plugin used before the Strut rebrand (fork phase 5 stage 3)
  * <p>
@@ -9527,6 +9600,10 @@ const PROPERTY_MODEL_TYPE = 'strut_model_type';
 const PROPERTY_FILEPATH_CACHE = 'strut_filepath_cache';
 /** The model's physics text (JSON), written into the model file as its strut_physics:physics section */
 const PROPERTY_PHYSICS = 'strut_physics';
+/** The model's skeleton id (such as mymod:creature_a): the rig it is built on, written into the model and into the animation files made for it */
+/** The workspace's own data (the scene, the actors' skeletons and roles, the animations' tags) as JSON: what Blockbench has nowhere else to keep */
+const PROPERTY_STAGE = 'strut_stage';
+const PROPERTY_SKELETON_ID = 'strut_skeleton_id';
 /**
  * The wire keys {@link PROPERTY_MODID}, {@link PROPERTY_MODEL_TYPE} and
  * {@link PROPERTY_FILEPATH_CACHE} replaced. A project saved under {@link LEGACY_MODEL_ID} still
@@ -9911,11 +9988,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   monkeypatchAnimatorLoadFile: () => (/* binding */ monkeypatchAnimatorLoadFile),
 /* harmony export */   removeEventListeners: () => (/* binding */ removeEventListeners)
 /* harmony export */ });
+/* harmony import */ var _stage_stageUi__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stage/stageUi */ "./ts/stage/stageUi.ts");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
-/* harmony import */ var _keyframe__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./keyframe */ "./ts/keyframe.ts");
+/* harmony import */ var _keyframe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./keyframe */ "./ts/keyframe.ts");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
 /* harmony import */ var _legacyMigration__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./legacyMigration */ "./ts/legacyMigration.ts");
-/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
+/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
+
 
 
 
@@ -10029,8 +10108,12 @@ function onBedrockCompile(e) {
  * The project <b><u>may not</u></b> be a GeckoLib project, so check it as necessary
  */
 function monkeypatchProjectWindowClick() {
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_0__.isGeckoLibModel)()) {
-        (0,_codec__WEBPACK_IMPORTED_MODULE_3__.openProjectSettingsDialog)();
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_0__.isStrutWorkspace)()) {
+        // a workspace has no model to set up: the scene it is for is all it asks
+        (0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_3__.workspaceSettingsDialog)();
+    }
+    else if ((0,_utils__WEBPACK_IMPORTED_MODULE_0__.isGeckoLibModel)()) {
+        (0,_codec__WEBPACK_IMPORTED_MODULE_4__.openProjectSettingsDialog)();
     }
     else {
         _utils__WEBPACK_IMPORTED_MODULE_0__.Monkeypatches.get(BarItems).click();
@@ -10207,7 +10290,7 @@ function monkeypatchAnimatorLoadFile(file, exportingAnims) {
                     const group = Group.all.find(group => group.name.toLowerCase() == lowercase_bone_name);
                     const uuid = group ? group.uuid : guid();
                     let ga; // eslint-disable-line @typescript-eslint/no-unused-vars
-                    const boneAnimator = new _keyframe__WEBPACK_IMPORTED_MODULE_4__.GeckolibBoneAnimator(uuid, animation, boneName);
+                    const boneAnimator = new _keyframe__WEBPACK_IMPORTED_MODULE_5__.GeckolibBoneAnimator(uuid, animation, boneName);
                     animation.animators[uuid] = boneAnimator;
                     //Channels
                     for (const channel in bone) {
@@ -10394,6 +10477,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // `Keyframe` is the runtime global the plugin patches (see types/blockbench-types.d.ts) -
 // blockbench-types 5.1 only ambient-declares the underscore-prefixed `_Keyframe` type/class,
 // not the `Keyframe` value Blockbench itself exposes via `Object.assign(window, {Keyframe, ...})`
@@ -10419,10 +10503,10 @@ function loadKeyframeOverrides() {
     (0,_utils__WEBPACK_IMPORTED_MODULE_2__.addMonkeypatch)(BarItems.reverse_keyframes, null, "click", onReverseKeyframes);
     keyframeProperties = [
         new Property(Keyframe, "string", "easing", {
-            condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID] },
+            condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID, _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_WORKSPACE_ID] },
         }),
         new Property(Keyframe, "array", "easingArgs", {
-            condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID] },
+            condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID, _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_WORKSPACE_ID] },
         }),
     ];
 }
@@ -10453,7 +10537,7 @@ function lerp(start, stop, amt) {
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function keyframeGetLerp(other, axis, amount, allow_expression) {
     const easing = other.easing || _easing__WEBPACK_IMPORTED_MODULE_4__.EASING_DEFAULT;
-    if (Format.id !== _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID) {
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_2__.isGeckoLibModel)()) {
         return _utils__WEBPACK_IMPORTED_MODULE_2__.Monkeypatches.get(Keyframe).getLerp.apply(this, arguments);
     }
     let easingFunc = _easing__WEBPACK_IMPORTED_MODULE_4__.easingFunctions[easing];
@@ -10494,7 +10578,7 @@ function keyframeGetLerp(other, axis, amount, allow_expression) {
  * shape regardless of whether an easing is actually set
  */
 function keyframeCompileBedrock() {
-    if (Format.id !== _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID || !this.transform) {
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_2__.isGeckoLibModel)() || !this.transform) {
         return _utils__WEBPACK_IMPORTED_MODULE_2__.Monkeypatches.get(Keyframe).compileBedrockKeyframe.apply(this, arguments);
     }
     const { easing, easingArgs } = this;
@@ -10524,7 +10608,7 @@ function keyframeCompileBedrock() {
 function keyframeGetUndoCopy() {
     const { easing, easingArgs } = this;
     const result = _utils__WEBPACK_IMPORTED_MODULE_2__.Monkeypatches.get(Keyframe).getUndoCopy.apply(this, arguments);
-    if (Format.id === _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID) {
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__.isGeckoLibModel)()) {
         Object.assign(result, { easing });
         if ((0,_easing__WEBPACK_IMPORTED_MODULE_4__.isArgsEasing)(easing))
             result.easingArgs = easingArgs;
@@ -10535,7 +10619,7 @@ function keyframeGetUndoCopy() {
 function keyframeExtend(dataIn) {
     const data = Object.assign({}, dataIn);
     //   console.log('keyframeExtend 1 arguments:', arguments);
-    if (Format.id === _constants__WEBPACK_IMPORTED_MODULE_3__.STRUT_MODEL_ID) {
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__.isGeckoLibModel)()) {
         if (typeof data.values === 'object') {
             if (data.values.easing !== undefined) {
                 Merge.string(this, data.values, 'easing');
@@ -19347,6 +19431,1321 @@ function openPhysicsDialog() {
 
 /***/ }),
 
+/***/ "./ts/stage/actorsPanel.ts":
+/*!*********************************!*\
+  !*** ./ts/stage/actorsPanel.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createActorsPanel: () => (/* binding */ createActorsPanel),
+/* harmony export */   deleteActorsPanel: () => (/* binding */ deleteActorsPanel)
+/* harmony export */ });
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
+/* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+let panel = null;
+let styles = null;
+const CSS = `
+    .strut_actors { padding: 6px; }
+    .strut_actors .strut_actor { display: flex; align-items: center; gap: 4px; padding: 4px 6px; margin-bottom: 4px; background: var(--color-back); border: 1px solid var(--color-border); border-radius: 3px; }
+    .strut_actors .strut_actor.hidden_actor { opacity: 0.55; }
+    .strut_actors .strut_actor_text { flex: 1; min-width: 0; line-height: 1.25; }
+    .strut_actors .strut_actor_role { font-weight: bold; }
+    .strut_actors .strut_actor_note { color: var(--color-subtle_text); font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .strut_actors .strut_actor_button { cursor: pointer; padding: 2px 3px; border-radius: 3px; }
+    .strut_actors .strut_actor_button:hover { background: var(--color-button); color: var(--color-light); }
+    .strut_actors .strut_actor_add { display: inline-block; cursor: pointer; padding: 4px 10px; background: var(--color-button); border-radius: 3px; margin-top: 2px; }
+    .strut_actors .strut_actor_empty { color: var(--color-subtle_text); padding: 6px 2px 10px; }
+`;
+function createActorsPanel(handlers) {
+    const Panel_ = globalThis.Panel;
+    if (!Panel_ || panel)
+        return;
+    styles = Blockbench.addCSS(CSS);
+    panel = new Panel_('strut_actors', {
+        name: 'Actors',
+        icon: 'groups',
+        growable: true,
+        resizable: true,
+        condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID], modes: ['animate'] },
+        default_position: { slot: 'left_bar', float_position: [0, 0], float_size: [300, 300], height: 300 },
+        component: {
+            data() {
+                return { rows: [] };
+            },
+            created() {
+                this.refresh();
+                this.timer = setInterval(() => this.refresh(), 700);
+            },
+            beforeDestroy() {
+                clearInterval(this.timer);
+            },
+            methods: {
+                refresh() {
+                    var _a;
+                    if (((_a = globalThis.Format) === null || _a === void 0 ? void 0 : _a.id) !== _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID) {
+                        this.rows = [];
+                        return;
+                    }
+                    const rows = (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.actorRows)();
+                    // only when something changed, so the list does not redraw under the mouse
+                    if (JSON.stringify(rows) !== JSON.stringify(this.rows))
+                        this.rows = rows;
+                },
+                add() {
+                    handlers.add();
+                },
+                toggle(row) {
+                    (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.setActorVisible)(row.role, !row.visible);
+                    this.refresh();
+                },
+                edit(row) {
+                    handlers.edit(row.role);
+                },
+                swap(row) {
+                    handlers.swap(row.role);
+                },
+                remove(row) {
+                    Blockbench.showMessageBox({
+                        title: 'Remove actor',
+                        message: `Remove ${row.role}? Its model, textures and keyframes go with it.`,
+                        buttons: ['Remove', 'Cancel'],
+                        confirm: 0,
+                        cancel: 1,
+                    }, (button) => {
+                        if (button === 0) {
+                            (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.removeActor)(row.role);
+                            this.refresh();
+                        }
+                    });
+                },
+            },
+            template: `
+                <div class="strut_actors">
+                    <div v-if="rows.length === 0" class="strut_actor_empty">No actors yet. Add the characters this scene is animated with: their models and textures are loaded for you.</div>
+                    <div v-for="row in rows" :key="row.role" class="strut_actor" :class="{hidden_actor: !row.visible}">
+                        <div class="strut_actor_text">
+                            <div class="strut_actor_role">{{ row.role }}<span v-if="row.lead"> (lead)</span><span v-if="!row.required"> (optional)</span></div>
+                            <div class="strut_actor_note" :title="row.skeleton">{{ row.skeleton }}</div>
+                            <div class="strut_actor_note" :title="row.model">{{ row.model }}</div>
+                        </div>
+                        <i class="material-icons strut_actor_button" title="Show or hide" @click="toggle(row)">{{ row.visible ? 'visibility' : 'visibility_off' }}</i>
+                        <i class="material-icons strut_actor_button" title="Who this actor is" @click="edit(row)">edit</i>
+                        <i class="material-icons strut_actor_button" title="Give it another model" @click="swap(row)">swap_horiz</i>
+                        <i class="material-icons strut_actor_button" title="Remove" @click="remove(row)">delete</i>
+                    </div>
+                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor</div>
+                </div>`,
+        },
+    });
+}
+function deleteActorsPanel() {
+    var _a, _b;
+    (_a = panel === null || panel === void 0 ? void 0 : panel.delete) === null || _a === void 0 ? void 0 : _a.call(panel);
+    panel = null;
+    (_b = styles === null || styles === void 0 ? void 0 : styles.delete) === null || _b === void 0 ? void 0 : _b.call(styles);
+    styles = null;
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/stageExport.ts":
+/*!*********************************!*\
+  !*** ./ts/stage/stageExport.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clipFilePath: () => (/* binding */ clipFilePath),
+/* harmony export */   clipFor: () => (/* binding */ clipFor),
+/* harmony export */   exportStage: () => (/* binding */ exportStage),
+/* harmony export */   layoutText: () => (/* binding */ layoutText)
+/* harmony export */ });
+/* harmony import */ var _binary_animation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../binary/animation */ "./ts/binary/animation.ts");
+/* harmony import */ var _binary_writer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../binary/writer */ "./ts/binary/writer.ts");
+/* harmony import */ var _stageFold__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stageFold */ "./ts/stage/stageFold.ts");
+/* harmony import */ var _stageFormat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./stageFormat */ "./ts/stage/stageFormat.ts");
+
+
+
+
+const TICKS_PER_SECOND = 20;
+function exportStage(stage, options = {}) {
+    var _a, _b;
+    const problems = (0,_stageFormat__WEBPACK_IMPORTED_MODULE_0__.checkStage)(stage);
+    for (const actor of stage.actors) {
+        const character = (_a = options.characters) === null || _a === void 0 ? void 0 : _a[actor.role];
+        if (character !== undefined && !/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(character))
+            problems.push({ severity: 'error', message: `${actor.role}: "${character}" is not a character id (a namespace, a colon and a path)` });
+    }
+    if (problems.some(problem => problem.severity === 'error'))
+        return { files: [], problems };
+    const files = [];
+    for (const actor of stage.actors) {
+        const clips = stage.animations.map(animation => clipFor(actor, animation, problems));
+        files.push({ path: clipFilePath(stage, actor, (_b = options.characters) === null || _b === void 0 ? void 0 : _b[actor.role]), bytes: (0,_binary_animation__WEBPACK_IMPORTED_MODULE_1__.encodeAnimation)(animationFile(clips, actor.skeleton)) });
+    }
+    files.push({ path: `assets/${stage.namespace}/strut/scenes/${stage.scene}.strutscene`, text: layoutText(stage) });
+    return { files, problems };
+}
+/** One actor's clip for one animation: the track with its shift applied and its stage offset folded into the root */
+function clipFor(actor, animation, problems = []) {
+    var _a, _b, _c;
+    const track = animation.tracks[actor.role];
+    const shift = (_a = track === null || track === void 0 ? void 0 : track.shift) !== null && _a !== void 0 ? _a : 0;
+    const shifted = (time) => {
+        const moved = time + shift;
+        if (moved < 0) {
+            problems.push({ severity: 'warning', message: `${actor.role} has a key or event at ${time}s in "${animation.name}" that the ${shift}s shift moves before the start; it is put at 0` });
+            return 0;
+        }
+        return moved;
+    };
+    const channels = ((_b = track === null || track === void 0 ? void 0 : track.channels) !== null && _b !== void 0 ? _b : []).map(channel => (Object.assign(Object.assign({}, channel), { keys: channel.keys.map((key) => (Object.assign(Object.assign({}, key), { time: shifted(key.time) }))) })));
+    const events = ((_c = track === null || track === void 0 ? void 0 : track.events) !== null && _c !== void 0 ? _c : []).map(event => (Object.assign(Object.assign({}, event), { time: shifted(event.time) })));
+    const folded = (0,_stageFold__WEBPACK_IMPORTED_MODULE_2__.foldStageOffset)(channels, actor.roots, actor.offset);
+    for (const message of folded.problems)
+        problems.push({ severity: 'warning', message: `${animation.name}: ${message}` });
+    return { name: animation.name, duration: animation.duration, loop: animation.loop, channels: folded.channels, events };
+}
+/** A role's clips as a file made for {@code skeletonId} (matched by it in game, whichever model plays it) */
+function animationFile(clips, skeletonId) {
+    const strings = new _binary_writer__WEBPACK_IMPORTED_MODULE_3__.StringTable();
+    for (const clip of clips) {
+        strings.intern(clip.name);
+        for (const channel of clip.channels) {
+            strings.intern(channel.target);
+            for (const key of channel.keys) {
+                internValue(strings, key.value);
+                if (key.post !== null)
+                    internValue(strings, key.post);
+                if (key.easing !== null)
+                    strings.intern(key.easing);
+            }
+        }
+        for (const event of clip.events) {
+            strings.intern(event.kind);
+            strings.intern(event.payload);
+        }
+    }
+    strings.intern(skeletonId);
+    return { version: _binary_animation__WEBPACK_IMPORTED_MODULE_1__.ANIMATION_VERSION, flags: 0, skeletonFingerprint: 0, skeletonId, strings: strings.entries(), clips };
+}
+function internValue(strings, value) {
+    for (const expression of value.expressions) {
+        if (expression !== null)
+            strings.intern(expression);
+    }
+}
+function idPath(id) {
+    return id.slice(id.indexOf(':') + 1);
+}
+function idNamespace(id) {
+    return id.slice(0, id.indexOf(':'));
+}
+/** Where an actor's clips are written: its clip set's file for the skeleton (in the skeleton id's namespace), or for one character (in the character's) */
+function clipFilePath(stage, actor, character) {
+    const set = `scenes/${stage.scene}/${actor.role}`;
+    return character === undefined
+        ? `assets/${idNamespace(actor.skeleton)}/strut/animations/${set}/skeletons/${idPath(actor.skeleton)}.strutanim`
+        : `assets/${idNamespace(character)}/strut/animations/${set}/characters/${idPath(character)}.strutanim`;
+}
+const LAYOUT_LOOP = { PLAY_ONCE: 'once', LOOP: 'loop', HOLD_ON_LAST_FRAME: 'hold' };
+/** The scene's layout file ({@code strut/scenes/<scene>.strutscene}): its roles, who may fill them, and each clip's length and loop mode */
+function layoutText(stage) {
+    const roles = {};
+    for (const actor of stage.actors) {
+        roles[actor.role] = Object.assign(Object.assign(Object.assign(Object.assign({ clipSet: `scenes/${stage.scene}/${actor.role}`, skeleton: actor.skeleton }, (actor.compatible && actor.compatible.length > 0 ? { compatible: actor.compatible } : {})), (actor.required === false ? { required: false } : {})), (actor.camera ? { camera: actor.camera } : {})), (actor.lead ? { lead: true } : {}));
+    }
+    const clips = {};
+    for (const animation of stage.animations)
+        clips[animation.name] = Object.assign(Object.assign(Object.assign({ length: Math.round(animation.duration * TICKS_PER_SECOND), loop: LAYOUT_LOOP[animation.loop] }, (animation.phase ? { phase: animation.phase } : {})), (animation.variant ? { variant: animation.variant } : {})), (animation.side ? { side: animation.side } : {}));
+    return JSON.stringify({ roles, clips }, null, 2);
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/stageFold.ts":
+/*!*******************************!*\
+  !*** ./ts/stage/stageFold.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   eulerOf: () => (/* binding */ eulerOf),
+/* harmony export */   foldStageOffset: () => (/* binding */ foldStageOffset),
+/* harmony export */   isIdentityOffset: () => (/* binding */ isIdentityOffset)
+/* harmony export */ });
+/* harmony import */ var _physics_math__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../physics/math */ "./ts/physics/math.ts");
+
+const ZERO = [0, 0, 0];
+/** Whether the offset moves anything */
+function isIdentityOffset(offset) {
+    return offset.yaw === 0 && offset.position[0] === 0 && offset.position[1] === 0 && offset.position[2] === 0;
+}
+/**
+ * Folds {@code offset} into the channels that drive {@code rootBone} (a group bone), adding a position or rotation channel when the actor had none and the offset
+ * needs one. Channels of other bones are returned as they are
+ */
+function foldStageOffset(channels, roots, offset) {
+    if (isIdentityOffset(offset))
+        return { channels, problems: [] };
+    const problems = [];
+    const turn = (0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qaxisY)(offset.yaw * Math.PI / 180);
+    let result = [...channels];
+    for (const root of roots)
+        result = foldRoot(result, root, offset, turn, problems);
+    return { channels: result, problems };
+}
+function foldRoot(channels, root, offset, turn, problems) {
+    const rootBone = root.bone;
+    const pivot = root.pivot;
+    const result = [];
+    let hasPosition = false;
+    let hasRotation = false;
+    for (const channel of channels) {
+        if (channel.target !== rootBone || channel.targetKind !== 'GROUP_BONE') {
+            result.push(channel);
+            continue;
+        }
+        if (channel.property === 'POSITION') {
+            hasPosition = true;
+            result.push(Object.assign(Object.assign({}, channel), { keys: channel.keys.map(key => foldPositionKey(key, pivot, offset, turn, problems, rootBone)) }));
+        }
+        else if (channel.property === 'ROTATION') {
+            hasRotation = true;
+            result.push(Object.assign(Object.assign({}, channel), { keys: foldRotationKeys(channel.keys, turn, offset.yaw, problems, rootBone) }));
+        }
+        else {
+            result.push(channel);
+        }
+    }
+    // an actor that never moved its root still has to stand where the stage puts it
+    if (!hasPosition) {
+        const at = foldPosition(ZERO, pivot, offset, turn);
+        if (at[0] !== 0 || at[1] !== 0 || at[2] !== 0)
+            result.push(constantChannel(rootBone, 'POSITION', at));
+    }
+    if (!hasRotation && offset.yaw !== 0)
+        result.push(constantChannel(rootBone, 'ROTATION', [0, offset.yaw, 0]));
+    return result;
+}
+function foldPosition(pos, pivot, offset, turn) {
+    const pivotAt = [pivot[0], pivot[1], pivot[2]];
+    return tidy((0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.sub)((0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.add)((0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qrotate)(turn, (0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.add)(pivotAt, pos)), [offset.position[0], offset.position[1], offset.position[2]]), pivotAt));
+}
+/** Rounds away the 1e-15 left by turning a vector, so a clip does not hold 1.2e-15 where it means 0 */
+function tidy(v) {
+    return v.map(c => Math.round(c * 1e9) / 1e9 + 0);
+}
+function constantChannel(target, property, value) {
+    return {
+        target, targetKind: 'GROUP_BONE', property, interpolation: 'LINEAR',
+        keys: [{ time: 0, interpolation: 'LINEAR', value: { literals: value, expressions: [null, null, null] }, post: null, easing: null, easingArgs: [], bezier: null }],
+    };
+}
+function hasExpression(value) {
+    return value.expressions.some(expression => expression !== null);
+}
+function foldPositionKey(key, pivot, offset, turn, problems, bone) {
+    if (hasExpression(key.value) || key.post !== null && hasExpression(key.post)) {
+        problems.push(`${bone} has a position key at ${key.time}s that is a Molang expression; the stage offset cannot be folded into it, so it is left as it is`);
+        return key;
+    }
+    const at = (value) => ({ literals: foldPosition(value.literals, pivot, offset, turn), expressions: value.expressions });
+    const bezier = key.bezier === null ? null : {
+        leftTime: key.bezier.leftTime,
+        leftValue: (0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qrotate)(turn, key.bezier.leftValue),
+        rightTime: key.bezier.rightTime,
+        rightValue: (0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qrotate)(turn, key.bezier.rightValue),
+    };
+    return Object.assign(Object.assign({}, key), { value: at(key.value), post: key.post === null ? null : at(key.post), bezier });
+}
+function foldRotationKeys(keys, turn, yaw, problems, bone) {
+    if (yaw === 0)
+        return [...keys];
+    const folded = [];
+    let previous = null;
+    for (const key of keys) {
+        if (hasExpression(key.value) || key.post !== null && hasExpression(key.post)) {
+            problems.push(`${bone} has a rotation key at ${key.time}s that is a Molang expression; the stage turn cannot be folded into it, so it is left as it is`);
+            folded.push(key);
+            continue;
+        }
+        if (key.bezier !== null)
+            problems.push(`${bone} has a bezier rotation key at ${key.time}s; its handles are not turned with the stage, so check the curve`);
+        const literals = key.value.literals;
+        // the first key is put near the plain sum (a turn about y added to the angle about y), which is the answer when only y is turned: no needless 180s about x and z
+        const value = composeRotation(turn, literals, previous !== null && previous !== void 0 ? previous : [literals[0], literals[1] + yaw, literals[2]]);
+        previous = value;
+        const post = key.post === null ? null : { literals: composeRotation(turn, key.post.literals, value), expressions: key.post.expressions };
+        folded.push(Object.assign(Object.assign({}, key), { value: { literals: value, expressions: key.value.expressions }, post }));
+    }
+    return folded;
+}
+/** {@code turn} then the Euler rotation {@code euler}, as Euler angles near {@code near} (so a run of keys does not spin the long way round) */
+function composeRotation(turn, euler, near) {
+    return closest(eulerOf((0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qmul)(turn, (0,_physics_math__WEBPACK_IMPORTED_MODULE_0__.qfromEulerDegrees)(euler))), near);
+}
+/** The Euler angles (degrees, applied z then y then x) of a unit quaternion */
+function eulerOf(q) {
+    const [x, y, z, w] = q;
+    // the matrix elements of Rz Ry Rx
+    const m20 = 2 * (x * z - w * y);
+    const m21 = 2 * (y * z + w * x);
+    const m22 = 1 - 2 * (x * x + y * y);
+    const m10 = 2 * (x * y + w * z);
+    const m00 = 1 - 2 * (y * y + z * z);
+    const m11 = 1 - 2 * (x * x + z * z);
+    const m12 = 2 * (y * z - w * x);
+    const degrees = 180 / Math.PI;
+    if (Math.abs(m20) > 0.9999999) {
+        // looking straight up or down: x and z are one turn; give it all to x
+        return [Math.atan2(-m12, m11) * degrees, (m20 < 0 ? 90 : -90), 0];
+    }
+    return [Math.atan2(m21, m22) * degrees, Math.asin(-m20) * degrees, Math.atan2(m10, m00) * degrees];
+}
+/** Of the Euler triples that are the same turn (each angle plus whole turns, and the other way to reach the same pose), the one nearest {@code near} */
+function closest(euler, near) {
+    const candidates = [euler, [euler[0] + 180, 180 - euler[1], euler[2] + 180]];
+    let best = euler;
+    let bestDistance = Infinity;
+    for (const candidate of candidates) {
+        const unwrapped = candidate.map((angle, i) => angle + 360 * Math.round((near[i] - angle) / 360));
+        const distance = Math.abs(unwrapped[0] - near[0]) + Math.abs(unwrapped[1] - near[1]) + Math.abs(unwrapped[2] - near[2]);
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            best = unwrapped;
+        }
+    }
+    return best;
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/stageFormat.ts":
+/*!*********************************!*\
+  !*** ./ts/stage/stageFormat.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   STAGE_EXTENSION: () => (/* binding */ STAGE_EXTENSION),
+/* harmony export */   STAGE_FORMAT: () => (/* binding */ STAGE_FORMAT),
+/* harmony export */   STAGE_VERSION: () => (/* binding */ STAGE_VERSION),
+/* harmony export */   checkStage: () => (/* binding */ checkStage),
+/* harmony export */   newStage: () => (/* binding */ newStage),
+/* harmony export */   parseStage: () => (/* binding */ parseStage),
+/* harmony export */   serializeStage: () => (/* binding */ serializeStage)
+/* harmony export */ });
+/* harmony import */ var _binary_animation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/animation */ "./ts/binary/animation.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
+
+
+/**
+ * The workspace file ({@code .strutstage}): a scene, or one skeleton's clips, authored on one timeline for every actor, separated per actor only when exported
+ * <p>
+ * Plain data, no Blockbench: the tracks are kept by actor and bone name (never by group UUID), in the same shape the binary animation format holds them, so a
+ * workspace does not depend on any one model and swapping an actor's preview model loses no keyframe. JSON on disk
+ */
+const STAGE_FORMAT = 'strut_stage';
+const STAGE_VERSION = 1;
+const STAGE_EXTENSION = 'strutstage';
+function newStage(scene, namespace) {
+    return { format: STAGE_FORMAT, version: STAGE_VERSION, scene, namespace, actors: [], animations: [] };
+}
+function serializeStage(stage) {
+    return JSON.stringify(stage, null, 2);
+}
+const PATH = /^[a-z0-9_./-]+$/;
+const NAMESPACE = /^[a-z0-9_.-]+$/;
+/** Reads a workspace file; throws an Error naming what is wrong with it, so a damaged file is never half loaded */
+function parseStage(text) {
+    var _a, _b;
+    let root;
+    try {
+        root = JSON.parse(text);
+    }
+    catch (error) {
+        throw new Error(`the workspace is not valid JSON: ${error.message}`);
+    }
+    if (typeof root !== 'object' || root === null || root.format !== STAGE_FORMAT)
+        throw new Error(`this is not a Strut workspace (its format is not "${STAGE_FORMAT}")`);
+    if (typeof root.version !== 'number' || root.version > STAGE_VERSION)
+        throw new Error(`this workspace is version ${root.version}, which is newer than this build reads (${STAGE_VERSION}); update the plugin`);
+    if (typeof root.scene !== 'string' || !PATH.test(root.scene))
+        throw new Error('the workspace has no valid scene path');
+    if (typeof root.namespace !== 'string' || !NAMESPACE.test(root.namespace))
+        throw new Error('the workspace has no valid namespace');
+    if (!Array.isArray(root.actors) || !Array.isArray(root.animations))
+        throw new Error('the workspace has no actors or animations list');
+    const roles = new Set();
+    for (const actor of root.actors) {
+        if (typeof (actor === null || actor === void 0 ? void 0 : actor.role) !== 'string' || actor.role === '' || !PATH.test(actor.role))
+            throw new Error('an actor has no valid role name');
+        if (roles.has(actor.role))
+            throw new Error(`two actors are the role "${actor.role}"`);
+        roles.add(actor.role);
+        if (typeof actor.skeleton !== 'string')
+            throw new Error(`the actor "${actor.role}" has no skeleton id`);
+        if (!Array.isArray(actor.roots) || actor.roots.some((root) => typeof (root === null || root === void 0 ? void 0 : root.bone) !== 'string' || !Array.isArray(root.pivot) || root.pivot.length !== 3))
+            throw new Error(`the actor "${actor.role}" has no root bones with pivots`);
+        if (typeof ((_a = actor.offset) === null || _a === void 0 ? void 0 : _a.yaw) !== 'number' || !Array.isArray(actor.offset.position) || actor.offset.position.length !== 3)
+            throw new Error(`the actor "${actor.role}" has no stage offset`);
+    }
+    const names = new Set();
+    for (const animation of root.animations) {
+        if (typeof (animation === null || animation === void 0 ? void 0 : animation.name) !== 'string' || animation.name === '')
+            throw new Error('an animation has no name');
+        if (names.has(animation.name))
+            throw new Error(`two animations are named "${animation.name}"`);
+        names.add(animation.name);
+        if (typeof animation.duration !== 'number' || !(animation.duration >= 0))
+            throw new Error(`the animation "${animation.name}" has no valid length`);
+        if (!(animation.loop in _binary_animation__WEBPACK_IMPORTED_MODULE_0__.LoopMode))
+            throw new Error(`the animation "${animation.name}" has the loop mode "${animation.loop}"`);
+        for (const role of Object.keys((_b = animation.tracks) !== null && _b !== void 0 ? _b : {})) {
+            if (!roles.has(role))
+                throw new Error(`the animation "${animation.name}" has a track for "${role}", who is not an actor`);
+        }
+    }
+    return root;
+}
+/**
+ * What is wrong with a workspace for export, the checks of the plan's section 4d. Errors stop an export; warnings are shown. A scene cannot check a role that has
+ * no skeleton id, and every actor is one clip on one clock, so the checks are about those
+ */
+function checkStage(stage) {
+    var _a, _b, _c;
+    const problems = [];
+    const error = (message) => void problems.push({ severity: 'error', message });
+    const warn = (message) => void problems.push({ severity: 'warning', message });
+    if (stage.actors.length === 0)
+        error('the workspace has no actors');
+    for (const actor of stage.actors) {
+        if (actor.skeleton === '')
+            error(`${actor.role} has no skeleton id, so a scene could not check who fills the role`);
+        else if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__.isValidSkeletonId)(actor.skeleton))
+            error(`${actor.role}: "${actor.skeleton}" is not a skeleton id (a namespace, a colon and a path, such as mymod:creature)`);
+        for (const other of (_a = actor.compatible) !== null && _a !== void 0 ? _a : []) {
+            if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__.isValidSkeletonId)(other))
+                error(`${actor.role}: the compatible skeleton "${other}" is not a skeleton id`);
+        }
+    }
+    if (stage.actors.filter(actor => actor.lead).length > 1)
+        warn('more than one role is the lead; the first is used');
+    for (const animation of stage.animations) {
+        if (animation.duration <= 0)
+            error(`the animation "${animation.name}" has no length`);
+        for (const actor of stage.actors) {
+            const track = animation.tracks[actor.role];
+            if (!track || track.channels.length === 0 && track.events.length === 0)
+                warn(`${actor.role} does nothing in "${animation.name}"; it is exported as an empty clip, so the role stands at rest`);
+            for (const channel of (_b = track === null || track === void 0 ? void 0 : track.channels) !== null && _b !== void 0 ? _b : []) {
+                const last = channel.keys.length === 0 ? 0 : channel.keys[channel.keys.length - 1].time + ((_c = track === null || track === void 0 ? void 0 : track.shift) !== null && _c !== void 0 ? _c : 0);
+                if (last > animation.duration + 1e-6)
+                    warn(`${actor.role} has a key at ${last.toFixed(3)}s in "${animation.name}", after its end at ${animation.duration}s`);
+            }
+        }
+    }
+    return problems;
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/stageProject.ts":
+/*!**********************************!*\
+  !*** ./ts/stage/stageProject.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ACTOR_PREFIX: () => (/* binding */ ACTOR_PREFIX),
+/* harmony export */   actorGroups: () => (/* binding */ actorGroups),
+/* harmony export */   actorRows: () => (/* binding */ actorRows),
+/* harmony export */   addActor: () => (/* binding */ addActor),
+/* harmony export */   exportWorkspaceFiles: () => (/* binding */ exportWorkspaceFiles),
+/* harmony export */   isUnder: () => (/* binding */ isUnder),
+/* harmony export */   metaOrNew: () => (/* binding */ metaOrNew),
+/* harmony export */   offsetOf: () => (/* binding */ offsetOf),
+/* harmony export */   readMeta: () => (/* binding */ readMeta),
+/* harmony export */   readStage: () => (/* binding */ readStage),
+/* harmony export */   removeActor: () => (/* binding */ removeActor),
+/* harmony export */   setActorVisible: () => (/* binding */ setActorVisible),
+/* harmony export */   swapActorModel: () => (/* binding */ swapActorModel),
+/* harmony export */   writeMeta: () => (/* binding */ writeMeta)
+/* harmony export */ });
+/* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../binary/animationMapping */ "./ts/binary/animationMapping.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
+/* harmony import */ var _binary_writer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../binary/writer */ "./ts/binary/writer.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
+/* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
+/* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../strutCodec */ "./ts/strutCodec.ts");
+/* harmony import */ var _stageExport__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./stageExport */ "./ts/stage/stageExport.ts");
+/* harmony import */ var _stageFormat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./stageFormat */ "./ts/stage/stageFormat.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+
+
+
+
+
+
+/**
+ * A workspace in Blockbench: an open Strut project whose top level groups named {@code @<role>} are actors
+ * <p>
+ * An actor is a locked copy of a preview model's bones under its {@code @role} group (the geometry is there to look at, never to edit), so every tool Blockbench has
+ * for animating groups works on it: the timeline, the graph editor, keyframes, onion skinning. Where the actor stands on the stage is the {@code @role} group's own
+ * move and turn, set with the normal gizmo in edit mode. What is not Blockbench's to keep (which skeleton an actor is, who may fill the role, the scene's name) is
+ * one JSON text in a project property ({@link PROPERTY_STAGE}), like the physics are
+ * <p>
+ * {@link readStage} reads the whole thing back as the plain {@link Stage} the exporter works on, so everything here is reading and writing the open project; what the
+ * export does with it is {@code stageExport.ts}, and is tested without Blockbench
+ */
+const ACTOR_PREFIX = '@';
+// ===============================================================
+// The metadata
+// ===============================================================
+function readMeta() {
+    var _a, _b, _c, _d, _e;
+    const text = String((_a = Project === null || Project === void 0 ? void 0 : Project[_constants__WEBPACK_IMPORTED_MODULE_0__.PROPERTY_STAGE]) !== null && _a !== void 0 ? _a : '');
+    if (text === '')
+        return null;
+    try {
+        const meta = JSON.parse(text);
+        return { scene: (_b = meta.scene) !== null && _b !== void 0 ? _b : '', namespace: (_c = meta.namespace) !== null && _c !== void 0 ? _c : '', actors: (_d = meta.actors) !== null && _d !== void 0 ? _d : {}, animations: (_e = meta.animations) !== null && _e !== void 0 ? _e : {} };
+    }
+    catch (_f) {
+        console.warn('[Strut] The workspace data of this project is damaged and was ignored.');
+        return null;
+    }
+}
+function writeMeta(meta) {
+    Project[_constants__WEBPACK_IMPORTED_MODULE_0__.PROPERTY_STAGE] = JSON.stringify(meta);
+}
+/** The metadata of the open project, started from {@code scene} and {@code namespace} if it has none */
+function metaOrNew(scene, namespace) {
+    var _a;
+    return (_a = readMeta()) !== null && _a !== void 0 ? _a : { scene, namespace, actors: {}, animations: {} };
+}
+// ===============================================================
+// The actors
+// ===============================================================
+/** The actors of the open project: its top level groups named {@code @<role>}, by role */
+function actorGroups() {
+    const actors = new Map();
+    for (const node of Outliner.root) {
+        if (node instanceof Group && typeof node.name === 'string' && node.name.startsWith(ACTOR_PREFIX) && node.name.length > ACTOR_PREFIX.length)
+            actors.set(node.name.slice(ACTOR_PREFIX.length), node);
+    }
+    return actors;
+}
+/** Whether {@code node} is {@code group} or somewhere under it */
+function isUnder(node, group) {
+    for (let at = node; at; at = at.parent) {
+        if (at === group)
+            return true;
+    }
+    return false;
+}
+/**
+ * Adds an actor: {@code model}'s bones under a new locked group {@code @role}, and the actor's data
+ * <p>
+ * The textures the format carries no pixels for are the usual magenta and black placeholders; the preview is for posing, not for looking nice
+ *
+ * @throws Error if the role is taken or the model's own skeleton id is not {@code skeleton}
+ */
+function addActor(role, skeleton, model, modelName, extra = {}, images) {
+    var _a, _b;
+    if (!/^[a-z0-9_./-]+$/.test(role))
+        throw new Error(`"${role}" is not a role name (lower case letters, digits, _ . / -)`);
+    if (actorGroups().has(role))
+        throw new Error(`there already is an actor called "${role}"`);
+    checkSkeleton(model, skeleton, modelName);
+    const group = new Group({ name: ACTOR_PREFIX + role, origin: [0, 0, 0] });
+    group.init().addTo();
+    const loaded = loadModelInto(group, model, images);
+    const meta = metaOrNew(String(Project.name || 'scene'), '');
+    meta.actors[role] = Object.assign({ skeleton, model: modelName, pivots: loaded.pivots, textures: loaded.textures }, extra);
+    meta.namespace = meta.namespace || skeleton.slice(0, skeleton.indexOf(':'));
+    meta.scene = meta.scene === 'scene' || meta.scene === '' ? sceneNameOf(String(Project.name || 'scene')) : meta.scene;
+    writeMeta(meta);
+    (_b = (_a = Canvas).updateAll) === null || _b === void 0 ? void 0 : _b.call(_a);
+    return group;
+}
+function checkSkeleton(model, skeleton, modelName) {
+    var _a;
+    const section = (_a = model.extensions) === null || _a === void 0 ? void 0 : _a.get(_binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__.SKELETON_SECTION);
+    const modelId = section ? (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__.decodeSkeletonId)(section) : null;
+    if (modelId !== null && modelId !== skeleton)
+        throw new Error(`${modelName} is on the skeleton ${modelId}, not ${skeleton}; a model can only play an actor of its own skeleton`);
+}
+/** Loads a model's bones under an actor group, locks its geometry, and says which pivots and textures it brought */
+function loadModelInto(group, model, images) {
+    const before = new Set(Texture.all.map(texture => texture.uuid));
+    const groups = (0,_strutCodec__WEBPACK_IMPORTED_MODULE_2__.buildProjectFromModel)(model, group, images);
+    for (const element of [...Cube.all, ...Mesh.all]) {
+        if (groups.some(bone => isUnder(element, bone)))
+            element.locked = true;
+    }
+    const pivots = {};
+    for (const child of group.children) {
+        if (child instanceof Group)
+            pivots[child.name] = [child.origin[0], child.origin[1], child.origin[2]];
+    }
+    return { pivots, textures: Texture.all.map(texture => texture.uuid).filter(uuid => !before.has(uuid)) };
+}
+/**
+ * Gives an actor another preview model of the same skeleton, keeping every keyframe: the tracks are read by bone name, the old bones and textures are taken out, the
+ * new model is loaded, and the tracks are put back on the new bones. Keys for a bone the new model does not have are dropped and counted
+ *
+ * @returns how many channels had no bone to go to
+ */
+function swapActorModel(role, model, modelName, images) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const group = actorGroups().get(role);
+    const meta = readMeta();
+    const data = meta === null || meta === void 0 ? void 0 : meta.actors[role];
+    if (!group || !meta || !data)
+        throw new Error(`there is no actor called "${role}"`);
+    checkSkeleton(model, data.skeleton, modelName);
+    const animations = (_a = Project.animations) !== null && _a !== void 0 ? _a : [];
+    const kept = animations.map(animation => ({ animation, clip: (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__.buildClip)(animation, new _binary_writer__WEBPACK_IMPORTED_MODULE_4__.StringTable(), node => isUnder(node, group)) }));
+    // out with the old bones, their animators, their textures
+    for (const { animation } of kept) {
+        for (const uuid of Object.keys((_b = animation.animators) !== null && _b !== void 0 ? _b : {})) {
+            const node = (_c = OutlinerNode.uuids) === null || _c === void 0 ? void 0 : _c[uuid];
+            if (node && isUnder(node, group))
+                delete animation.animators[uuid];
+        }
+    }
+    for (const child of [...group.children])
+        child.remove(true);
+    for (const uuid of (_d = data.textures) !== null && _d !== void 0 ? _d : []) {
+        const old = Texture.all.find(texture => texture.uuid === uuid);
+        (_e = old === null || old === void 0 ? void 0 : old.remove) === null || _e === void 0 ? void 0 : _e.call(old, true);
+    }
+    const loaded = loadModelInto(group, model, images);
+    data.model = modelName;
+    data.pivots = loaded.pivots;
+    data.textures = loaded.textures;
+    writeMeta(meta);
+    let dropped = 0;
+    for (const { animation, clip } of kept) {
+        const bones = new Set();
+        for (const child of group.children)
+            collectNames(child, bones);
+        dropped += clip.channels.filter(channel => !bones.has(channel.target)).length;
+        (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__.addChannelsToAnimation)(animation, Object.assign(Object.assign({}, clip), { events: [] }), group);
+    }
+    (_g = (_f = Canvas).updateAll) === null || _g === void 0 ? void 0 : _g.call(_f);
+    return dropped;
+}
+function collectNames(node, into) {
+    var _a;
+    into.add(node.name);
+    for (const child of (_a = node.children) !== null && _a !== void 0 ? _a : [])
+        collectNames(child, into);
+}
+/** Shows or hides an actor in the viewport (its keyframes are kept and exported either way) */
+function setActorVisible(role, visible) {
+    var _a, _b, _c;
+    const group = actorGroups().get(role);
+    if (!group)
+        return;
+    group.visibility = visible;
+    (_a = group.updateVisibility) === null || _a === void 0 ? void 0 : _a.call(group);
+    (_c = (_b = Canvas).updateVisibility) === null || _c === void 0 ? void 0 : _c.call(_b);
+}
+function actorRows() {
+    const meta = readMeta();
+    return [...actorGroups()].map(([role, group]) => {
+        var _a, _b, _c, _d, _e, _f;
+        return ({
+            role,
+            skeleton: (_b = (_a = meta === null || meta === void 0 ? void 0 : meta.actors[role]) === null || _a === void 0 ? void 0 : _a.skeleton) !== null && _b !== void 0 ? _b : '',
+            model: (_d = (_c = meta === null || meta === void 0 ? void 0 : meta.actors[role]) === null || _c === void 0 ? void 0 : _c.model) !== null && _d !== void 0 ? _d : '',
+            visible: group.visibility !== false,
+            lead: ((_e = meta === null || meta === void 0 ? void 0 : meta.actors[role]) === null || _e === void 0 ? void 0 : _e.lead) === true,
+            required: ((_f = meta === null || meta === void 0 ? void 0 : meta.actors[role]) === null || _f === void 0 ? void 0 : _f.required) !== false,
+        });
+    });
+}
+function removeActor(role) {
+    var _a, _b, _c, _d, _e;
+    const group = actorGroups().get(role);
+    const meta = readMeta();
+    if (group)
+        group.remove(true);
+    for (const uuid of (_b = (_a = meta === null || meta === void 0 ? void 0 : meta.actors[role]) === null || _a === void 0 ? void 0 : _a.textures) !== null && _b !== void 0 ? _b : [])
+        (_d = (_c = Texture.all.find(texture => texture.uuid === uuid)) === null || _c === void 0 ? void 0 : _c.remove) === null || _d === void 0 ? void 0 : _d.call(_c, true);
+    if (meta) {
+        delete meta.actors[role];
+        for (const animation of Object.values(meta.animations))
+            (_e = animation.shifts) === null || _e === void 0 ? true : delete _e[role];
+        writeMeta(meta);
+    }
+}
+/** A scene name from a project name: lower case, with anything else turned into an underscore */
+function sceneNameOf(name) {
+    return name.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '') || 'scene';
+}
+/**
+ * Where an actor's bones stand on the stage, from its {@code @role} group. The group is turned about its own pivot {@code O}, and moving it with the gizmo moves its
+ * children's pivots by {@code d} (the bones' pivots now against the ones the model was loaded with), so a point {@code x} of the model ends up at
+ * {@code O + Ry(x + d - O)}: a turn about the origin, then the move {@code O + Ry(d - O)}
+ */
+function offsetOf(group, shift = [0, 0, 0]) {
+    var _a, _b, _c, _d, _e, _f;
+    const origin = [group.origin[0], group.origin[1], group.origin[2]];
+    const yaw = Number((_b = (_a = group.rotation) === null || _a === void 0 ? void 0 : _a[1]) !== null && _b !== void 0 ? _b : 0);
+    const radians = yaw * Math.PI / 180;
+    const turn = (x, z) => [x * Math.cos(radians) + z * Math.sin(radians), -x * Math.sin(radians) + z * Math.cos(radians)];
+    const [tx, tz] = turn(shift[0] - origin[0], shift[2] - origin[2]);
+    return {
+        position: [origin[0] + tx, shift[1], origin[2] + tz],
+        yaw,
+        tilted: Math.abs(Number((_d = (_c = group.rotation) === null || _c === void 0 ? void 0 : _c[0]) !== null && _d !== void 0 ? _d : 0)) > 1e-6 || Math.abs(Number((_f = (_e = group.rotation) === null || _e === void 0 ? void 0 : _e[2]) !== null && _f !== void 0 ? _f : 0)) > 1e-6,
+    };
+}
+function readStage() {
+    var _a, _b, _c;
+    const meta = readMeta();
+    const problems = [];
+    if (!meta)
+        return { stage: null, problems: [{ severity: 'error', message: 'this project is not a workspace yet: add an actor first' }] };
+    const groups = actorGroups();
+    const actors = [];
+    for (const [role, group] of groups) {
+        const data = meta.actors[role];
+        if (!data) {
+            problems.push({ severity: 'error', message: `the group @${role} is not an actor (it has no workspace data); remove it or add the actor again` });
+            continue;
+        }
+        const loaded = group.children.filter(child => child instanceof Group);
+        // the game's pivots, which the clips are made for; an actor from before they were kept uses the bones' pivots as they are
+        const roots = loaded.map(child => { var _a, _b; return ({ bone: child.name, pivot: (_b = (_a = data.pivots) === null || _a === void 0 ? void 0 : _a[child.name]) !== null && _b !== void 0 ? _b : [child.origin[0], child.origin[1], child.origin[2]] }); });
+        const first = loaded[0];
+        const was = first ? (_a = data.pivots) === null || _a === void 0 ? void 0 : _a[first.name] : undefined;
+        const shift = first && was ? [first.origin[0] - was[0], first.origin[1] - was[1], first.origin[2] - was[2]] : [0, 0, 0];
+        const offset = offsetOf(group, shift);
+        for (const child of loaded) {
+            const had = (_b = data.pivots) === null || _b === void 0 ? void 0 : _b[child.name];
+            if (had && (Math.abs(child.origin[0] - had[0] - shift[0]) > 1e-4 || Math.abs(child.origin[1] - had[1] - shift[1]) > 1e-4 || Math.abs(child.origin[2] - had[2] - shift[2]) > 1e-4))
+                problems.push({ severity: 'warning', message: `the bones of @${role} were not all moved by the same amount; the stage offset follows ${first.name}` });
+        }
+        if (offset.tilted)
+            problems.push({ severity: 'error', message: `@${role} is turned about x or z; a stage turn is about the vertical axis only` });
+        if (roots.length === 0)
+            problems.push({ severity: 'error', message: `@${role} has no bones` });
+        actors.push(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ role, skeleton: data.skeleton }, (data.model ? { model: data.model } : {})), { roots, offset: { position: offset.position, yaw: offset.yaw } }), (data.compatible && data.compatible.length > 0 ? { compatible: data.compatible } : {})), (data.required === false ? { required: false } : {})), (data.camera ? { camera: data.camera } : {})), (data.lead ? { lead: true } : {})));
+    }
+    for (const role of Object.keys(meta.actors)) {
+        if (!groups.has(role))
+            problems.push({ severity: 'warning', message: `the actor ${role} has data but no @${role} group; the data is ignored` });
+    }
+    const animations = ((_c = Project.animations) !== null && _c !== void 0 ? _c : []).map(animation => {
+        var _a, _b, _c;
+        const tags = (_a = meta.animations[animation.name]) !== null && _a !== void 0 ? _a : {};
+        const tracks = {};
+        const strings = new _binary_writer__WEBPACK_IMPORTED_MODULE_4__.StringTable();
+        let first = true;
+        for (const [role, group] of groups) {
+            const clip = (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__.buildClip)(animation, strings, node => isUnder(node, group));
+            // the effects of the animation (sounds, particles, instructions) are one list in Blockbench: they are given to the first actor
+            const events = first ? (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__.buildEvents)((_b = animation.animators) === null || _b === void 0 ? void 0 : _b.effects, strings) : [];
+            first = false;
+            tracks[role] = Object.assign({ channels: clip.channels, events }, (((_c = tags.shifts) === null || _c === void 0 ? void 0 : _c[role]) ? { shift: tags.shifts[role] } : {}));
+        }
+        return Object.assign(Object.assign(Object.assign(Object.assign({ name: animation.name, duration: animation.length || 0, loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.loopModeFromLive)(animation.loop) }, (tags.phase ? { phase: tags.phase } : {})), (tags.variant ? { variant: tags.variant } : {})), (tags.side ? { side: tags.side } : {})), { tracks });
+    });
+    const stage = Object.assign(Object.assign({}, (0,_stageFormat__WEBPACK_IMPORTED_MODULE_6__.newStage)(meta.scene, meta.namespace)), { actors, animations });
+    if (stage.scene === '')
+        problems.push({ severity: 'error', message: 'the workspace has no scene name' });
+    if (stage.namespace === '')
+        problems.push({ severity: 'error', message: 'the workspace has no namespace' });
+    return { stage, problems };
+}
+/** The files of the workspace as exported, with every problem found reading the project and exporting it */
+function exportWorkspaceFiles(options = {}) {
+    const read = readStage();
+    if (!read.stage || read.problems.some(problem => problem.severity === 'error'))
+        return { files: [], problems: read.problems };
+    const exported = (0,_stageExport__WEBPACK_IMPORTED_MODULE_7__.exportStage)(read.stage, options);
+    return { files: exported.files, problems: [...read.problems, ...exported.problems] };
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/stageUi.ts":
+/*!*****************************!*\
+  !*** ./ts/stage/stageUi.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addActorDialog: () => (/* binding */ addActorDialog),
+/* harmony export */   animationTagsDialog: () => (/* binding */ animationTagsDialog),
+/* harmony export */   checkWorkspace: () => (/* binding */ checkWorkspace),
+/* harmony export */   createStageMenuItems: () => (/* binding */ createStageMenuItems),
+/* harmony export */   editActorDialog: () => (/* binding */ editActorDialog),
+/* harmony export */   exportWorkspace: () => (/* binding */ exportWorkspace),
+/* harmony export */   loadStageUi: () => (/* binding */ loadStageUi),
+/* harmony export */   swapModelDialog: () => (/* binding */ swapModelDialog),
+/* harmony export */   unloadStageUi: () => (/* binding */ unloadStageUi),
+/* harmony export */   workspaceSettingsDialog: () => (/* binding */ workspaceSettingsDialog)
+/* harmony export */ });
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
+/* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/model */ "./ts/binary/model.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
+/* harmony import */ var _textureMatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./textureMatch */ "./ts/stage/textureMatch.ts");
+/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
+/* harmony import */ var _actorsPanel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorsPanel */ "./ts/stage/actorsPanel.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+
+
+
+
+
+function problemsText(problems) {
+    return problems.map(problem => `${problem.severity === 'error' ? 'Error' : 'Warning'}: ${problem.message}`).join('\n');
+}
+function showProblems(title, problems) {
+    Blockbench.showMessageBox({
+        title,
+        message: problems.length === 0 ? 'Nothing is wrong.' : problemsText(problems),
+        buttons: ['OK'],
+    });
+}
+function say(title, message) {
+    Blockbench.showMessageBox({ title, message, buttons: ['OK'] });
+}
+/** Asks for a {@code .strutmodel} and calls {@code then} with it decoded */
+function pickModel(then) {
+    Blockbench.import({
+        resource_id: 'strut_model',
+        type: 'Strut Binary Model',
+        extensions: [_binary_model__WEBPACK_IMPORTED_MODULE_0__.MODEL_EXTENSION],
+        readtype: 'binary',
+    }, (files) => {
+        var _a;
+        const file = files[0];
+        if (!file)
+            return;
+        try {
+            then((0,_binary_model__WEBPACK_IMPORTED_MODULE_0__.decodeModel)(new Uint8Array(file.content), file.name || 'model.strutmodel'), String((_a = file.name) !== null && _a !== void 0 ? _a : 'model'));
+        }
+        catch (error) {
+            say('Could not read the model', error.message);
+        }
+    });
+}
+/** Asks whether to choose the model's textures now, then for the image files; calls {@code then} with what was chosen (none if skipped) */
+function pickTextures(modelName, textureNames, then) {
+    if (textureNames.length === 0) {
+        then([]);
+        return;
+    }
+    Blockbench.showMessageBox({
+        title: 'Textures',
+        message: `${modelName} uses ${textureNames.length === 1 ? 'the texture' : 'the textures'} ${textureNames.map(name => `"${name}"`).join(', ')}. Choose the image files now? They are matched by name, and kept in the workspace.`,
+        buttons: ['Choose images...', 'Skip (placeholders)'],
+        confirm: 0,
+        cancel: 1,
+    }, (button) => {
+        if (button !== 0) {
+            then([]);
+            return;
+        }
+        Blockbench.import({
+            resource_id: 'strut_texture',
+            type: 'PNG Image',
+            extensions: ['png'],
+            readtype: 'image',
+            multiple: true,
+        }, (files) => then(files.map(file => { var _a, _b; return ({ name: String((_a = file.name) !== null && _a !== void 0 ? _a : ''), content: String((_b = file.content) !== null && _b !== void 0 ? _b : '') }); })));
+    });
+}
+function textureReport(model, files) {
+    const match = (0,_textureMatch__WEBPACK_IMPORTED_MODULE_1__.matchTextures)(model.textures.map(texture => texture.name), files);
+    const notes = [];
+    if (match.missing.length > 0)
+        notes.push(`No image for ${match.missing.map(name => `"${name}"`).join(', ')}: it is drawn as a placeholder.`);
+    if (match.unused.length > 0)
+        notes.push(`Not used: ${match.unused.join(', ')}.`);
+    return { images: match.images, note: notes.join(' ') };
+}
+function list(text) {
+    return text.split(',').map(part => part.trim()).filter(part => part !== '');
+}
+// ===============================================================
+// Actors
+// ===============================================================
+/** Add Actor: a model and its textures, and who it is in the scene */
+function addActorDialog() {
+    pickModel((model, name) => pickTextures(name, model.textures.map(texture => texture.name), files => addActorDetails(model, name, files)));
+}
+function addActorDetails(model, name, files) {
+    var _a;
+    const report = textureReport(model, files);
+    const section = (_a = model.extensions) === null || _a === void 0 ? void 0 : _a.get('strut:skeleton');
+    const own = section ? new TextDecoder().decode(section.subarray(2)) : '';
+    new Dialog({
+        id: 'strut_add_actor',
+        title: `Add Actor (${name})`,
+        form: Object.assign(Object.assign({}, (report.note ? { textures: { label: 'Textures', type: 'info', text: report.note } } : {})), { role: { label: 'Role', type: 'text', value: '', placeholder: 'host', description: 'The scene role this actor is exported as' }, skeleton: { label: 'Skeleton ID', type: 'text', value: own, placeholder: 'my_modid:creature', description: 'The skeleton this actor is animated for; the model must be on it' }, compatible: { label: 'Also fits', type: 'text', value: '', description: 'Other skeleton IDs that may fill the role, separated by commas' }, required: { label: 'Required', type: 'checkbox', value: true, description: 'The scene cannot start without this role' }, lead: { label: 'Lead role', type: 'checkbox', value: false }, camera: { label: 'Camera bone', type: 'text', value: '', description: 'The bone a player in this role looks out of' } }),
+        onConfirm(form) {
+            try {
+                if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__.isValidSkeletonId)(form.skeleton))
+                    throw new Error(`"${form.skeleton}" is not a skeleton ID (a namespace, a colon and a path, such as my_modid:creature)`);
+                const compatible = list(String(form.compatible));
+                (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.addActor)(String(form.role).trim(), String(form.skeleton).trim(), model, name, Object.assign(Object.assign(Object.assign(Object.assign({}, (compatible.length > 0 ? { compatible } : {})), (form.required === false ? { required: false } : {})), (form.lead ? { lead: true } : {})), (String(form.camera).trim() !== '' ? { camera: String(form.camera).trim() } : {})), report.images);
+            }
+            catch (error) {
+                say('Could not add the actor', error.message);
+                return false;
+            }
+        },
+    }).show();
+}
+/** Swap Model: another model of the same skeleton for the actor; every keyframe stays */
+function swapModelDialog(role) {
+    pickModel((model, name) => pickTextures(name, model.textures.map(texture => texture.name), files => {
+        const report = textureReport(model, files);
+        try {
+            const dropped = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.swapActorModel)(role, model, name, report.images);
+            const notes = [report.note, dropped > 0 ? `${dropped} tracks were for bones the new model does not have, and were dropped.` : ''].filter(note => note !== '');
+            if (notes.length > 0)
+                say('Model swapped', notes.join('\n'));
+        }
+        catch (error) {
+            say('Could not swap the model', error.message);
+        }
+    }));
+}
+/** Edit Actor: who the actor is for the scene (which role it is is the name of its group); with no role, asks which actor */
+function editActorDialog(role) {
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.readMeta)();
+    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys()];
+    if (role !== undefined && (meta === null || meta === void 0 ? void 0 : meta.actors[role])) {
+        editActorDetails(meta, role);
+        return;
+    }
+    if (!meta || roles.length === 0) {
+        say('Edit Actor', 'The workspace has no actors yet.');
+        return;
+    }
+    new Dialog({
+        id: 'strut_edit_actor',
+        title: 'Edit Actor',
+        form: {
+            role: { label: 'Actor', type: 'select', options: Object.fromEntries(roles.map(each => [each, each])), value: roles[0] },
+        },
+        onConfirm(pick) {
+            setTimeout(() => editActorDetails(meta, String(pick.role)), 0);
+        },
+    }).show();
+}
+function editActorDetails(meta, role) {
+    var _a, _b;
+    const actor = meta.actors[role];
+    if (!actor)
+        return;
+    new Dialog({
+        id: 'strut_edit_actor_details',
+        title: `Actor ${role}`,
+        form: {
+            skeleton: { label: 'Skeleton ID', type: 'text', value: actor.skeleton },
+            compatible: { label: 'Also fits', type: 'text', value: ((_a = actor.compatible) !== null && _a !== void 0 ? _a : []).join(', ') },
+            required: { label: 'Required', type: 'checkbox', value: actor.required !== false },
+            lead: { label: 'Lead role', type: 'checkbox', value: actor.lead === true },
+            camera: { label: 'Camera bone', type: 'text', value: (_b = actor.camera) !== null && _b !== void 0 ? _b : '' },
+            remove: { label: 'Remove this actor', type: 'checkbox', value: false, description: 'Takes the actor, its model, its textures and its keyframes out of the workspace' },
+        },
+        onConfirm(form) {
+            if (form.remove) {
+                (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.removeActor)(role);
+                return;
+            }
+            if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__.isValidSkeletonId)(form.skeleton)) {
+                say('Not saved', `"${form.skeleton}" is not a skeleton ID`);
+                return false;
+            }
+            actor.skeleton = String(form.skeleton).trim();
+            actor.compatible = list(String(form.compatible));
+            actor.required = form.required !== false;
+            actor.lead = form.lead === true;
+            actor.camera = String(form.camera).trim();
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+        },
+    }).show();
+}
+// ===============================================================
+// The scene
+// ===============================================================
+/** Workspace Settings: the scene's name and the namespace its layout is written under; also what a new workspace asks first */
+function workspaceSettingsDialog() {
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.metaOrNew)(String(Project.name || 'scene'), '');
+    new Dialog({
+        id: 'strut_workspace_settings',
+        title: 'Workspace Settings',
+        form: {
+            scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'doggy', description: 'The scene\'s name: it names the layout and the clip sets' },
+            namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' },
+        },
+        onConfirm(form) {
+            meta.scene = String(form.scene).trim().toLowerCase().replace(/[^a-z0-9_/-]+/g, '_');
+            meta.namespace = String(form.namespace).trim().toLowerCase();
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+            animateOnly();
+        },
+    }).show();
+}
+/** Animation Tags: what the selected animation is called in the layout (a mod's own words), and each actor's shift in time */
+function animationTagsDialog() {
+    var _a, _b, _c, _d, _e, _f;
+    const animation = Animation.selected;
+    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys()];
+    if (!animation) {
+        say('Animation Tags', 'Select an animation first.');
+        return;
+    }
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.metaOrNew)(String(Project.name || 'scene'), '');
+    const tags = (_a = meta.animations[animation.name]) !== null && _a !== void 0 ? _a : {};
+    const form = {
+        phase: { label: 'Phase', type: 'text', value: (_b = tags.phase) !== null && _b !== void 0 ? _b : '', description: 'What part of the scene this clip is, in the mod\'s own words; written to the layout and never worked out from the name' },
+        variant: { label: 'Variant', type: 'number', value: (_c = tags.variant) !== null && _c !== void 0 ? _c : 0, min: 0, step: 1, description: 'Which of several clips of the phase this is, counting from 1; 0 for none' },
+        side: { label: 'Side', type: 'text', value: (_d = tags.side) !== null && _d !== void 0 ? _d : '' },
+    };
+    for (const role of roles)
+        form[`shift_${role}`] = { label: `${role} shift (s)`, type: 'number', value: (_f = (_e = tags.shifts) === null || _e === void 0 ? void 0 : _e[role]) !== null && _f !== void 0 ? _f : 0, step: 0.05, description: 'Seconds this actor\'s keys and events are moved later (or earlier) against the others on export' };
+    new Dialog({
+        id: 'strut_animation_tags',
+        title: `Animation Tags: ${animation.name}`,
+        form,
+        onConfirm(values) {
+            const shifts = {};
+            for (const role of roles) {
+                const shift = Number(values[`shift_${role}`]) || 0;
+                if (shift !== 0)
+                    shifts[role] = shift;
+            }
+            meta.animations[animation.name] = Object.assign(Object.assign(Object.assign(Object.assign({}, (String(values.phase).trim() ? { phase: String(values.phase).trim() } : {})), (Number(values.variant) > 0 ? { variant: Math.floor(Number(values.variant)) } : {})), (String(values.side).trim() ? { side: String(values.side).trim() } : {})), (Object.keys(shifts).length > 0 ? { shifts } : {}));
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+        },
+    }).show();
+}
+function checkWorkspace() {
+    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.exportWorkspaceFiles)();
+    showProblems(files.length > 0 ? 'Workspace Check' : 'Workspace Check: it cannot be exported yet', problems);
+}
+/** Writes the exported files: into a folder when Blockbench has a file system (the app), else as one zip */
+function exportWorkspace() {
+    var _a, _b;
+    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.exportWorkspaceFiles)();
+    if (files.length === 0) {
+        showProblems('The workspace cannot be exported yet', problems);
+        return;
+    }
+    const done = (where) => {
+        say('Workspace exported', `${files.length} files written to ${where}.` + (problems.length > 0 ? `\n\n${problemsText(problems)}` : ''));
+    };
+    if (Blockbench.isApp && typeof Blockbench.pickDirectory === 'function') {
+        const directory = Blockbench.pickDirectory({ title: 'Export the workspace into the pack folder', resource_id: 'strut_workspace' });
+        if (!directory)
+            return;
+        for (const file of files) {
+            const content = file.bytes !== undefined ? file.bytes.buffer.slice(file.bytes.byteOffset, file.bytes.byteOffset + file.bytes.byteLength) : file.text;
+            Blockbench.writeFile(`${directory}/${file.path}`, { content, savetype: file.bytes !== undefined ? 'buffer' : 'text', custom_writer: null }, undefined);
+        }
+        done(String(directory));
+        return;
+    }
+    // the web version has no folders: one zip, with the same paths inside
+    const zip = new globalThis.JSZip();
+    for (const file of files)
+        zip.file(file.path, (_b = (_a = file.bytes) !== null && _a !== void 0 ? _a : file.text) !== null && _b !== void 0 ? _b : '');
+    zip.generateAsync({ type: 'blob' }).then((blob) => {
+        var _a, _b;
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${(_b = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.readStage)().stage) === null || _a === void 0 ? void 0 : _a.scene) !== null && _b !== void 0 ? _b : 'workspace'}.zip`;
+        link.click();
+        done('a zip download');
+    });
+}
+// ===============================================================
+// Wiring
+// ===============================================================
+/** Sets the workspace project type up: its new project dialog and the Actors panel */
+function loadStageUi() {
+    Blockbench.on('select_project', animateOnly);
+    Blockbench.on('load_project', animateOnly);
+    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_4__.createActorsPanel)({ add: addActorDialog, edit: editActorDialog, swap: swapModelDialog });
+}
+/** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
+function animateOnly() {
+    var _a;
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
+        Modes.options.animate.select();
+}
+function unloadStageUi() {
+    Blockbench.removeListener('select_project', animateOnly);
+    Blockbench.removeListener('load_project', animateOnly);
+    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_4__.deleteActorsPanel)();
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__.workspaceFormat.delete();
+}
+/** The actions, for the Tools menu */
+function createStageMenuItems() {
+    const item = (id, name, icon, description, click) => ({
+        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace, click }),
+        menuCategory: 'tools',
+    });
+    return [
+        item('strut_workspace_add_actor', 'Workspace: Add Actor...', 'person_add', 'Add a model and its textures as an actor of this workspace: it is loaded for you, animated with the normal tools, and exported per actor', addActorDialog),
+        item('strut_workspace_edit_actor', 'Workspace: Edit Actor...', 'manage_accounts', 'Change who an actor is for the scene, or remove it', () => editActorDialog()),
+        item('strut_workspace_settings', 'Workspace: Settings...', 'settings', 'The scene\'s name and the namespace its files are written under', workspaceSettingsDialog),
+        item('strut_workspace_animation_tags', 'Workspace: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout, and each actor\'s shift in time', animationTagsDialog),
+        item('strut_workspace_check', 'Workspace: Check', 'fact_check', 'Check the workspace for what would stop an export or make it wrong', checkWorkspace),
+        {
+            action: new Action('strut_workspace_export', {
+                name: 'Export Workspace...',
+                icon: 'save',
+                description: 'Export every actor\'s clips into its clip set, and the scene\'s layout',
+                category: 'file',
+                condition: _utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace,
+                click: exportWorkspace,
+            }),
+            menuCategory: 'file.export',
+        },
+    ];
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/textureMatch.ts":
+/*!**********************************!*\
+  !*** ./ts/stage/textureMatch.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   matchTextures: () => (/* binding */ matchTextures)
+/* harmony export */ });
+/**
+ * Which image is the texture of which model texture: by name first (the file {@code jenny.png} for the model's texture {@code jenny}, with a path or the extension
+ * left off either way), and a model with one texture given one image takes it whatever it is called. What is left over is reported, never guessed
+ */
+/** The last part of a path, lower case, with the extension cut off */
+function stem(name) {
+    var _a;
+    const last = (_a = name.split('\\').join('/').split('/').pop()) !== null && _a !== void 0 ? _a : name;
+    const dot = last.lastIndexOf('.');
+    return (dot > 0 ? last.slice(0, dot) : last).toLowerCase();
+}
+function matchTextures(textureNames, files) {
+    const images = new Map();
+    const taken = new Set();
+    for (const texture of textureNames) {
+        const wanted = stem(texture);
+        const found = files.find(file => !taken.has(file) && stem(file.name) === wanted);
+        if (found) {
+            images.set(texture, found.content);
+            taken.add(found);
+        }
+    }
+    // one texture and one image: that image is it
+    const left = textureNames.filter(texture => !images.has(texture));
+    const spare = files.filter(file => !taken.has(file));
+    if (left.length === 1 && spare.length === 1 && textureNames.length === 1) {
+        images.set(left[0], spare[0].content);
+        taken.add(spare[0]);
+    }
+    return {
+        images,
+        missing: textureNames.filter(texture => !images.has(texture)),
+        unused: files.filter(file => !taken.has(file)).map(file => file.name),
+    };
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/workspaceFormat.ts":
+/*!*************************************!*\
+  !*** ./ts/stage/workspaceFormat.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   workspaceFormat: () => (/* binding */ workspaceFormat)
+/* harmony export */ });
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
+
+/**
+ * The workspace project type: where a scene is animated
+ * <p>
+ * A project of this type has no model of its own and no modelling tools: no edit mode (nothing to move, add or reshape), no paint mode, no display settings. It holds
+ * the actors of a scene (their models and textures are loaded for it, see {@code stageProject.ts}) and the animations, so the person animating only animates.
+ * Everything that animates still works as in a model project: the timeline, the graph editor, the toolkit's easing, onion skinning. It is saved as a Blockbench
+ * project, which keeps the actors, their textures and every keyframe
+ */
+const workspaceFormat = new ModelFormat(_constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID, {
+    name: 'Strut Workspace',
+    category: 'minecraft',
+    description: 'Animate a scene, or one skeleton, for several characters on one timeline. The characters are loaded as actors and exported one by one for Strut',
+    icon: 'groups',
+    show_on_start_screen: true,
+    // the actors are made of bones, cubes and meshes loaded from their models, never edited here
+    bone_rig: true,
+    meshes: true,
+    armature_rig: true,
+    per_texture_uv_size: true,
+    centered_grid: true,
+    animated_textures: true,
+    locators: true,
+    rotate_cubes: true,
+    box_uv: false,
+    codec: Codecs.project,
+    // animate only
+    animation_mode: true,
+    edit_mode: false,
+    paint_mode: false,
+    display_mode: false,
+});
+
+
+/***/ }),
+
 /***/ "./ts/strutAnimationCodec.ts":
 /*!***********************************!*\
   !*** ./ts/strutAnimationCodec.ts ***!
@@ -19356,16 +20755,21 @@ function openPhysicsDialog() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addChannelsToAnimation: () => (/* binding */ addChannelsToAnimation),
 /* harmony export */   buildAnimationFile: () => (/* binding */ buildAnimationFile),
+/* harmony export */   buildClip: () => (/* binding */ buildClip),
+/* harmony export */   buildEvents: () => (/* binding */ buildEvents),
 /* harmony export */   exportBinaryAnimations: () => (/* binding */ exportBinaryAnimations),
 /* harmony export */   importBinaryAnimations: () => (/* binding */ importBinaryAnimations)
 /* harmony export */ });
 /* harmony import */ var _binary_animation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./binary/animation */ "./ts/binary/animation.ts");
 /* harmony import */ var _binary_writer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./binary/writer */ "./ts/binary/writer.ts");
 /* harmony import */ var _binary_fingerprint__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./binary/fingerprint */ "./ts/binary/fingerprint.ts");
-/* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./binary/animationMapping */ "./ts/binary/animationMapping.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
+/* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./binary/animationMapping */ "./ts/binary/animationMapping.ts");
 /* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./strutCodec */ "./ts/strutCodec.ts");
-/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./easing */ "./ts/easing.ts");
+/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./easing */ "./ts/easing.ts");
+
 
 
 
@@ -19421,6 +20825,7 @@ function exportBinaryAnimations() {
  * Build a {@link RawBinaryAnimation} from a list of live `Animation` objects
  */
 function buildAnimationFile(animations) {
+    var _a;
     const strings = new _binary_writer__WEBPACK_IMPORTED_MODULE_1__.StringTable();
     // The skeleton fingerprint has to be computed from exactly the same bone lists
     // buildModel() would write, in exactly the same order, since the Java engine independently
@@ -19433,15 +20838,12 @@ function buildAnimationFile(animations) {
     const armatureBoneNames = model.armatures.map(armature => armature.bones.map(bone => bone.name));
     const fingerprint = (0,_binary_fingerprint__WEBPACK_IMPORTED_MODULE_3__.skeletonFingerprint)(groupBoneNames, armatureBoneNames);
     const clips = animations.map(animation => buildClip(animation, strings));
-    return {
-        version: _binary_animation__WEBPACK_IMPORTED_MODULE_0__.ANIMATION_VERSION,
-        flags: 0,
-        skeletonFingerprint: fingerprint,
-        strings: strings.entries(),
-        clips,
-    };
+    const skeletonId = String((_a = Project === null || Project === void 0 ? void 0 : Project[_constants__WEBPACK_IMPORTED_MODULE_4__.PROPERTY_SKELETON_ID]) !== null && _a !== void 0 ? _a : '').trim();
+    if (skeletonId !== '')
+        strings.intern(skeletonId);
+    return Object.assign(Object.assign({ version: _binary_animation__WEBPACK_IMPORTED_MODULE_0__.ANIMATION_VERSION, flags: 0, skeletonFingerprint: fingerprint }, (skeletonId !== '' ? { skeletonId } : {})), { strings: strings.entries(), clips });
 }
-function buildClip(animation, strings) {
+function buildClip(animation, strings, nodeFilter) {
     var _a, _b;
     strings.intern(animation.name);
     const channels = [];
@@ -19450,9 +20852,11 @@ function buildClip(animation, strings) {
         const targetKind = resolveTargetKind(node);
         if (targetKind === undefined)
             continue; // The effects animator, or any node this format doesn't animate
+        if (nodeFilter && !nodeFilter(node))
+            continue;
         strings.intern(node.name);
         for (const property of ['ROTATION', 'POSITION', 'SCALE']) {
-            const channelName = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.liveChannelName)(property);
+            const channelName = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.liveChannelName)(property);
             const keyframes = (animator.keyframes || [])
                 .filter(kf => kf.channel === channelName)
                 .sort((a, b) => a.time - b.time);
@@ -19468,7 +20872,7 @@ function buildClip(animation, strings) {
     return {
         name: animation.name,
         duration: animation.length || 0,
-        loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.loopModeFromLive)(animation.loop),
+        loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.loopModeFromLive)(animation.loop),
         channels,
         events: buildEvents((_b = animation.animators) === null || _b === void 0 ? void 0 : _b.effects, strings),
     };
@@ -19489,23 +20893,23 @@ function resolveTargetKind(node) {
  * as-is
  */
 function buildKey(kf, strings) {
-    const interpolation = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.interpolationFromLive)(kf.interpolation);
+    const interpolation = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.interpolationFromLive)(kf.interpolation);
     const value = valueFromKeyframe(kf, 0, strings);
     const hasPostSplit = interpolation !== 'BEZIER' && Array.isArray(kf.data_points) && kf.data_points.length > 1;
     const post = hasPostSplit ? valueFromKeyframe(kf, 1, strings) : null;
     const easingName = kf.easing;
-    const easing = easingName && easingName !== _easing__WEBPACK_IMPORTED_MODULE_5__.EASING_DEFAULT ? easingName : null;
+    const easing = easingName && easingName !== _easing__WEBPACK_IMPORTED_MODULE_6__.EASING_DEFAULT ? easingName : null;
     if (easing !== null)
         strings.intern(easing);
-    const easingArgs = easing !== null && (0,_easing__WEBPACK_IMPORTED_MODULE_5__.isArgsEasing)(easingName) && Array.isArray(kf.easingArgs)
+    const easingArgs = easing !== null && (0,_easing__WEBPACK_IMPORTED_MODULE_6__.isArgsEasing)(easingName) && Array.isArray(kf.easingArgs)
         ? [...kf.easingArgs]
         : [];
     const bezier = interpolation === 'BEZIER'
         ? {
-            leftTime: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.toVec3)(kf.bezier_left_time),
-            leftValue: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.toVec3)(kf.bezier_left_value),
-            rightTime: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.toVec3)(kf.bezier_right_time),
-            rightValue: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.toVec3)(kf.bezier_right_value),
+            leftTime: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.toVec3)(kf.bezier_left_time),
+            leftValue: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.toVec3)(kf.bezier_left_value),
+            rightTime: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.toVec3)(kf.bezier_right_time),
+            rightValue: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.toVec3)(kf.bezier_right_value),
         }
         : null;
     return { time: kf.time, interpolation, value, post, easing, easingArgs, bezier };
@@ -19515,7 +20919,7 @@ function valueFromKeyframe(kf, dataPoint, strings) {
     const expressions = [null, null, null];
     ['x', 'y', 'z'].forEach((axis, i) => {
         const raw = kf.get(axis, dataPoint);
-        if (typeof raw === 'string' && Object.prototype.hasOwnProperty.call(_easing__WEBPACK_IMPORTED_MODULE_5__.easingFunctions, raw)) {
+        if (typeof raw === 'string' && Object.prototype.hasOwnProperty.call(_easing__WEBPACK_IMPORTED_MODULE_6__.easingFunctions, raw)) {
             // An easing name is never a Molang expression. A project imported from older data can carry one in a data point's
             // x/y/z, and exporting it as an expression would make the game drop the whole clip. Written as 0 instead
             console.warn(`Strut export: keyframe at ${kf.time}s has the easing name "${raw}" as its ${axis} value; exporting 0`);
@@ -19597,11 +21001,17 @@ function importBinaryAnimations() {
         extensions: [_binary_animation__WEBPACK_IMPORTED_MODULE_0__.ANIMATION_EXTENSION],
         readtype: 'binary',
     }, (files) => {
+        var _a;
         const file = files[0];
         if (!file)
             return;
         const bytes = new Uint8Array(file.content);
         const raw = (0,_binary_animation__WEBPACK_IMPORTED_MODULE_0__.decodeAnimation)(bytes, file.name || 'imported.strutanim');
+        const mine = String((_a = Project === null || Project === void 0 ? void 0 : Project[_constants__WEBPACK_IMPORTED_MODULE_4__.PROPERTY_SKELETON_ID]) !== null && _a !== void 0 ? _a : '').trim();
+        if (raw.skeletonId && raw.skeletonId !== mine)
+            Blockbench.showQuickMessage(mine === ''
+                ? `These animations are made for the skeleton ${raw.skeletonId}; this model has no Skeleton ID set`
+                : `These animations are made for the skeleton ${raw.skeletonId}, and this model is ${mine}`, 4500);
         buildAnimationsFromFile(raw, file.path);
     });
 }
@@ -19611,7 +21021,7 @@ function buildAnimationsFromFile(raw, path) {
         const animation = new Animation({
             name: clip.name,
             path,
-            loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.loopModeToLive)(clip.loop),
+            loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.loopModeToLive)(clip.loop),
             length: clip.duration,
         }).add();
         addChannelsToAnimation(animation, clip);
@@ -19622,13 +21032,17 @@ function buildAnimationsFromFile(raw, path) {
     if (created.length > 0 && Animator.open)
         created[0].select();
 }
-function addChannelsToAnimation(animation, clip) {
+/**
+ * Puts the keys of {@code clip} on the animation's animators. With {@code within} only the bones under that group are looked for (a workspace actor: two actors
+ * may have bones of one name)
+ */
+function addChannelsToAnimation(animation, clip, within) {
     const animatorsByTarget = new Map();
     for (const channel of clip.channels) {
         const targetKey = `${channel.targetKind}:${channel.target}`;
         let animator = animatorsByTarget.get(targetKey);
         if (animator === undefined) {
-            const node = resolveTargetNode(channel.targetKind, channel.target);
+            const node = resolveTargetNode(channel.targetKind, channel.target, within);
             if (!node) {
                 console.warn(`[Strut] animation "${clip.name}" references ${channel.targetKind.toLowerCase()}`
                     + ` "${channel.target}", which does not exist in this project; its keyframes were skipped`);
@@ -19641,25 +21055,31 @@ function addChannelsToAnimation(animation, clip) {
         }
         if (!animator)
             continue;
-        const channelName = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.liveChannelName)(channel.property);
+        const channelName = (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.liveChannelName)(channel.property);
         for (const key of channel.keys) {
             animator.addKeyframe(keyframeOptionsFromRawKey(key, channelName));
         }
     }
 }
-function resolveTargetNode(targetKind, name) {
-    if (targetKind === 'GROUP_BONE')
-        return (Group.all || []).find((group) => group.name === name);
-    return (ArmatureBone.all || []).find((bone) => bone.name === name);
+function resolveTargetNode(targetKind, name, within) {
+    const under = (node) => {
+        for (let at = node; at; at = at.parent) {
+            if (at === within)
+                return true;
+        }
+        return false;
+    };
+    const all = targetKind === 'GROUP_BONE' ? (Group.all || []) : (ArmatureBone.all || []);
+    return all.find(node => node.name === name && (!within || under(node)));
 }
 function keyframeOptionsFromRawKey(key, channel) {
-    const dataPoints = [(0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.dataPointFromValue)(key.value)];
+    const dataPoints = [(0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.dataPointFromValue)(key.value)];
     if (key.post !== null)
-        dataPoints.push((0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.dataPointFromValue)(key.post));
+        dataPoints.push((0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.dataPointFromValue)(key.post));
     const options = {
         channel,
         time: key.time,
-        interpolation: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_4__.interpolationToLive)(key.interpolation),
+        interpolation: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.interpolationToLive)(key.interpolation),
         data_points: dataPoints,
     };
     if (key.easing !== null) {
@@ -19724,11 +21144,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./binary/model */ "./ts/binary/model.ts");
 /* harmony import */ var _binary_writer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./binary/writer */ "./ts/binary/writer.ts");
 /* harmony import */ var _binary_cubeUv__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./binary/cubeUv */ "./ts/binary/cubeUv.ts");
-/* harmony import */ var _binary_skinWeights__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./binary/skinWeights */ "./ts/binary/skinWeights.ts");
-/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
+/* harmony import */ var _binary_skinWeights__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./binary/skinWeights */ "./ts/binary/skinWeights.ts");
+/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _physics_config__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./physics/config */ "./ts/physics/config.ts");
 /* harmony import */ var _boneColours__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./boneColours */ "./ts/boneColours.ts");
+
 
 
 
@@ -19846,7 +21268,7 @@ function exportSlotGroups(groups, name) {
  * @param unitsPerBlock The authoring grid the project was built on - Minecraft's own is 16
  */
 function buildModel(unitsPerBlock = _binary_model__WEBPACK_IMPORTED_MODULE_0__.DEFAULT_UNITS_PER_BLOCK, selection, modelIdOverride) {
-    var _a;
+    var _a, _b;
     const strings = new _binary_writer__WEBPACK_IMPORTED_MODULE_1__.StringTable();
     // By convention the model's own identifier is interned first, so it lands at string index 0 -
     // see RawBinaryModel#modelId's own doc comment on the Java side
@@ -20083,6 +21505,9 @@ function buildModel(unitsPerBlock = _binary_model__WEBPACK_IMPORTED_MODULE_0__.D
     const sections = new Map();
     if (physics !== null)
         sections.set(_physics_config__WEBPACK_IMPORTED_MODULE_4__.PHYSICS_SECTION, physics);
+    const skeletonId = String((_b = Project[_constants__WEBPACK_IMPORTED_MODULE_5__.PROPERTY_SKELETON_ID]) !== null && _b !== void 0 ? _b : '').trim();
+    if (skeletonId !== '')
+        sections.set(_binary_skeletonId__WEBPACK_IMPORTED_MODULE_6__.SKELETON_SECTION, (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_6__.encodeSkeletonId)(skeletonId));
     if (colours !== null)
         sections.set(_boneColours__WEBPACK_IMPORTED_MODULE_3__.BONE_COLOUR_SECTION, colours);
     return Object.assign(Object.assign({}, (sections.size > 0 ? { extensions: sections } : {})), { version: 100, modelId,
@@ -20197,7 +21622,7 @@ function buildSkinForVertices(mesh, vkeys, liveBones, boneIndexByUuid) {
                 raw.push({ boneIndex: boneIndexByUuid.get(bone.uuid), weight });
             }
         }
-        return (0,_binary_skinWeights__WEBPACK_IMPORTED_MODULE_6__.normalizeInfluences)(raw);
+        return (0,_binary_skinWeights__WEBPACK_IMPORTED_MODULE_7__.normalizeInfluences)(raw);
     });
 }
 // ===============================================================
@@ -20233,18 +21658,24 @@ function placeholderTextureDataUrl(width, height) {
  * `js/formats/bedrock/bedrock.js`) - `addTo` before `init()`, since `init()`'s own root-parented
  * default only fires when `this.parent` is not already set
  */
-function buildProjectFromModel(model) {
-    var _a, _b, _c;
-    setupProject(_codec__WEBPACK_IMPORTED_MODULE_7__.format);
+function buildProjectFromModel(model, into, images) {
+    var _a, _b, _c, _d, _e;
+    // with {@code into} the model is added under that group of the open project (an actor of a workspace) and the project itself is left as it is
+    if (!into)
+        setupProject(_codec__WEBPACK_IMPORTED_MODULE_8__.format);
     // buildModel() reads Project.model_identifier first (falling back to Project.name) for
     // RawBinaryModel#modelId, which is written as string index 0 - the very first byte of the
     // string table. Without setting this back on import, a fresh ModelProject's own default
     // model_identifier would make a re-export produce a different modelId than the one just
     // decoded, breaking §5's round-trip byte-identity on the very first field
-    if (model.modelId)
+    if (model.modelId && !into)
         Project.model_identifier = model.modelId;
     const physicsSection = (_a = model.extensions) === null || _a === void 0 ? void 0 : _a.get(_physics_config__WEBPACK_IMPORTED_MODULE_4__.PHYSICS_SECTION);
-    Project[_constants__WEBPACK_IMPORTED_MODULE_5__.PROPERTY_PHYSICS] = physicsSection ? (0,_physics_config__WEBPACK_IMPORTED_MODULE_4__.decodePhysicsSection)(physicsSection) : '';
+    if (!into)
+        Project[_constants__WEBPACK_IMPORTED_MODULE_5__.PROPERTY_PHYSICS] = physicsSection ? (0,_physics_config__WEBPACK_IMPORTED_MODULE_4__.decodePhysicsSection)(physicsSection) : '';
+    const skeletonSection = (_b = model.extensions) === null || _b === void 0 ? void 0 : _b.get(_binary_skeletonId__WEBPACK_IMPORTED_MODULE_6__.SKELETON_SECTION);
+    if (!into)
+        Project[_constants__WEBPACK_IMPORTED_MODULE_5__.PROPERTY_SKELETON_ID] = (_c = (skeletonSection ? (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_6__.decodeSkeletonId)(skeletonSection) : null)) !== null && _c !== void 0 ? _c : '';
     // Texture.load() (called internally by fromDataURL) reads a canvas-generated data URL's real
     // pixel dimensions into texture.width/height - this happens through the browser's own Image
     // decode, which is not necessarily synchronous. Unverified without a live session: whether
@@ -20252,10 +21683,12 @@ function buildProjectFromModel(model) {
     // Explicitly set uv_width/uv_height beforehand regardless, since those come from the decoded
     // model directly rather than depending on image decode timing
     const liveTextures = model.textures.map(texture => {
+        var _a;
         const live = new Texture({ name: texture.name });
         live.uv_width = texture.uvWidth;
         live.uv_height = texture.uvHeight;
-        live.fromDataURL(placeholderTextureDataUrl(texture.width, texture.height));
+        // a real image for the texture when one was given (by the texture's name), else the placeholder
+        live.fromDataURL((_a = images === null || images === void 0 ? void 0 : images.get(texture.name)) !== null && _a !== void 0 ? _a : placeholderTextureDataUrl(texture.width, texture.height));
         live.add(false);
         return live;
     });
@@ -20269,11 +21702,11 @@ function buildProjectFromModel(model) {
     // read `liveGroups[bone.parentIndex]` from an array that does not exist yet for every
     // non-root bone
     const liveGroups = [];
-    const colourSection = (_b = model.extensions) === null || _b === void 0 ? void 0 : _b.get(_boneColours__WEBPACK_IMPORTED_MODULE_3__.BONE_COLOUR_SECTION);
+    const colourSection = (_d = model.extensions) === null || _d === void 0 ? void 0 : _d.get(_boneColours__WEBPACK_IMPORTED_MODULE_3__.BONE_COLOUR_SECTION);
     const boneColours = colourSection ? (0,_boneColours__WEBPACK_IMPORTED_MODULE_3__.decodeBoneColours)(colourSection, model.groupBones.length) : [];
     for (const [boneIndex, bone] of model.groupBones.entries()) {
-        const parent = bone.parentIndex >= 0 ? liveGroups[bone.parentIndex] : undefined;
-        const marker = (0,_boneColours__WEBPACK_IMPORTED_MODULE_3__.markerOf)((_c = boneColours[boneIndex]) !== null && _c !== void 0 ? _c : 0);
+        const parent = bone.parentIndex >= 0 ? liveGroups[bone.parentIndex] : into;
+        const marker = (0,_boneColours__WEBPACK_IMPORTED_MODULE_3__.markerOf)((_e = boneColours[boneIndex]) !== null && _e !== void 0 ? _e : 0);
         const group = new Group(Object.assign(Object.assign({ name: bone.name }, (marker !== undefined ? { color: marker } : {})), { origin: bone.pivot, rotation: bone.rotation }));
         if (marker !== undefined)
             group.color = marker;
@@ -20287,7 +21720,7 @@ function buildProjectFromModel(model) {
     const liveArmatures = [];
     const liveArmatureBones = [];
     for (const armature of model.armatures) {
-        const parent = armature.parentGroupBone >= 0 ? liveGroups[armature.parentGroupBone] : undefined;
+        const parent = armature.parentGroupBone >= 0 ? liveGroups[armature.parentGroupBone] : into;
         const liveArmature = new Armature({ name: armature.name, origin: armature.origin });
         liveArmature.addTo(parent);
         liveArmature.init();
@@ -20347,6 +21780,7 @@ function buildProjectFromModel(model) {
             }
         }
     });
+    return liveGroups;
 }
 function addMeshToProject(mesh, parent, textureFor, liveArmatures, liveArmatureBones, boneName) {
     const vertexKeys = [];
@@ -20537,6 +21971,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   hasModelDisplaySettings: () => (/* binding */ hasModelDisplaySettings),
 /* harmony export */   isEmpty: () => (/* binding */ isEmpty),
 /* harmony export */   isGeckoLibModel: () => (/* binding */ isGeckoLibModel),
+/* harmony export */   isStrutModelProject: () => (/* binding */ isStrutModelProject),
+/* harmony export */   isStrutWorkspace: () => (/* binding */ isStrutWorkspace),
 /* harmony export */   isValidNamespace: () => (/* binding */ isValidNamespace),
 /* harmony export */   isValidPath: () => (/* binding */ isValidPath),
 /* harmony export */   make: () => (/* binding */ make),
@@ -20646,9 +22082,13 @@ const isValidNamespace = (namespace) => {
  */
 const isEmpty = (object = {}) => Object.keys(object).length === 0;
 /**
- * Whether the currently focussed model is a GeckoLib model
+ * Whether the focussed project is a Strut one, a model or a workspace: what the animation tools (easing, keyframe overrides, the animation export) work for
  */
-const isGeckoLibModel = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_MODEL_ID;
+const isGeckoLibModel = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_MODEL_ID || Format.id === _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID;
+/** Whether the focussed project is a Strut model project: what the model tools (export a model, armour, physics, the model's own properties) work for */
+const isStrutModelProject = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_MODEL_ID;
+/** Whether the focussed project is a workspace */
+const isStrutWorkspace = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID;
 /**
  * Whether the current project is a GeckoLib model that has or uses item render perspective transforms
  */
@@ -20656,6 +22096,64 @@ const isGeckoLibModel = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE_
 // checkbox and is always boolean at runtime, but the cast keeps this function's own return type
 // boolean rather than widening to `boolean | SettingsValue`
 const hasModelDisplaySettings = () => Boolean(isGeckoLibModel() && Project && ((Project[_constants__WEBPACK_IMPORTED_MODULE_0__.PROPERTY_MODEL_TYPE] === _constants__WEBPACK_IMPORTED_MODULE_0__.GeckoModelType.ITEM || !isEmpty(Project.display_settings)) || settings[_constants__WEBPACK_IMPORTED_MODULE_0__.SETTING_ALWAYS_SHOW_DISPLAY].value));
+
+
+/***/ }),
+
+/***/ "./ts/uvBoxSelectFix.ts":
+/*!******************************!*\
+  !*** ./ts/uvBoxSelectFix.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   loadUvBoxSelectFix: () => (/* binding */ loadUvBoxSelectFix),
+/* harmony export */   unloadUvBoxSelectFix: () => (/* binding */ unloadUvBoxSelectFix)
+/* harmony export */ });
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let patched = null;
+/** Whether the selection is a mesh and no cube: what is being edited has face UVs, so there are no box UVs to be selecting by */
+function onlyMeshesSelected() {
+    var _a, _b, _c, _d, _e, _f;
+    const scope = globalThis;
+    return ((_c = (_b = (_a = scope.Mesh) === null || _a === void 0 ? void 0 : _a.selected) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0) > 0 && ((_f = (_e = (_d = scope.Cube) === null || _d === void 0 ? void 0 : _d.selected) === null || _e === void 0 ? void 0 : _e.length) !== null && _f !== void 0 ? _f : 0) === 0;
+}
+function loadUvBoxSelectFix() {
+    if (patched)
+        return;
+    const editor = globalThis.UVEditor;
+    const vue = editor === null || editor === void 0 ? void 0 : editor.vue;
+    if (!vue || typeof vue.onPointerDown !== 'function' || typeof editor.isBoxUV !== 'function') {
+        console.warn('[Strut Toolkit] The UV editor was not found, so the box selection fix was not installed.');
+        return;
+    }
+    const original = vue.onPointerDown;
+    const wrapper = function (...args) {
+        if (!onlyMeshesSelected())
+            return original.apply(this, args);
+        const isBoxUV = editor.isBoxUV;
+        editor.isBoxUV = () => false;
+        try {
+            // the handler reads it as the box selection begins, before anything is dragged
+            return original.apply(this, args);
+        }
+        finally {
+            editor.isBoxUV = isBoxUV;
+        }
+    };
+    vue.onPointerDown = wrapper;
+    patched = { vue, original, wrapper };
+}
+function unloadUvBoxSelectFix() {
+    if (!patched)
+        return;
+    // only if nothing else has wrapped it since: another plugin's wrapper is not ours to remove
+    if (patched.vue.onPointerDown === patched.wrapper)
+        patched.vue.onPointerDown = patched.original;
+    patched = null;
+}
 
 
 /***/ }),
@@ -20806,18 +22304,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../package.json */ "./package.json");
 /* harmony import */ var _animationUi__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./animationUi */ "./ts/animationUi.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./binary/skeletonId */ "./ts/binary/skeletonId.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
 /* harmony import */ var _keyframe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./keyframe */ "./ts/keyframe.ts");
-/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
-/* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./strutCodec */ "./ts/strutCodec.ts");
-/* harmony import */ var _armourUi__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./armourUi */ "./ts/armourUi.ts");
-/* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
-/* harmony import */ var _strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./strutJsonAnimationCodec */ "./ts/strutJsonAnimationCodec.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
+/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
+/* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./strutCodec */ "./ts/strutCodec.ts");
+/* harmony import */ var _armourUi__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./armourUi */ "./ts/armourUi.ts");
+/* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
+/* harmony import */ var _strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./strutJsonAnimationCodec */ "./ts/strutJsonAnimationCodec.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./events */ "./ts/events.ts");
-/* harmony import */ var _physicsUi__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./physicsUi */ "./ts/physicsUi.ts");
+/* harmony import */ var _physicsUi__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./physicsUi */ "./ts/physicsUi.ts");
 /* harmony import */ var _physicsTab__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./physicsTab */ "./ts/physicsTab.ts");
 /* harmony import */ var _armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./armaturePasteFix */ "./ts/armaturePasteFix.ts");
+/* harmony import */ var _uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./uvBoxSelectFix */ "./ts/uvBoxSelectFix.ts");
+/* harmony import */ var _stage_stageUi__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./stage/stageUi */ "./ts/stage/stageUi.ts");
+
+
+
 
 
 
@@ -20857,15 +22361,17 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
             (0,_keyframe__WEBPACK_IMPORTED_MODULE_5__.loadKeyframeOverrides)();
             (0,_physicsTab__WEBPACK_IMPORTED_MODULE_6__.loadPhysicsTab)();
             (0,_armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__.loadArmaturePasteFix)();
+            (0,_uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__.loadUvBoxSelectFix)();
+            (0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.loadStageUi)();
             // Fixes GeckoLib .animation.json import - live-verified that Blockbench's own "Import
             // Animations" panel button dispatches through AnimationCodec.getCodec(), which falls
             // back to Blockbench's generic, GeckoLib-unaware `bedrock` codec whenever a format (like
             // Strut, until now) has none of its own. See strutJsonAnimationCodec.ts's own top
             // comment for the full investigation
-            _codec__WEBPACK_IMPORTED_MODULE_8__.format.animation_codec = (0,_strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_9__.createStrutJsonAnimationCodec)();
+            _codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec = (0,_strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_11__.createStrutJsonAnimationCodec)();
             pluginSettings = createPluginSettings();
-            pluginProperties = [...createPluginProperties(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_10__.createArmourProperties)()];
-            pluginMenuItems = [...createPluginMenuItems(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_10__.createArmourMenuItems)()];
+            pluginProperties = [...createPluginProperties(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.createArmourProperties)()];
+            pluginMenuItems = [...createPluginMenuItems(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.createArmourMenuItems)(), ...(0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.createStageMenuItems)()];
             for (const menuItem of pluginMenuItems) {
                 MenuBar.addAction(menuItem.action, menuItem.menuCategory);
             }
@@ -20881,17 +22387,19 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
             for (const menuItem of pluginMenuItems) {
                 menuItem.action.delete();
             }
+            (0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.unloadStageUi)();
+            (0,_uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__.unloadUvBoxSelectFix)();
             (0,_armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__.unloadArmaturePasteFix)();
             (0,_physicsTab__WEBPACK_IMPORTED_MODULE_6__.unloadPhysicsTab)();
             (0,_keyframe__WEBPACK_IMPORTED_MODULE_5__.unloadKeyframeOverrides)();
             (0,_animationUi__WEBPACK_IMPORTED_MODULE_4__.unloadAnimationUI)();
             (0,_events__WEBPACK_IMPORTED_MODULE_3__.removeEventListeners)();
-            if (_codec__WEBPACK_IMPORTED_MODULE_8__.format.animation_codec) {
-                delete AnimationCodec.codecs[_codec__WEBPACK_IMPORTED_MODULE_8__.format.animation_codec.id];
-                _codec__WEBPACK_IMPORTED_MODULE_8__.format.animation_codec = undefined;
+            if (_codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec) {
+                delete AnimationCodec.codecs[_codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec.id];
+                _codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec = undefined;
             }
-            _codec__WEBPACK_IMPORTED_MODULE_8__.format.delete();
-            delete Formats[_constants__WEBPACK_IMPORTED_MODULE_11__.LEGACY_MODEL_ID];
+            _codec__WEBPACK_IMPORTED_MODULE_10__.format.delete();
+            delete Formats[_constants__WEBPACK_IMPORTED_MODULE_13__.LEGACY_MODEL_ID];
             console.clear();
         },
     }));
@@ -20903,31 +22411,31 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
  */
 function createPluginSettings() {
     return [
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_11__.SETTING_AUTO_PARTICLE_TEXTURE, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_AUTO_PARTICLE_TEXTURE, {
             value: true,
             category: "export",
             name: "Auto-compute block/item particle texture",
             description: "Attempt to auto-compute the particle texture for a Strut block/item model if one isn't already specified when exporting the display settings json"
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_11__.BAKE_IN_BEZIER_KEYFRAMES, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.BAKE_IN_BEZIER_KEYFRAMES, {
             value: false,
             category: "export",
             name: "Bake in bezier keyframes",
             description: "When true Blockbench makes a ton of linear keyframes to form the illusion of a bezier easing, rather than properly setting the easing to bezier."
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_11__.SETTING_ALWAYS_SHOW_DISPLAY, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_ALWAYS_SHOW_DISPLAY, {
             value: false,
             category: "edit",
             name: "Always show display tab",
             description: "Force the Display tab to always show, even when not an Item type model"
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_11__.SETTING_REMEMBER_EXPORT_LOCATIONS, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_REMEMBER_EXPORT_LOCATIONS, {
             value: true,
             category: "export",
             name: "Remember file export locations",
             description: "Remember where you export model/display/animation files to for re-use. Stores the file paths in the bbmodel project file."
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_12__.make)(new Setting(_constants__WEBPACK_IMPORTED_MODULE_11__.SETTING_DEFAULT_MODID, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_DEFAULT_MODID, {
             // The below is absolutely disgusting, but I have no choice because this is a bug in Blockbench's API
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -20953,45 +22461,66 @@ function createPluginSettings() {
  */
 function createPluginProperties() {
     return [
-        (0,_utils__WEBPACK_IMPORTED_MODULE_12__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_11__.PROPERTY_MODID, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_MODID, {
             label: "Mod ID",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_11__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
             },
             values: [],
-            merge_validation: _utils__WEBPACK_IMPORTED_MODULE_12__.isValidNamespace
+            merge_validation: _utils__WEBPACK_IMPORTED_MODULE_14__.isValidNamespace
         }), property => {
             property['placeholder'] = 'my_modid';
             property['description'] = 'The modid of the mod this model is for';
             property.getDefault = function () {
-                return String(settings[_constants__WEBPACK_IMPORTED_MODULE_11__.SETTING_DEFAULT_MODID].value);
+                return String(settings[_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_DEFAULT_MODID].value);
             };
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_12__.make)(new Property(ModelProject, "enum", _constants__WEBPACK_IMPORTED_MODULE_11__.PROPERTY_MODEL_TYPE, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "enum", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_MODEL_TYPE, {
             label: "Model Type",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_11__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
             },
             exposed: false,
-            options: _constants__WEBPACK_IMPORTED_MODULE_11__.GeckoModelType,
-            values: Object.values(_constants__WEBPACK_IMPORTED_MODULE_11__.GeckoModelType)
+            options: _constants__WEBPACK_IMPORTED_MODULE_13__.GeckoModelType,
+            values: Object.values(_constants__WEBPACK_IMPORTED_MODULE_13__.GeckoModelType)
         }), property => {
             property['description'] = 'The type of Strut object this model is for. Leave as the default value if unsure';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_12__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_11__.PROPERTY_PHYSICS, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_SKELETON_ID, {
+            label: "Skeleton ID",
+            condition: {
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+            },
+            values: [],
+            merge_validation: (id) => id === '' || (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_15__.isValidSkeletonId)(id)
+        }), property => {
+            property['placeholder'] = 'my_modid:creature';
+            property['description'] = 'The rig this model is built on. A scene only lets a model fill a role made for its skeleton ID, and animations exported from this project carry it. Leave empty if the model is not used in scenes';
+        }),
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_STAGE, {
+            label: "Strut Workspace",
+            condition: {
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_WORKSPACE_ID]
+            },
+            exposed: false,
+            values: []
+        }), property => {
+            property['description'] = 'The workspace data of the project as JSON (use the Workspace actions under Tools)';
+        }),
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_PHYSICS, {
             label: "Strut Physics",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_11__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
             },
             exposed: false,
             values: []
         }), property => {
             property['description'] = 'The physics of the model as JSON (edit it under Tools, Strut Physics)';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_12__.make)(new Property(ModelProject, "instance", _constants__WEBPACK_IMPORTED_MODULE_11__.PROPERTY_FILEPATH_CACHE, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "instance", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_FILEPATH_CACHE, {
             label: "Strut Filepath Cache",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_11__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
             },
             exposed: false,
             values: []
@@ -21016,9 +22545,9 @@ function createPluginMenuItems() {
                 icon: "save",
                 description: "Export your model geometry as a .strutmodel binary file for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
                 click: function () {
-                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_13__.exportBinaryModel)();
+                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_16__.exportBinaryModel)();
                 },
             }),
             menuCategory: 'file.export'
@@ -21029,9 +22558,9 @@ function createPluginMenuItems() {
                 icon: "shield",
                 description: "Select the bones (groups) that hold an armour piece in the outliner first, then pick its slot: exports only their geometry, on top of the bones above them, so it is worn by bone name.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
                 click: function () {
-                    (0,_armourUi__WEBPACK_IMPORTED_MODULE_10__.exportSelectedSlot)();
+                    (0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.exportSelectedSlot)();
                 },
             }),
             menuCategory: 'file.export'
@@ -21045,7 +22574,7 @@ function createPluginMenuItems() {
                 description: "Open a .strutmodel binary file as a new Strut project.",
                 category: "file",
                 click: function () {
-                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_13__.importBinaryModel)();
+                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_16__.importBinaryModel)();
                 },
             }),
             menuCategory: 'file.import'
@@ -21056,8 +22585,8 @@ function createPluginMenuItems() {
                 icon: "icon-bb_interface",
                 description: "Export your item/block display settings for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)() && (0,_utils__WEBPACK_IMPORTED_MODULE_12__.hasModelDisplaySettings)(),
-                click: _codec__WEBPACK_IMPORTED_MODULE_8__.buildDisplaySettingsJson,
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)() && (0,_utils__WEBPACK_IMPORTED_MODULE_14__.hasModelDisplaySettings)(),
+                click: _codec__WEBPACK_IMPORTED_MODULE_10__.buildDisplaySettingsJson,
             }),
             menuCategory: 'file.export'
         },
@@ -21080,9 +22609,9 @@ function createPluginMenuItems() {
                 icon: "save",
                 description: "Export your model animations as a .strutanim binary file for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)() && !(0,_utils__WEBPACK_IMPORTED_MODULE_12__.isEmpty)(AnimationItem.all),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)() && !(0,_utils__WEBPACK_IMPORTED_MODULE_14__.isEmpty)(AnimationItem.all),
                 click: function () {
-                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_14__.exportBinaryAnimations)();
+                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__.exportBinaryAnimations)();
                 },
             }),
             menuCategory: 'file.export'
@@ -21093,9 +22622,9 @@ function createPluginMenuItems() {
                 icon: "waves",
                 description: "Edit the model's physics as JSON, check it and preview the response curves. The Physics tab is the visual way.",
                 category: "edit",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
                 click: function () {
-                    (0,_physicsUi__WEBPACK_IMPORTED_MODULE_15__.openPhysicsDialog)();
+                    (0,_physicsUi__WEBPACK_IMPORTED_MODULE_18__.openPhysicsDialog)();
                 },
             }),
             menuCategory: 'tools'
@@ -21108,9 +22637,9 @@ function createPluginMenuItems() {
                 icon: "movie",
                 description: "Import a .strutanim binary file's animations into the current project.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_12__.isGeckoLibModel)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
                 click: function () {
-                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_14__.importBinaryAnimations)();
+                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__.importBinaryAnimations)();
                 },
             }),
             menuCategory: 'file.import'

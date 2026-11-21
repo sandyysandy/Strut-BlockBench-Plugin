@@ -39,6 +39,28 @@
           "Flesh made for the old per-vertex solver keeps its entry; the numbers that no longer apply are dropped the first time its controls are edited",
           "What presses on flesh in the game from outside the model (other models, players and blocks) is not drawn in the preview"
         ]
+      },
+      {
+        "title": "Strut Workspace",
+        "list": [
+          "A new project type, File, New, Strut Workspace, for animating a scene or one skeleton for several characters on one timeline. It has no model of its own and no modelling tools (Animate mode only): the person animating only animates",
+          "The Actors panel lists the characters in the scene. Add actor loads a .strutmodel and its texture images for you (matched by name; kept in the workspace), under a locked @role group. Show or hide, change who an actor is (role, skeleton ID, who else may fill the role, lead, camera bone), give an actor another model of the same skeleton without losing a keyframe, or remove it. Where an actor stands is its own move and turn in the viewport",
+          "File, Export, Export Workspace writes each actor's clips into its own clip set, made for its skeleton ID with its stage position folded into its root bone, and the scene's layout file (roles, who may fill them, each clip's length, loop, phase, variant and side). Tools, Workspace: Animation Tags sets a clip's phase, variant and side and each actor's shift in time; Workspace: Check lists what would stop an export. The web version exports one zip",
+          "A workspace is saved as a normal Blockbench project: actors, textures and keyframes come back when it is opened. Sounds and particles are given to the first actor. A dedicated timeline grouped by actor and importing existing animations are not built yet"
+        ]
+      },
+      {
+        "title": "Skeleton ID",
+        "list": [
+          "A model project has a Skeleton ID in its properties (such as mymod:creature_a): a name for the rig the model is built on, written into the model file and into every animation file exported from the project. A scene only lets a model fill a role made for its skeleton ID, and an animation file that names one is matched by it instead of by the bone fingerprint",
+          "Importing animations made for a different skeleton ID than the project's says so. Files without one work as before"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "list": [
+          "Box selecting the UVs of a mesh no longer selects cubes that are not selected. With only a mesh selected in a box UV project, dragging a rectangle in the UV editor also selected every cube whose UV box lay under it, because the editor took the project's box UV setting for the answer when no cube was selected to ask. A mesh has face UVs, so the box selection now works on the selected elements only. With a cube selected, or nothing, nothing changes"
+        ]
       }
     ]
   },

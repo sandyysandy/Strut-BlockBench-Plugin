@@ -1,6 +1,6 @@
 import { exportSlotGroups } from './strutCodec';
 import { STRUT_MODEL_ID } from './constants';
-import { isGeckoLibModel, make } from './utils';
+import { isStrutModelProject, make } from './utils';
 import {
     ARMOUR_SLOTS, buildWearerProfile, isArmourSlot, MarkedGroup, PROPERTY_ARMOUR_COVERS, PROPERTY_ARMOUR_SET, PROPERTY_ARMOUR_SLOT, groupsOfSlot, slotModelName, slotsWithArmour,
 } from './armourProfile';
@@ -162,7 +162,7 @@ export function createArmourMenuItems(): { action: Action, menuCategory: string 
             icon: 'shield',
             description: `Export the groups marked as ${slot} armour as that slot's model, named from the armour set (no selection needed: the marks say which bones)`,
             category: 'file',
-            condition: () => isGeckoLibModel() && slotsWithArmour(markedGroups()).includes(slot),
+            condition: () => isStrutModelProject() && slotsWithArmour(markedGroups()).includes(slot),
             click: () => exportMarkedSlot(slot),
         }),
         menuCategory: 'file.export',
@@ -174,7 +174,7 @@ export function createArmourMenuItems(): { action: Action, menuCategory: string 
             icon: 'checkroom',
             description: 'Write the wearer profile of this model: its armour set and the groups each slot hides, from the marks on the groups',
             category: 'file',
-            condition: () => isGeckoLibModel(),
+            condition: () => isStrutModelProject(),
             click: exportWearerProfile,
         }),
         menuCategory: 'file.export',

@@ -1,4 +1,4 @@
-import {STRUT_MODEL_ID, GeckoModelType, PROPERTY_MODEL_TYPE, SETTING_ALWAYS_SHOW_DISPLAY} from "./constants";
+import {STRUT_MODEL_ID, STRUT_WORKSPACE_ID, GeckoModelType, PROPERTY_MODEL_TYPE, SETTING_ALWAYS_SHOW_DISPLAY} from "./constants";
 
 const VALID_NAMESPACE_PATTERN = new RegExp('^[_\\-.a-z0-9]+$')
 const VALID_PATH_PATTERN = new RegExp('^[_\\-/.a-z0-9]+$')
@@ -115,9 +115,15 @@ export const isValidNamespace = (namespace: string) => {
 export const isEmpty = (object = {}) => Object.keys(object).length === 0;
 
 /**
- * Whether the currently focussed model is a GeckoLib model
+ * Whether the focussed project is a Strut one, a model or a workspace: what the animation tools (easing, keyframe overrides, the animation export) work for
  */
-export const isGeckoLibModel = () => Format.id === STRUT_MODEL_ID;
+export const isGeckoLibModel = () => Format.id === STRUT_MODEL_ID || Format.id === STRUT_WORKSPACE_ID;
+
+/** Whether the focussed project is a Strut model project: what the model tools (export a model, armour, physics, the model's own properties) work for */
+export const isStrutModelProject = () => Format.id === STRUT_MODEL_ID;
+
+/** Whether the focussed project is a workspace */
+export const isStrutWorkspace = () => Format.id === STRUT_WORKSPACE_ID;
 
 /**
  * Whether the current project is a GeckoLib model that has or uses item render perspective transforms

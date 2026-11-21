@@ -1,7 +1,8 @@
 import groupBy from 'lodash/groupBy';
 import mapValues from 'lodash/mapValues';
 import {addMonkeypatch, Monkeypatches} from './utils';
-import {STRUT_MODEL_ID} from './constants';
+import {STRUT_MODEL_ID, STRUT_WORKSPACE_ID} from './constants';
+import {isGeckoLibModel} from './utils';
 import {
     EASING_DEFAULT,
     easingFunctions, type EasingKey,
@@ -40,10 +41,10 @@ export function loadKeyframeOverrides() {
 
     keyframeProperties = [
         new Property(Keyframe, "string", "easing", {
-            condition: {formats: [STRUT_MODEL_ID]},
+            condition: {formats: [STRUT_MODEL_ID, STRUT_WORKSPACE_ID]},
         }),
         new Property(Keyframe, "array", "easingArgs", {
-            condition: {formats: [STRUT_MODEL_ID]},
+            condition: {formats: [STRUT_MODEL_ID, STRUT_WORKSPACE_ID]},
         }),
     ];
 }
@@ -84,7 +85,7 @@ function lerp(start: number, stop: number, amt: number) {
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function keyframeGetLerp(other, axis, amount, allow_expression) {
     const easing = other.easing || EASING_DEFAULT;
-    if (Format.id !== STRUT_MODEL_ID) {
+    if (!isGeckoLibModel()) {
         return Monkeypatches.get(Keyframe).getLerp.apply(this, arguments);
     }
     let easingFunc = easingFunctions[easing];
@@ -126,7 +127,7 @@ function keyframeGetLerp(other, axis, amount, allow_expression) {
  * shape regardless of whether an easing is actually set
  */
 function keyframeCompileBedrock() {
-    if (Format.id !== STRUT_MODEL_ID || !this.transform) {
+    if (!isGeckoLibModel() || !this.transform) {
         return Monkeypatches.get(Keyframe).compileBedrockKeyframe.apply(this, arguments);
     }
 
@@ -162,7 +163,7 @@ function keyframeCompileBedrock() {
 function keyframeGetUndoCopy() {
     const {easing, easingArgs} = this;
     const result = Monkeypatches.get(Keyframe).getUndoCopy.apply(this, arguments);
-    if (Format.id === STRUT_MODEL_ID) {
+    if (isGeckoLibModel()) {
         Object.assign(result, {easing});
         if (isArgsEasing(easing)) result.easingArgs = easingArgs;
     }
@@ -173,7 +174,7 @@ function keyframeGetUndoCopy() {
 function keyframeExtend(dataIn) {
     const data = Object.assign({}, dataIn);
 //   console.log('keyframeExtend 1 arguments:', arguments);
-    if (Format.id === STRUT_MODEL_ID) {
+    if (isGeckoLibModel()) {
         if (typeof data.values === 'object') {
             if (data.values.easing !== undefined) {
                 Merge.string(this, data.values, 'easing');

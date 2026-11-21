@@ -1,5 +1,6 @@
 import { BinaryWriter } from './writer';
 import { BinaryReader } from './reader';
+import { ANIMATION_FLAG_SKELETON_ID } from './skeletonId';
 
 /**
  * Plain records and codec functions for {@code .strutanim}, mirroring
@@ -22,6 +23,8 @@ export const ANIMATION_VERSION = 100;
 export const ANIMATION_MIN_VERSION = 100;
 export const ANIMATION_HEADER_BYTES = 32;
 const ANIMATION_RESERVED_V100 = 12;
+/** The reserved bytes after the skeleton id's two */
+const ANIMATION_RESERVED_AFTER_ID = ANIMATION_RESERVED_V100 - 2;
 
 /**
  * The smallest a keyframe can be: a time (4), an interpolation (1), flags (2), and three components that are each a 2-byte expression index
@@ -132,6 +135,11 @@ export interface RawBinaryAnimation {
     readonly flags: number;
     /** A hash of the bone names the clips were authored against */
     readonly skeletonFingerprint: number;
+    /**
+     * The skeleton id the clips were made for (see {@link ANIMATION_FLAG_SKELETON_ID}), or undefined for a file that names none and is matched by its fingerprint. When
+     * writing, it must be in {@link strings} like any other string the file uses
+     */
+    readonly skeletonId?: string;
     readonly strings: readonly string[];
     readonly clips: readonly RawClip[];
 }
@@ -182,12 +190,18 @@ export function encodeAnimation(animation: RawBinaryAnimation): Uint8Array {
 
     header.fixedString(ANIMATION_MAGIC)
         .u16(ANIMATION_VERSION)
-        .u16(animation.flags)
+        .u16(animation.skeletonId ? animation.flags | ANIMATION_FLAG_SKELETON_ID : animation.flags & ~ANIMATION_FLAG_SKELETON_ID)
         .u16(strings.length)
         .u32(stringTable.byteLength)
         .u16(animation.clips.length)
-        .i32(animation.skeletonFingerprint)
-        .zeros(ANIMATION_RESERVED_V100);
+        .i32(animation.skeletonFingerprint);
+
+    if (animation.skeletonId) {
+        header.u16(indexOf(strings, animation.skeletonId, 'skeleton id')).zeros(ANIMATION_RESERVED_AFTER_ID);
+    }
+    else {
+        header.zeros(ANIMATION_RESERVED_V100);
+    }
 
     if (header.byteLength !== ANIMATION_HEADER_BYTES)
         throw new Error(`wrote a ${header.byteLength}-byte animation header, expected ${ANIMATION_HEADER_BYTES}`);
@@ -315,7 +329,10 @@ function parseAnimation(reader: BinaryReader): RawBinaryAnimation {
     const clipCount = reader.u16('clip count');
     const fingerprint = reader.i32('skeleton fingerprint');
 
-    reader.skip(ANIMATION_RESERVED_V100, 'reserved header bytes');
+    // with the flag, the first two of the reserved bytes are the string-table index of the skeleton id; without it they are not read (an older file wrote zeros)
+    const idIndex = (flags & ANIMATION_FLAG_SKELETON_ID) !== 0 ? reader.u16('skeleton id index') : -1;
+
+    reader.skip(idIndex >= 0 ? ANIMATION_RESERVED_AFTER_ID : ANIMATION_RESERVED_V100, 'reserved header bytes');
 
     if (reader.position() !== ANIMATION_HEADER_BYTES)
         throw reader.fail(`read a ${reader.position()}-byte header for version ${version}; every`
@@ -336,7 +353,10 @@ function parseAnimation(reader: BinaryReader): RawBinaryAnimation {
         clips.push(readClip(reader, strings, i));
     }
 
-    return { version, flags, skeletonFingerprint: fingerprint, strings, clips };
+    if (idIndex >= 0 && idIndex >= strings.length)
+        throw reader.fail(`names its skeleton id as string ${idIndex}, but has only ${strings.length} strings`);
+
+    return { version, flags, skeletonFingerprint: fingerprint, ...(idIndex >= 0 ? { skeletonId: strings[idIndex] } : {}), strings, clips };
 }
 
 function readStringTable(reader: BinaryReader, count: number): string[] {

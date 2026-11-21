@@ -10,6 +10,12 @@
 export const STRUT_MODEL_ID = "strut_model"
 
 /**
+ * The workspace project type: no model of its own, only the actors a scene is animated with (see {@code stage/workspaceFormat.ts}). It is a Strut project for every
+ * animation tool (the easing set, the keyframe overrides, the binary animation export) but not for the model ones (export a model, armour, physics)
+ */
+export const STRUT_WORKSPACE_ID = "strut_workspace"
+
+/**
  * The format id this plugin used before the Strut rebrand (fork phase 5 stage 3)
  * <p>
  * {@code index.ts} registers this as a second key in the global {@code Formats} lookup pointing
@@ -35,6 +41,10 @@ export const PROPERTY_MODEL_TYPE = 'strut_model_type';
 export const PROPERTY_FILEPATH_CACHE = 'strut_filepath_cache';
 /** The model's physics text (JSON), written into the model file as its strut_physics:physics section */
 export const PROPERTY_PHYSICS = 'strut_physics';
+/** The model's skeleton id (such as mymod:creature_a): the rig it is built on, written into the model and into the animation files made for it */
+/** The workspace's own data (the scene, the actors' skeletons and roles, the animations' tags) as JSON: what Blockbench has nowhere else to keep */
+export const PROPERTY_STAGE = 'strut_stage';
+export const PROPERTY_SKELETON_ID = 'strut_skeleton_id';
 
 /**
  * The wire keys {@link PROPERTY_MODID}, {@link PROPERTY_MODEL_TYPE} and

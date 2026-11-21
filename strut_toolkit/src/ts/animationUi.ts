@@ -1,6 +1,6 @@
 import uniq from 'lodash/uniq';
 import {addMonkeypatch} from './utils';
-import {STRUT_MODEL_ID} from './constants';
+import {isGeckoLibModel} from './utils';
 import {EASING_OPTIONS, EASING_DEFAULT, getEasingArgDefault, parseEasingArg, GeckolibKeyframe, isArgsEasing} from './easing';
 
 const easingRegExp = /^ease(InOut|In|Out)?([\w]+)$/;
@@ -26,7 +26,7 @@ export const displayAnimationFrameCallback = (/*...args*/) => {
 };
 
 export function renderFrameCallback() {
-  if (Format.id !== STRUT_MODEL_ID) return
+  if (!isGeckoLibModel()) return
   Timeline.keyframes.forEach((kf: GeckolibKeyframe) => {
     if (kf.interpolation != "linear" && kf.easing != undefined) {
       kf.easing = undefined
@@ -124,7 +124,7 @@ export const updateKeyframeSelectionCallback = (/*...args*/) => {
 
     const isFirstInChannel = (kf: _Keyframe) => keyframesByChannel.get(kf.animator)[kf.channel].indexOf(kf) < 1;
 
-    if (Timeline.selected.length && Format.id === STRUT_MODEL_ID) {
+    if (Timeline.selected.length && isGeckoLibModel()) {
       if (Timeline.selected.every(kf => kf.animator instanceof BoneAnimator && !isFirstInChannel(kf))) {
         const displayedEasing = getMultiSelectValue('easing', EASING_DEFAULT, 'null');
 

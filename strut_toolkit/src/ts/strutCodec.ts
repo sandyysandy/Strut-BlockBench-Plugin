@@ -7,7 +7,8 @@ import { StringTable } from './binary/writer';
 import { cubeFaceUvRotationSteps, fileFaceUv, isCubeFaceExported } from './binary/cubeUv';
 import { normalizeInfluences } from './binary/skinWeights';
 import { format } from './codec';
-import { PROPERTY_PHYSICS } from './constants';
+import { PROPERTY_PHYSICS, PROPERTY_SKELETON_ID } from './constants';
+import { decodeSkeletonId, encodeSkeletonId, SKELETON_SECTION } from './binary/skeletonId';
 import { decodePhysicsSection, encodePhysicsSection, PHYSICS_SECTION } from './physics/config';
 import { BONE_COLOUR_SECTION, decodeBoneColours, elementNameFor, encodeBoneColours, markerOf, storedColour } from './boneColours';
 
@@ -440,6 +441,11 @@ export function buildModel(unitsPerBlock: number = DEFAULT_UNITS_PER_BLOCK, sele
     if (physics !== null)
         sections.set(PHYSICS_SECTION, physics);
 
+    const skeletonId = String((Project as any)[PROPERTY_SKELETON_ID] ?? '').trim();
+
+    if (skeletonId !== '')
+        sections.set(SKELETON_SECTION, encodeSkeletonId(skeletonId));
+
     if (colours !== null)
         sections.set(BONE_COLOUR_SECTION, colours);
 
@@ -636,20 +642,28 @@ function placeholderTextureDataUrl(width: number, height: number): string {
  * `js/formats/bedrock/bedrock.js`) - `addTo` before `init()`, since `init()`'s own root-parented
  * default only fires when `this.parent` is not already set
  */
-export function buildProjectFromModel(model: RawBinaryModel): void {
-    setupProject(format);
+export function buildProjectFromModel(model: RawBinaryModel, into?: any, images?: ReadonlyMap<string, string>): any[] {
+    // with {@code into} the model is added under that group of the open project (an actor of a workspace) and the project itself is left as it is
+    if (!into)
+        setupProject(format);
 
     // buildModel() reads Project.model_identifier first (falling back to Project.name) for
     // RawBinaryModel#modelId, which is written as string index 0 - the very first byte of the
     // string table. Without setting this back on import, a fresh ModelProject's own default
     // model_identifier would make a re-export produce a different modelId than the one just
     // decoded, breaking §5's round-trip byte-identity on the very first field
-    if (model.modelId)
+    if (model.modelId && !into)
         (Project as any).model_identifier = model.modelId;
 
     const physicsSection = model.extensions?.get(PHYSICS_SECTION);
 
-    (Project as any)[PROPERTY_PHYSICS] = physicsSection ? decodePhysicsSection(physicsSection) : '';
+    if (!into)
+        (Project as any)[PROPERTY_PHYSICS] = physicsSection ? decodePhysicsSection(physicsSection) : '';
+
+    const skeletonSection = model.extensions?.get(SKELETON_SECTION);
+
+    if (!into)
+        (Project as any)[PROPERTY_SKELETON_ID] = (skeletonSection ? decodeSkeletonId(skeletonSection) : null) ?? '';
 
     // Texture.load() (called internally by fromDataURL) reads a canvas-generated data URL's real
     // pixel dimensions into texture.width/height - this happens through the browser's own Image
@@ -662,7 +676,8 @@ export function buildProjectFromModel(model: RawBinaryModel): void {
 
         live.uv_width = texture.uvWidth;
         live.uv_height = texture.uvHeight;
-        live.fromDataURL(placeholderTextureDataUrl(texture.width, texture.height));
+        // a real image for the texture when one was given (by the texture's name), else the placeholder
+        live.fromDataURL(images?.get(texture.name) ?? placeholderTextureDataUrl(texture.width, texture.height));
         live.add(false);
 
         return live;
@@ -682,7 +697,7 @@ export function buildProjectFromModel(model: RawBinaryModel): void {
     const boneColours = colourSection ? decodeBoneColours(colourSection, model.groupBones.length) : [];
 
     for (const [boneIndex, bone] of model.groupBones.entries()) {
-        const parent = bone.parentIndex >= 0 ? liveGroups[bone.parentIndex] : undefined;
+        const parent = bone.parentIndex >= 0 ? liveGroups[bone.parentIndex] : into;
         const marker = markerOf(boneColours[boneIndex] ?? 0);
         const group = new (Group as any)({
             name: bone.name,
@@ -707,7 +722,7 @@ export function buildProjectFromModel(model: RawBinaryModel): void {
     const liveArmatureBones: any[][] = [];
 
     for (const armature of model.armatures) {
-        const parent = armature.parentGroupBone >= 0 ? liveGroups[armature.parentGroupBone] : undefined;
+        const parent = armature.parentGroupBone >= 0 ? liveGroups[armature.parentGroupBone] : into;
         const liveArmature = new (Armature as any)({ name: armature.name, origin: armature.origin });
 
         liveArmature.addTo(parent);
@@ -776,6 +791,8 @@ export function buildProjectFromModel(model: RawBinaryModel): void {
             }
         }
     });
+
+    return liveGroups;
 }
 
 function addMeshToProject(mesh: RawMesh, parent: any, textureFor: (index: number) => any,
