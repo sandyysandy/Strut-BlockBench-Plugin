@@ -19945,6 +19945,8 @@ function parseTemplate(entry, source, problems) {
             continue;
         }
         const loop = text(phase.loop, 'loop');
+        const sides = (Array.isArray(phase.sides) ? phase.sides : []).map((each) => text(each)).filter((each) => /^[A-Za-z0-9_]+$/.test(each));
+        const sidesRequired = Array.isArray(phase.sidesRequired) ? phase.sidesRequired.map((each) => text(each)).filter((each) => sides.includes(each)) : sides;
         // a phase that is required has one clip at least, one that is not may have none, unless it says how many
         const variants = range(phase.variants, { min: phase.required === true ? 1 : 0, max: 1 });
         phases.push({
@@ -19952,10 +19954,13 @@ function parseTemplate(entry, source, problems) {
             name: text(phase.name, phaseId) || phaseId,
             description: text(phase.description),
             loop: (LOOPS.includes(loop) ? loop : 'loop'),
+            loopAny: loop === 'any',
             // asking for at least one variant is requiring the phase
             required: phase.required === true || variants.min >= 1,
             variants: { min: Math.max(0, Math.floor(variants.min)), max: Math.max(1, Math.floor(variants.max)) },
-            sides: (Array.isArray(phase.sides) ? phase.sides : []).map((each) => text(each)).filter((each) => /^[A-Za-z0-9_]+$/.test(each)),
+            sides,
+            sidesOptional: phase.sidesOptional === true && sides.length > 0,
+            sidesRequired,
             seconds: range(phase.seconds, { min: 0, max: 0 }),
         });
     }
@@ -19983,7 +19988,7 @@ function clipName(template, scene, phase, variant = 1, side = '') {
 /** What a clip of this scene is, from its name and the template: null for a name that is no phase of it */
 function identify(template, scene, name) {
     for (const phase of template.phases) {
-        const sides = phase.sides.length > 0 ? phase.sides : [''];
+        const sides = phase.sides.length > 0 ? (phase.sidesOptional ? ['', ...phase.sides] : phase.sides) : [''];
         for (const side of sides) {
             for (let variant = 1; variant <= Math.max(phase.variants.max, 1) + 8; variant++) {
                 if (clipName(template, scene, phase.id, variant, side) === name)
@@ -20010,7 +20015,7 @@ function phaseStatus(template, scene, animations) {
             if (!sides.has(identity.variant))
                 sides.set(identity.variant, new Set());
             sides.get(identity.variant).add(identity.side);
-            if (loopOf(phase.loop) !== animation.loop)
+            if (!phase.loopAny && loopOf(phase.loop) !== animation.loop)
                 missing.push(`${animation.name} should be ${phase.loop === 'once' ? 'play once' : phase.loop === 'loop' ? 'looping' : 'hold on last frame'}`);
             if (phase.seconds.min > 0 && animation.duration < phase.seconds.min - 1e-6)
                 missing.push(`${animation.name} is shorter than ${phase.seconds.min}s`);
@@ -20023,7 +20028,13 @@ function phaseStatus(template, scene, animations) {
         if (variants.size > phase.variants.max)
             missing.push(`${variants.size} variants, at most ${phase.variants.max}`);
         for (const [variant, have] of sides) {
-            for (const side of phase.sides) {
+            if (phase.sidesOptional && have.has('')) {
+                // one plain clip is a whole variant: it must not also have sided clips
+                if (have.size > 1)
+                    missing.push(`variant ${variant} has a plain clip and sided ones: use one or the other`);
+                continue;
+            }
+            for (const side of phase.sidesRequired) {
                 if (!have.has(side))
                     missing.push(`variant ${variant} has no ${side} clip`);
             }
@@ -20504,6 +20515,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   sceneOverview: () => (/* binding */ sceneOverview),
 /* harmony export */   setActorVisible: () => (/* binding */ setActorVisible),
 /* harmony export */   swapActorModel: () => (/* binding */ swapActorModel),
+/* harmony export */   unlockGeometry: () => (/* binding */ unlockGeometry),
 /* harmony export */   writeMeta: () => (/* binding */ writeMeta)
 /* harmony export */ });
 /* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../binary/animationMapping */ "./ts/binary/animationMapping.ts");
@@ -20528,7 +20540,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * A workspace in Blockbench: an open Strut project whose top level groups named {@code @<role>} are actors
  * <p>
- * An actor is a locked copy of a preview model's bones under its {@code @role} group (the geometry is there to look at, never to edit), so every tool Blockbench has
+ * An actor is a copy of a preview model's bones under its {@code @role} group (the geometry is there to pose, not to edit: a scene has no edit mode), so every tool Blockbench has
  * for animating groups works on it: the timeline, the graph editor, keyframes, onion skinning. Where the actor stands on the stage is the {@code @role} group's own
  * move and turn, set with the normal gizmo in edit mode. What is not Blockbench's to keep (which skeleton an actor is, who may fill the role, the scene's name) is
  * one JSON text in a project property ({@link PROPERTY_STAGE}), like the physics are
@@ -20565,6 +20577,13 @@ function metaOrNew(scene, namespace) {
 // ===============================================================
 // The actors
 // ===============================================================
+/** Makes every element of the open scene selectable: scenes made before the geometry was left unlocked had it locked, and a locked element cannot be clicked in the viewport */
+function unlockGeometry() {
+    for (const element of [...Cube.all, ...Mesh.all]) {
+        if (element.locked)
+            element.locked = false;
+    }
+}
 /** The actors of the open project: its top level groups named {@code @<role>}, by role */
 function actorGroups() {
     const actors = new Map();
@@ -20583,7 +20602,7 @@ function isUnder(node, group) {
     return false;
 }
 /**
- * Adds an actor: {@code model}'s bones under a new locked group {@code @role}, and the actor's data
+ * Adds an actor: {@code model}'s bones under a new group {@code @role}, and the actor's data
  * <p>
  * The textures the format carries no pixels for are the usual magenta and black placeholders; the preview is for posing, not for looking nice
  *
@@ -20614,14 +20633,13 @@ function checkSkeleton(model, skeleton, modelName) {
     if (modelId !== null && modelId !== skeleton)
         throw new Error(`${modelName} is on the skeleton ${modelId}, not ${skeleton}; a model can only play an actor of its own skeleton`);
 }
-/** Loads a model's bones under an actor group, locks its geometry, and says which pivots and textures it brought */
+/**
+ * Loads a model's bones under an actor group, and says which pivots and textures it brought. The geometry is not locked: a locked element cannot be selected, and a bone
+ * of a character is picked by clicking its geometry in the viewport, as in any animation (there is no edit mode in a scene to change the geometry in)
+ */
 function loadModelInto(group, model, images) {
     const before = new Set(Texture.all.map(texture => texture.uuid));
-    const groups = (0,_strutCodec__WEBPACK_IMPORTED_MODULE_2__.buildProjectFromModel)(model, group, images);
-    for (const element of [...Cube.all, ...Mesh.all]) {
-        if (groups.some(bone => isUnder(element, bone)))
-            element.locked = true;
-    }
+    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_2__.buildProjectFromModel)(model, group, images);
     const pivots = {};
     for (const child of group.children) {
         if (child instanceof Group)
@@ -20935,6 +20953,8 @@ function showProblems(title, problems) {
         buttons: ['OK'],
     });
 }
+/** The "no side" choice of a phase whose sides are optional (a select has no empty option) */
+const NO_SIDE = '__none';
 function say(title, message) {
     Blockbench.showMessageBox({ title, message, buttons: ['OK'] });
 }
@@ -21282,11 +21302,20 @@ function addClipDialog(phaseId) {
             id: 'strut_add_clip_side',
             title: `Add a clip: ${phase.name}`,
             form: {
-                side: { label: 'Side', type: 'select', options: Object.fromEntries(phase.sides.map(side => [side, side])), value: phase.sides[0], description: 'Each variant of this phase has one clip for each side' },
+                side: {
+                    label: 'Side',
+                    type: 'select',
+                    options: Object.assign(Object.assign({}, (phase.sidesOptional ? { [NO_SIDE]: 'No side (one plain clip)' } : {})), Object.fromEntries(phase.sides.map(side => [side, side]))),
+                    value: phase.sidesOptional ? NO_SIDE : phase.sides[0],
+                    description: phase.sidesOptional
+                        ? `Only some scenes have sides: leave it at "no side" for one plain clip, or make the clips for ${phase.sidesRequired.join(' and ')}${phase.sides.length > phase.sidesRequired.length ? ` (and ${phase.sides.filter(side => !phase.sidesRequired.includes(side)).join(', ')} if the scene has them)` : ''}`
+                        : 'Each variant of this phase has one clip for each side',
+                },
             },
             onConfirm(form) {
-                if ((0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addClipForPhase)(phase.id, String(form.side)) === null)
-                    say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants for ${form.side}.`);
+                const side = String(form.side) === NO_SIDE ? '' : String(form.side);
+                if ((0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addClipForPhase)(phase.id, side) === null)
+                    say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants${side !== '' ? ` for ${side}` : ''}.`);
             },
         }).show();
         return;
@@ -21405,7 +21434,10 @@ function loadStageUi() {
 /** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
 function animateOnly() {
     var _a;
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)())
+        return;
+    (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.unlockGeometry)();
+    if (((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
         Modes.options.animate.select();
 }
 function unloadStageUi() {

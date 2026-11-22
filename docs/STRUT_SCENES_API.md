@@ -61,10 +61,12 @@ Everything here is neutral: the Toolkit ships two built-in templates (a free sce
 | key | meaning |
 |---|---|
 | `id`, `name`, `description` | `id` is what the layout's `phase` says (`a-z 0-9 _`). |
-| `loop` | `once`, `loop` or `hold`: every clip of the phase has it. A clip that does not is an error. |
+| `loop` | `once`, `loop` or `hold`: every clip of the phase has it. A clip that does not is an error. `any`: the loop mode is not checked (a new clip is made looping), for a game that does not insist on one. |
 | `required` | The scene must have a clip of this phase. |
 | `variants` | `{ "min", "max" }`: how many variants there may be, counting from 1. A phase that asks for a minimum of 1 or more is required. Default: none needed, one allowed. |
 | `sides` | Names of the sides a clip of the phase comes in (`["L", "R"]`). Every variant then needs one clip for each side. |
+| `sidesOptional` | `true`: a variant may be one plain clip with no side instead of the sided ones (but not both). Adding a clip then offers "no side" first. |
+| `sidesRequired` | With sides, the ones a sided variant must have all of (default: all of `sides`); the others may be there or not. |
 | `seconds` | `{ "min", "max" }`: how long a clip of the phase may be. `max` 0 is no limit. |
 
 * `freeClips`: whether a clip that is no phase of the template is allowed (a warning if not). A template with no phases is a free one.

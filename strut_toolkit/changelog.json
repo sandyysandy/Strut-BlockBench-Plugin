@@ -48,7 +48,8 @@
           "The Scene panel is the whole scene in one place: each role is a row with an Add button until it has a character (from a preset or a file), each clip of the kind is a row that says what is missing and makes the next clip with one press, named and set as the kind says, with its phase, variant and side written into the layout for you. Check and Export are at its foot; a missing required role or clip, a wrong skeleton, loop mode or length stops the export and says so",
           "Characters are loaded for you with their models and textures; show or hide, change who one is, give one another model of the same skeleton without losing a keyframe, or remove it. Where a character stands is its own move and turn in the viewport. Export writes each character's clips into its own clip set, made for its skeleton ID with its stage position folded into its root bone, and the scene's layout. The web version exports one zip",
           "A scene is saved as a normal Blockbench project: characters, textures, keyframes and the kind of scene come back when it is opened. Sounds and particles are given to the first character. A timeline grouped by character and importing existing animations are not built yet",
-          "Character presets: folders of ready-made characters a tool registers once, so adding one is a single choice"
+          "Character presets: folders of ready-made characters a tool registers once, so adding one is a single choice",
+          "A character's bones are picked by clicking its geometry in the viewport, as in any animation (the geometry was locked, which stopped clicks; scenes made before are unlocked when opened)"
         ]
       },
       {

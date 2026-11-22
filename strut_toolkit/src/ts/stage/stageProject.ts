@@ -13,7 +13,7 @@ import { checkAgainstTemplate, clipName, identify, loopOf, phaseStatus, PhaseSta
 /**
  * A workspace in Blockbench: an open Strut project whose top level groups named {@code @<role>} are actors
  * <p>
- * An actor is a locked copy of a preview model's bones under its {@code @role} group (the geometry is there to look at, never to edit), so every tool Blockbench has
+ * An actor is a copy of a preview model's bones under its {@code @role} group (the geometry is there to pose, not to edit: a scene has no edit mode), so every tool Blockbench has
  * for animating groups works on it: the timeline, the graph editor, keyframes, onion skinning. Where the actor stands on the stage is the {@code @role} group's own
  * move and turn, set with the normal gizmo in edit mode. What is not Blockbench's to keep (which skeleton an actor is, who may fill the role, the scene's name) is
  * one JSON text in a project property ({@link PROPERTY_STAGE}), like the physics are
@@ -90,6 +90,14 @@ export function metaOrNew(scene: string, namespace: string): StageMeta {
 // The actors
 // ===============================================================
 
+/** Makes every element of the open scene selectable: scenes made before the geometry was left unlocked had it locked, and a locked element cannot be clicked in the viewport */
+export function unlockGeometry(): void {
+    for (const element of [...Cube.all, ...(Mesh as any).all] as any[]) {
+        if (element.locked)
+            element.locked = false;
+    }
+}
+
 /** The actors of the open project: its top level groups named {@code @<role>}, by role */
 export function actorGroups(): Map<string, any> {
     const actors = new Map<string, any>();
@@ -113,7 +121,7 @@ export function isUnder(node: any, group: any): boolean {
 }
 
 /**
- * Adds an actor: {@code model}'s bones under a new locked group {@code @role}, and the actor's data
+ * Adds an actor: {@code model}'s bones under a new group {@code @role}, and the actor's data
  * <p>
  * The textures the format carries no pixels for are the usual magenta and black placeholders; the preview is for posing, not for looking nice
  *
@@ -152,15 +160,13 @@ function checkSkeleton(model: RawBinaryModel, skeleton: string, modelName: strin
         throw new Error(`${modelName} is on the skeleton ${modelId}, not ${skeleton}; a model can only play an actor of its own skeleton`);
 }
 
-/** Loads a model's bones under an actor group, locks its geometry, and says which pivots and textures it brought */
+/**
+ * Loads a model's bones under an actor group, and says which pivots and textures it brought. The geometry is not locked: a locked element cannot be selected, and a bone
+ * of a character is picked by clicking its geometry in the viewport, as in any animation (there is no edit mode in a scene to change the geometry in)
+ */
 function loadModelInto(group: any, model: RawBinaryModel, images?: ReadonlyMap<string, string>): { pivots: Record<string, [number, number, number]>; textures: string[] } {
     const before = new Set(((Texture as any).all as any[]).map(texture => texture.uuid));
-    const groups = buildProjectFromModel(model, group, images);
-
-    for (const element of [...Cube.all, ...(Mesh as any).all] as any[]) {
-        if (groups.some(bone => isUnder(element, bone)))
-            element.locked = true;
-    }
+    buildProjectFromModel(model, group, images);
 
     const pivots: Record<string, [number, number, number]> = {};
 

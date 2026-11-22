@@ -159,3 +159,47 @@ describe('the registry and the API', () => {
         expect(changes).toBe(before);
     });
 });
+
+describe('optional sides and any loop mode', () => {
+    const loose = (): SceneTemplate => parseTemplates(JSON.stringify({
+        templates: [{
+            id: 'demo:loose', roles: [{ id: 'a' }],
+            clips: { phases: [
+                { id: 'slow', name: 'Slow', loop: 'any', variants: { min: 1, max: 2 }, sides: ['L', 'R', 'L_swap', 'R_swap'], sidesOptional: true, sidesRequired: ['L', 'R'] },
+                { id: 'fast', name: 'Fast', loop: 'any', required: true },
+            ] },
+        }],
+    }), 'test').templates[0];
+
+    test('the flags are read, and the required sides default to all of them', () => {
+        const t = loose();
+
+        expect(t.phases[0]).toMatchObject({ loopAny: true, loop: 'loop', sidesOptional: true, sidesRequired: ['L', 'R'] });
+        expect(template().phases[1]).toMatchObject({ loopAny: false, sidesOptional: false, sidesRequired: ['L', 'R'] });
+    });
+
+    test('a plain clip and a sided clip are both clips of the phase, with or without a side', () => {
+        const t = loose();
+
+        expect(identify(t, 'x', 'animation.x.slow')).toEqual({ phase: 'slow', variant: 1, side: '' });
+        expect(identify(t, 'x', 'animation.x.slow_R_swap_2')).toEqual({ phase: 'slow', variant: 2, side: 'R_swap' });
+    });
+
+    test('a plain clip is a whole variant; sided clips need the required sides, and a plain one beside them is a mistake', () => {
+        const t = loose();
+        const slow = (clips: string[]): readonly string[] => phaseStatus(t, 'x', [...clips.map(name => clip(name, 1, 'PLAY_ONCE')), clip('animation.x.fast', 1, 'HOLD_ON_LAST_FRAME')])[0].missing;
+
+        expect(slow(['animation.x.slow'])).toEqual([]);
+        expect(slow(['animation.x.slow_L', 'animation.x.slow_R'])).toEqual([]);
+        expect(slow(['animation.x.slow_L', 'animation.x.slow_R', 'animation.x.slow_L_swap'])).toEqual([]);
+        expect(slow(['animation.x.slow_L'])).toEqual(['variant 1 has no R clip']);
+        expect(slow(['animation.x.slow', 'animation.x.slow_L'])).toEqual(['variant 1 has a plain clip and sided ones: use one or the other']);
+    });
+
+    test('the loop mode is not checked when the template says any', () => {
+        const t = loose();
+        const status = phaseStatus(t, 'x', [clip('animation.x.slow', 1, 'PLAY_ONCE'), clip('animation.x.fast', 1, 'HOLD_ON_LAST_FRAME')]);
+
+        expect(status.map(each => each.missing)).toEqual([[], []]);
+    });
+});

@@ -2,7 +2,7 @@
 import { isValidSkeletonId } from '../binary/skeletonId';
 import { decodeModel, MODEL_EXTENSION } from '../binary/model';
 import { isStrutWorkspace } from '../utils';
-import { actorGroups, addActor, addClipForPhase, addFreeClip, exportWorkspaceFiles, metaOrNew, readMeta, readStage, removeActor, sceneOverview, SlotRow, swapActorModel, writeMeta } from './stageProject';
+import { actorGroups, addActor, addClipForPhase, addFreeClip, exportWorkspaceFiles, metaOrNew, readMeta, readStage, removeActor, sceneOverview, SlotRow, swapActorModel, unlockGeometry, writeMeta } from './stageProject';
 import { SceneTemplate } from './sceneTemplate';
 import { installApi, registry, uninstallApi } from './templateRegistry';
 import { Problem } from './stageFormat';
@@ -28,6 +28,9 @@ function showProblems(title: string, problems: readonly Problem[]): void {
         buttons: ['OK'],
     });
 }
+
+/** The "no side" choice of a phase whose sides are optional (a select has no empty option) */
+const NO_SIDE = '__none';
 
 function say(title: string, message: string): void {
     (Blockbench as any).showMessageBox({ title, message, buttons: ['OK'] });
@@ -476,11 +479,21 @@ export function addClipDialog(phaseId?: string): void {
             id: 'strut_add_clip_side',
             title: `Add a clip: ${phase.name}`,
             form: {
-                side: { label: 'Side', type: 'select', options: Object.fromEntries(phase.sides.map(side => [side, side])), value: phase.sides[0], description: 'Each variant of this phase has one clip for each side' },
+                side: {
+                    label: 'Side',
+                    type: 'select',
+                    options: { ...(phase.sidesOptional ? { [NO_SIDE]: 'No side (one plain clip)' } : {}), ...Object.fromEntries(phase.sides.map(side => [side, side])) },
+                    value: phase.sidesOptional ? NO_SIDE : phase.sides[0],
+                    description: phase.sidesOptional
+                        ? `Only some scenes have sides: leave it at "no side" for one plain clip, or make the clips for ${phase.sidesRequired.join(' and ')}${phase.sides.length > phase.sidesRequired.length ? ` (and ${phase.sides.filter(side => !phase.sidesRequired.includes(side)).join(', ')} if the scene has them)` : ''}`
+                        : 'Each variant of this phase has one clip for each side',
+                },
             },
             onConfirm(form: any) {
-                if (addClipForPhase(phase.id, String(form.side)) === null)
-                    say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants for ${form.side}.`);
+                const side = String(form.side) === NO_SIDE ? '' : String(form.side);
+
+                if (addClipForPhase(phase.id, side) === null)
+                    say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants${side !== '' ? ` for ${side}` : ''}.`);
             },
         }).show();
 
@@ -632,7 +645,12 @@ export function loadStageUi(): void {
 
 /** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
 function animateOnly(): void {
-    if (isStrutWorkspace() && Mode.selected?.id !== 'animate')
+    if (!isStrutWorkspace())
+        return;
+
+    unlockGeometry();
+
+    if (Mode.selected?.id !== 'animate')
         (Modes as any).options.animate.select();
 }
 

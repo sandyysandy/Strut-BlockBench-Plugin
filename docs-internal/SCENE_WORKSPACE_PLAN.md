@@ -52,7 +52,7 @@ This is what lets a clip be animated once and played by every model with the sam
 ### 4a. How actors live in the project
 
 Blockbench's timeline, graph editor, keyframe tools and gizmos animate **groups of the current project**. To keep every one of those tools, an actor
-is loaded as a **locked top-level group** `@<role>` holding the preview model's bones:
+is loaded as a **top-level group** `@<role>` holding the preview model's bones (its geometry is not locked: a locked element cannot be clicked in the viewport, and a bone is picked by clicking its geometry; a scene has no edit mode to change it in):
 
 - Geometry is reference only: not selectable as elements, never exported as a model, drawn with the preview model's textures.
 - Bones of two actors may share names (two actors with one skeleton id); every operation is scoped to one actor's subtree.

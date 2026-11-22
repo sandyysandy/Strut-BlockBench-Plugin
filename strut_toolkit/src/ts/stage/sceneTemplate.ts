@@ -49,14 +49,20 @@ export interface TemplatePhase {
     readonly id: string;
     readonly name: string;
     readonly description: string;
-    /** The loop mode every clip of the phase has: once, loop or hold */
+    /** The loop mode every clip of the phase has: once, loop or hold. A new clip of the phase is made with it */
     readonly loop: 'once' | 'loop' | 'hold';
+    /** The template does not check the loop mode of the phase's clips ({@code "loop": "any"}); a new clip is made looping */
+    readonly loopAny: boolean;
     /** Whether the scene must have a clip of this phase */
     readonly required: boolean;
     /** How many variants of the phase there may be (counting from 1) */
     readonly variants: Range;
     /** Sides a clip of the phase comes in: each variant needs one clip per side. Empty for none */
     readonly sides: readonly string[];
+    /** A variant may be one plain clip with no side instead of the sided ones (not both) */
+    readonly sidesOptional: boolean;
+    /** The sides a sided variant must have all of; the others it may have. All of {@code sides} unless the template says */
+    readonly sidesRequired: readonly string[];
     /** How long a clip of the phase may be, in seconds; max 0 for no limit */
     readonly seconds: Range;
 }
@@ -201,6 +207,8 @@ function parseTemplate(entry: any, source: string, problems: string[]): SceneTem
         }
 
         const loop = text(phase.loop, 'loop');
+        const sides: string[] = (Array.isArray(phase.sides) ? phase.sides : []).map((each: unknown) => text(each)).filter((each: string) => /^[A-Za-z0-9_]+$/.test(each));
+        const sidesRequired: string[] = Array.isArray(phase.sidesRequired) ? phase.sidesRequired.map((each: unknown) => text(each)).filter((each: string) => sides.includes(each)) : sides;
         // a phase that is required has one clip at least, one that is not may have none, unless it says how many
         const variants = range(phase.variants, { min: phase.required === true ? 1 : 0, max: 1 });
 
@@ -209,10 +217,13 @@ function parseTemplate(entry: any, source: string, problems: string[]): SceneTem
             name: text(phase.name, phaseId) || phaseId,
             description: text(phase.description),
             loop: (LOOPS.includes(loop) ? loop : 'loop') as TemplatePhase['loop'],
+            loopAny: loop === 'any',
             // asking for at least one variant is requiring the phase
             required: phase.required === true || variants.min >= 1,
             variants: { min: Math.max(0, Math.floor(variants.min)), max: Math.max(1, Math.floor(variants.max)) },
-            sides: (Array.isArray(phase.sides) ? phase.sides : []).map((each: unknown) => text(each)).filter((each: string) => /^[A-Za-z0-9_]+$/.test(each)),
+            sides,
+            sidesOptional: phase.sidesOptional === true && sides.length > 0,
+            sidesRequired,
             seconds: range(phase.seconds, { min: 0, max: 0 }),
         });
     }
@@ -252,7 +263,7 @@ export interface ClipIdentity {
 /** What a clip of this scene is, from its name and the template: null for a name that is no phase of it */
 export function identify(template: SceneTemplate, scene: string, name: string): ClipIdentity | null {
     for (const phase of template.phases) {
-        const sides = phase.sides.length > 0 ? phase.sides : [''];
+        const sides = phase.sides.length > 0 ? (phase.sidesOptional ? ['', ...phase.sides] : phase.sides) : [''];
 
         for (const side of sides) {
             for (let variant = 1; variant <= Math.max(phase.variants.max, 1) + 8; variant++) {
@@ -300,7 +311,7 @@ export function phaseStatus(template: SceneTemplate, scene: string, animations: 
 
             sides.get(identity.variant)!.add(identity.side);
 
-            if (loopOf(phase.loop) !== animation.loop)
+            if (!phase.loopAny && loopOf(phase.loop) !== animation.loop)
                 missing.push(`${animation.name} should be ${phase.loop === 'once' ? 'play once' : phase.loop === 'loop' ? 'looping' : 'hold on last frame'}`);
 
             if (phase.seconds.min > 0 && animation.duration < phase.seconds.min - 1e-6)
@@ -319,7 +330,15 @@ export function phaseStatus(template: SceneTemplate, scene: string, animations: 
             missing.push(`${variants.size} variants, at most ${phase.variants.max}`);
 
         for (const [variant, have] of sides) {
-            for (const side of phase.sides) {
+            if (phase.sidesOptional && have.has('')) {
+                // one plain clip is a whole variant: it must not also have sided clips
+                if (have.size > 1)
+                    missing.push(`variant ${variant} has a plain clip and sided ones: use one or the other`);
+
+                continue;
+            }
+
+            for (const side of phase.sidesRequired) {
                 if (!have.has(side))
                     missing.push(`variant ${variant} has no ${side} clip`);
             }
