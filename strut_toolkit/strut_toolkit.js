@@ -20921,6 +20921,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loadStageUi: () => (/* binding */ loadStageUi),
 /* harmony export */   presetFoldersDialog: () => (/* binding */ presetFoldersDialog),
 /* harmony export */   swapModelDialog: () => (/* binding */ swapModelDialog),
+/* harmony export */   toggleVariablePlaceholders: () => (/* binding */ toggleVariablePlaceholders),
 /* harmony export */   unloadStageUi: () => (/* binding */ unloadStageUi),
 /* harmony export */   workspaceSettingsDialog: () => (/* binding */ workspaceSettingsDialog)
 /* harmony export */ });
@@ -21431,18 +21432,50 @@ function loadStageUi() {
         export: exportWorkspace,
     });
 }
-/** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
+/**
+ * The Variable Placeholders panel is for Molang a scene does not use: it is not shown in a scene unless the person asks for it (Strut Scenes: Show or Hide Variable
+ * Placeholders, in the View menu). It is hidden by taking it out of the panels that are shown, so the person's own layout of it in other projects is left as it was
+ */
+let originalVariablesCondition = null;
+let variablesShown = false;
+function applyVariablesVisibility() {
+    var _a, _b, _c, _d;
+    const panel = (_a = globalThis.Panels) === null || _a === void 0 ? void 0 : _a.variable_placeholders;
+    if (!panel)
+        return;
+    if (originalVariablesCondition === null)
+        originalVariablesCondition = (_b = panel.condition) !== null && _b !== void 0 ? _b : true;
+    const original = originalVariablesCondition;
+    panel.condition = () => globalThis.Condition(original) && (!(0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)() || variablesShown);
+    (_d = (_c = globalThis).updateInterface) === null || _d === void 0 ? void 0 : _d.call(_c);
+}
+function restoreVariables() {
+    var _a, _b, _c;
+    const panel = (_a = globalThis.Panels) === null || _a === void 0 ? void 0 : _a.variable_placeholders;
+    if (panel && originalVariablesCondition !== null) {
+        panel.condition = originalVariablesCondition;
+        originalVariablesCondition = null;
+        (_c = (_b = globalThis).updateInterface) === null || _c === void 0 ? void 0 : _c.call(_b);
+    }
+}
+function toggleVariablePlaceholders() {
+    variablesShown = !variablesShown;
+    applyVariablesVisibility();
+}
+/** A scene is for animating only: it is opened in Animate mode (a scene has no Edit mode to start in) */
 function animateOnly() {
     var _a;
     if (!(0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)())
         return;
     (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.unlockGeometry)();
+    applyVariablesVisibility();
     if (((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
         Modes.options.animate.select();
 }
 function unloadStageUi() {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
+    restoreVariables();
     (0,_scenePanel__WEBPACK_IMPORTED_MODULE_6__.deleteScenePanel)();
     (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.uninstallApi)();
     _workspaceFormat__WEBPACK_IMPORTED_MODULE_8__.workspaceFormat.delete();
@@ -21461,6 +21494,17 @@ function createStageMenuItems() {
         item('strut_workspace_add_clip', 'Strut Scenes: Add Clip...', 'movie', 'Add a clip to the scene, named and set as the kind of scene asks', () => addClipDialog()),
         item('strut_workspace_settings', 'Strut Scenes: Scene Settings...', 'settings', 'The kind of scene, its name and the namespace its files are written under', workspaceSettingsDialog),
         item('strut_workspace_animation_tags', 'Strut Scenes: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout (filled in for you in a scene of a kind that names them), and each character\'s shift in time', animationTagsDialog),
+        {
+            action: new Action('strut_workspace_toggle_variables', {
+                name: 'Strut Scenes: Show or Hide Variable Placeholders',
+                icon: 'data_object',
+                description: 'The Variable Placeholders panel is hidden in a scene, which has no use for it; this shows it or hides it again',
+                category: 'view',
+                condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace,
+                click: toggleVariablePlaceholders,
+            }),
+            menuCategory: 'view',
+        },
         item('strut_workspace_check', 'Strut Scenes: Check the Scene', 'fact_check', 'Check the scene for what would stop an export or make it wrong', checkWorkspace),
         {
             action: new Action('strut_workspace_export', {

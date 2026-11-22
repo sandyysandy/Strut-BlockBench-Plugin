@@ -643,12 +643,50 @@ export function loadStageUi(): void {
     });
 }
 
-/** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
+/**
+ * The Variable Placeholders panel is for Molang a scene does not use: it is not shown in a scene unless the person asks for it (Strut Scenes: Show or Hide Variable
+ * Placeholders, in the View menu). It is hidden by taking it out of the panels that are shown, so the person's own layout of it in other projects is left as it was
+ */
+let originalVariablesCondition: any = null;
+let variablesShown = false;
+
+function applyVariablesVisibility(): void {
+    const panel = (globalThis as any).Panels?.variable_placeholders;
+
+    if (!panel)
+        return;
+
+    if (originalVariablesCondition === null)
+        originalVariablesCondition = panel.condition ?? true;
+
+    const original = originalVariablesCondition;
+
+    panel.condition = () => (globalThis as any).Condition(original) && (!isStrutWorkspace() || variablesShown);
+    (globalThis as any).updateInterface?.();
+}
+
+function restoreVariables(): void {
+    const panel = (globalThis as any).Panels?.variable_placeholders;
+
+    if (panel && originalVariablesCondition !== null) {
+        panel.condition = originalVariablesCondition;
+        originalVariablesCondition = null;
+        (globalThis as any).updateInterface?.();
+    }
+}
+
+export function toggleVariablePlaceholders(): void {
+    variablesShown = !variablesShown;
+    applyVariablesVisibility();
+}
+
+/** A scene is for animating only: it is opened in Animate mode (a scene has no Edit mode to start in) */
 function animateOnly(): void {
     if (!isStrutWorkspace())
         return;
 
     unlockGeometry();
+    applyVariablesVisibility();
 
     if (Mode.selected?.id !== 'animate')
         (Modes as any).options.animate.select();
@@ -657,6 +695,7 @@ function animateOnly(): void {
 export function unloadStageUi(): void {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
+    restoreVariables();
     deleteScenePanel();
     uninstallApi();
     workspaceFormat.delete();
@@ -677,6 +716,17 @@ export function createStageMenuItems(): { action: Action; menuCategory: string }
         item('strut_workspace_add_clip', 'Strut Scenes: Add Clip...', 'movie', 'Add a clip to the scene, named and set as the kind of scene asks', () => addClipDialog()),
         item('strut_workspace_settings', 'Strut Scenes: Scene Settings...', 'settings', 'The kind of scene, its name and the namespace its files are written under', workspaceSettingsDialog),
         item('strut_workspace_animation_tags', 'Strut Scenes: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout (filled in for you in a scene of a kind that names them), and each character\'s shift in time', animationTagsDialog),
+        {
+            action: new (Action as any)('strut_workspace_toggle_variables', {
+                name: 'Strut Scenes: Show or Hide Variable Placeholders',
+                icon: 'data_object',
+                description: 'The Variable Placeholders panel is hidden in a scene, which has no use for it; this shows it or hides it again',
+                category: 'view',
+                condition: isStrutWorkspace,
+                click: toggleVariablePlaceholders,
+            }),
+            menuCategory: 'view',
+        },
         item('strut_workspace_check', 'Strut Scenes: Check the Scene', 'fact_check', 'Check the scene for what would stop an export or make it wrong', checkWorkspace),
         {
             action: new (Action as any)('strut_workspace_export', {
