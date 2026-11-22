@@ -43,6 +43,14 @@ export const removeMonkeypatches = () => {
 /**
  * Wrap a callback object with a conditional check on the project being a GeckoLib project, for safety
  */
+/** Calls {@code callback} only while a Strut model project is focussed: what reads or writes a model's own properties does not run for a scene */
+export const onlyIfStrutModel = (callback: (data: object) => void) => {
+  return e => {
+    if (isStrutModelProject())
+      callback(e)
+  }
+}
+
 export const onlyIfGeckoLib = (callback: (data: object) => void) => {
   return e => {
     if (isGeckoLibModel())
@@ -131,4 +139,5 @@ export const isStrutWorkspace = () => Format.id === STRUT_WORKSPACE_ID;
 // settings[x].value is typed SettingsValue (string | number | boolean); this setting is a
 // checkbox and is always boolean at runtime, but the cast keeps this function's own return type
 // boolean rather than widening to `boolean | SettingsValue`
-export const hasModelDisplaySettings = () => Boolean(isGeckoLibModel() && Project && ((Project[PROPERTY_MODEL_TYPE] === GeckoModelType.ITEM || !isEmpty(Project.display_settings)) || settings[SETTING_ALWAYS_SHOW_DISPLAY].value));
+// a model project only: a scene has no model, so no display settings; and the setting may not exist (it is read as off)
+export const hasModelDisplaySettings = () => Boolean(isStrutModelProject() && Project && ((Project[PROPERTY_MODEL_TYPE] === GeckoModelType.ITEM || !isEmpty(Project.display_settings)) || settings[SETTING_ALWAYS_SHOW_DISPLAY]?.value));

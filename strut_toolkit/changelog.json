@@ -41,12 +41,14 @@
         ]
       },
       {
-        "title": "Strut Workspace",
+        "title": "Strut Scenes",
         "list": [
-          "A new project type, File, New, Strut Workspace, for animating a scene or one skeleton for several characters on one timeline. It has no model of its own and no modelling tools (Animate mode only): the person animating only animates",
-          "The Actors panel lists the characters in the scene. Add actor loads a .strutmodel and its texture images for you (matched by name; kept in the workspace), under a locked @role group. Show or hide, change who an actor is (role, skeleton ID, who else may fill the role, lead, camera bone), give an actor another model of the same skeleton without losing a keyframe, or remove it. Where an actor stands is its own move and turn in the viewport",
-          "File, Export, Export Workspace writes each actor's clips into its own clip set, made for its skeleton ID with its stage position folded into its root bone, and the scene's layout file (roles, who may fill them, each clip's length, loop, phase, variant and side). Tools, Workspace: Animation Tags sets a clip's phase, variant and side and each actor's shift in time; Workspace: Check lists what would stop an export. The web version exports one zip",
-          "A workspace is saved as a normal Blockbench project: actors, textures and keyframes come back when it is opened. Sounds and particles are given to the first actor. A dedicated timeline grouped by actor and importing existing animations are not built yet"
+          "The workspace is now called Strut Scenes (File, New, Strut Scenes): a project type for making a scene, or the clips of one skeleton, for several characters on one timeline. It has no model of its own and no modelling tools (Animate mode only): the person making the scene only animates",
+          "Kinds of scene: a new scene asks what kind it is. A kind (a scene template) says who takes part, which skeleton each role needs, and which clips there are, how they are named, whether they loop, how long they may be, how many variants and sides they have. Two built-in kinds, a free scene and clips for one skeleton; a mod, a pack tool or another plugin adds its own (see docs/STRUT_SCENES_API.md)",
+          "The Scene panel is the whole scene in one place: each role is a row with an Add button until it has a character (from a preset or a file), each clip of the kind is a row that says what is missing and makes the next clip with one press, named and set as the kind says, with its phase, variant and side written into the layout for you. Check and Export are at its foot; a missing required role or clip, a wrong skeleton, loop mode or length stops the export and says so",
+          "Characters are loaded for you with their models and textures; show or hide, change who one is, give one another model of the same skeleton without losing a keyframe, or remove it. Where a character stands is its own move and turn in the viewport. Export writes each character's clips into its own clip set, made for its skeleton ID with its stage position folded into its root bone, and the scene's layout. The web version exports one zip",
+          "A scene is saved as a normal Blockbench project: characters, textures, keyframes and the kind of scene come back when it is opened. Sounds and particles are given to the first character. A timeline grouped by character and importing existing animations are not built yet",
+          "Character presets: folders of ready-made characters a tool registers once, so adding one is a single choice"
         ]
       },
       {

@@ -300,7 +300,7 @@ function createProjectSettingsDialog(Project: ModelProject, form: {[formElement:
                     break;
             }
 
-            Format.display_mode = modelType === GeckoModelType.ITEM || Boolean(settings[SETTING_ALWAYS_SHOW_DISPLAY].value);
+            Format.display_mode = modelType === GeckoModelType.ITEM || Boolean(settings[SETTING_ALWAYS_SHOW_DISPLAY]?.value);
 
             dialog.hide();
         },

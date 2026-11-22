@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { loopModeFromLive } from '../binary/animationMapping';
+import { loopModeFromLive, loopModeToLive } from '../binary/animationMapping';
 import { RawBinaryModel } from '../binary/model';
 import { decodeSkeletonId, SKELETON_SECTION } from '../binary/skeletonId';
 import { StringTable } from '../binary/writer';
@@ -8,6 +8,7 @@ import { addChannelsToAnimation, buildClip, buildEvents } from '../strutAnimatio
 import { buildProjectFromModel } from '../strutCodec';
 import { exportStage, ExportedFile, ExportOptions } from './stageExport';
 import { newStage, Problem, Stage, StageActor, StageAnimation, StageRoot, StageTrack } from './stageFormat';
+import { checkAgainstTemplate, clipName, identify, loopOf, phaseStatus, PhaseStatus, SceneTemplate, TemplatePhase } from './sceneTemplate';
 
 /**
  * A workspace in Blockbench: an open Strut project whose top level groups named {@code @<role>} are actors
@@ -27,6 +28,8 @@ export const ACTOR_PREFIX = '@';
 export interface StageMeta {
     scene: string;
     namespace: string;
+    /** What kind of scene this is: the whole template, kept with the scene so it opens without the plugin that registered it */
+    template?: SceneTemplate;
     actors: Record<string, ActorMeta>;
     animations: Record<string, AnimationMeta>;
 }
@@ -65,7 +68,7 @@ export function readMeta(): StageMeta | null {
     try {
         const meta = JSON.parse(text);
 
-        return { scene: meta.scene ?? '', namespace: meta.namespace ?? '', actors: meta.actors ?? {}, animations: meta.animations ?? {} };
+        return { scene: meta.scene ?? '', namespace: meta.namespace ?? '', ...(meta.template ? { template: meta.template } : {}), actors: meta.actors ?? {}, animations: meta.animations ?? {} };
     }
     catch {
         console.warn('[Strut] The workspace data of this project is damaged and was ignored.');
@@ -333,7 +336,7 @@ export function readStage(): ReadStage {
     const problems: Problem[] = [];
 
     if (!meta)
-        return { stage: null, problems: [{ severity: 'error', message: 'this project is not a workspace yet: add an actor first' }] };
+        return { stage: null, problems: [{ severity: 'error', message: 'this project is not a scene yet: add a character first' }] };
 
     const groups = actorGroups();
     const actors: StageActor[] = [];
@@ -386,7 +389,9 @@ export function readStage(): ReadStage {
     }
 
     const animations: StageAnimation[] = ((Project as any).animations as any[] ?? []).map(animation => {
-        const tags = meta.animations[animation.name] ?? {};
+        // what a clip is comes from the kind of scene when it has one (its name says), and from what was typed for it when not
+        const known = meta.template ? identify(meta.template, meta.scene, animation.name) : null;
+        const tags = { ...(known ? { phase: known.phase, variant: known.variant, side: known.side } : {}), ...(meta.animations[animation.name] ?? {}) };
         const tracks: Record<string, StageTrack> = {};
         const strings = new StringTable();
         let first = true;
@@ -414,10 +419,13 @@ export function readStage(): ReadStage {
     const stage: Stage = { ...newStage(meta.scene, meta.namespace), actors, animations };
 
     if (stage.scene === '')
-        problems.push({ severity: 'error', message: 'the workspace has no scene name' });
+        problems.push({ severity: 'error', message: 'the scene has no name' });
 
     if (stage.namespace === '')
-        problems.push({ severity: 'error', message: 'the workspace has no namespace' });
+        problems.push({ severity: 'error', message: 'the scene has no namespace' });
+
+    if (meta.template)
+        problems.push(...checkAgainstTemplate(meta.template, stage));
 
     return { stage, problems };
 }
@@ -432,4 +440,124 @@ export function exportWorkspaceFiles(options: ExportOptions = {}): { files: read
     const exported = exportStage(read.stage, options);
 
     return { files: exported.files, problems: [...read.problems, ...exported.problems] };
+}
+
+// ===============================================================
+// What the Strut Scenes panel shows, and the clips it makes
+// ===============================================================
+
+export interface SlotRow {
+    readonly id: string;
+    readonly name: string;
+    readonly description: string;
+    readonly required: boolean;
+    readonly lead: boolean;
+    readonly skeleton: string;
+    readonly presetGroup: string;
+    /** The actor in the slot, or null while it is empty */
+    readonly actor: ActorRow | null;
+}
+
+export interface PhaseRow {
+    readonly id: string;
+    readonly name: string;
+    readonly description: string;
+    readonly required: boolean;
+    readonly loop: string;
+    readonly sides: readonly string[];
+    readonly maxVariants: number;
+    readonly clips: readonly string[];
+    readonly missing: readonly string[];
+}
+
+export interface SceneOverview {
+    readonly scene: string;
+    readonly namespace: string;
+    readonly templateName: string;
+    /** Whether the scene has no phases to fill: its clips are named by the person */
+    readonly free: boolean;
+    readonly slots: readonly SlotRow[];
+    /** Actors whose role the template does not have */
+    readonly others: readonly ActorRow[];
+    readonly phases: readonly PhaseRow[];
+    /** Every clip of the scene, in order */
+    readonly clips: readonly string[];
+}
+
+/** A light reading of the scene for the panel: no keys are read, so it can be asked for often */
+export function sceneOverview(): SceneOverview | null {
+    const meta = readMeta();
+
+    if (!meta)
+        return null;
+
+    const rows = actorRows();
+    const animations = ((Project as any).animations as any[] ?? []).map(animation => ({ name: String(animation.name), duration: Number(animation.length) || 0, loop: loopModeFromLive(animation.loop) }));
+    const template = meta.template ?? null;
+    const slots: SlotRow[] = (template?.roles ?? []).map(role => ({
+        id: role.id, name: role.name, description: role.description, required: role.required, lead: role.lead, skeleton: role.skeleton, presetGroup: role.presetGroup,
+        actor: rows.find(row => row.role === role.id) ?? null,
+    }));
+    const phases: PhaseRow[] = template ? phaseStatus(template, meta.scene, animations).map((status: PhaseStatus) => ({
+        id: status.phase.id, name: status.phase.name, description: status.phase.description, required: status.phase.required, loop: status.phase.loop,
+        sides: status.phase.sides, maxVariants: status.phase.variants.max, clips: status.clips, missing: status.missing,
+    })) : [];
+
+    return {
+        scene: meta.scene,
+        namespace: meta.namespace,
+        templateName: template?.name ?? '',
+        free: !template || template.phases.length === 0,
+        slots,
+        others: rows.filter(row => !slots.some(slot => slot.id === row.role)),
+        phases,
+        clips: animations.map(animation => animation.name),
+    };
+}
+
+/** The first variant of a phase, for a side, whose clip is not taken yet */
+export function nextVariant(template: SceneTemplate, scene: string, phase: TemplatePhase, side: string, taken: ReadonlySet<string>): number {
+    let variant = 1;
+
+    while (taken.has(clipName(template, scene, phase.id, variant, side)))
+        variant++;
+
+    return variant;
+}
+
+/**
+ * Makes the clip a phase of the template asks for, named as the template names it and set as it says (loop mode, a length in its range), and selects it
+ *
+ * @returns its name, or null if the phase's variants are all made
+ */
+export function addClipForPhase(phaseId: string, side = ''): string | null {
+    const meta = readMeta();
+    const template = meta?.template;
+    const phase = template?.phases.find(each => each.id === phaseId);
+
+    if (!meta || !template || !phase)
+        return null;
+
+    const taken = new Set<string>(((Project as any).animations as any[] ?? []).map(animation => String(animation.name)));
+    const variant = nextVariant(template, meta.scene, phase, side, taken);
+
+    if (variant > phase.variants.max)
+        return null;
+
+    const name = clipName(template, meta.scene, phase.id, variant, side);
+    const length = phase.seconds.min > 0 ? phase.seconds.min : phase.seconds.max > 0 ? Math.min(2, phase.seconds.max) : 2;
+    const animation = new (Animation as any)({ name, loop: loopModeToLive(loopOf(phase.loop)), length }).add();
+
+    animation.select();
+
+    return name;
+}
+
+/** A clip of a scene with no kind, named as the person says */
+export function addFreeClip(name: string): string {
+    const animation = new (Animation as any)({ name, loop: 'loop', length: 2 }).add();
+
+    animation.select();
+
+    return name;
 }

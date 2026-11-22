@@ -9364,6 +9364,7 @@ function createProjectSettingsDialog(Project, form) {
         width: 500,
         form,
         onConfirm: function (formResult) {
+            var _a;
             let save;
             const box_uv = formResult['uv_mode'] == 'box_uv';
             const texture_width = Math.clamp(formResult['texture_size'][0], 1, Infinity);
@@ -9446,7 +9447,7 @@ function createProjectSettingsDialog(Project, form) {
                 default:
                     break;
             }
-            Format.display_mode = modelType === _constants__WEBPACK_IMPORTED_MODULE_0__.GeckoModelType.ITEM || Boolean(settings[_constants__WEBPACK_IMPORTED_MODULE_0__.SETTING_ALWAYS_SHOW_DISPLAY].value);
+            Format.display_mode = modelType === _constants__WEBPACK_IMPORTED_MODULE_0__.GeckoModelType.ITEM || Boolean((_a = settings[_constants__WEBPACK_IMPORTED_MODULE_0__.SETTING_ALWAYS_SHOW_DISPLAY]) === null || _a === void 0 ? void 0 : _a.value);
             dialog.hide();
         },
         onFormChange(formResult) {
@@ -10001,33 +10002,34 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function addEventListeners() {
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addCodecCallback)(Codecs.project, 'parse', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onProjectParse));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addCodecCallback)(Codecs.bedrock, 'compile', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onBedrockCompile));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('select_mode', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onModeSelect));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('select_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onProjectSelect));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('update_project_settings', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onSettingsChanged));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('save_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onProjectSave));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addCodecCallback)(Codecs.project, 'parse', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onProjectParse));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addCodecCallback)(Codecs.bedrock, 'compile', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onBedrockCompile));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('select_mode', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onModeSelect));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('select_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onProjectSelect));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('update_project_settings', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onSettingsChanged));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addEventListener)('save_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onProjectSave));
     (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addMonkeypatch)(Animator, null, "buildFile", monkeypatchAnimatorBuildFile);
     (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addMonkeypatch)(Animator, null, "loadFile", monkeypatchAnimatorLoadFile);
     (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addMonkeypatch)(Blockbench, null, "export", monkeypatchBlockbenchExport);
     (0,_utils__WEBPACK_IMPORTED_MODULE_0__.addMonkeypatch)(BarItems, 'project_window', "click", monkeypatchProjectWindowClick);
 }
 function removeEventListeners() {
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeCodecCallback)(Codecs.project, 'parse', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onProjectParse));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeCodecCallback)(Codecs.bedrock, 'compile', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onBedrockCompile));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('select_mode', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onModeSelect));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('select_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onProjectSelect));
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('update_project_settings', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfGeckoLib)(onSettingsChanged));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeCodecCallback)(Codecs.project, 'parse', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onProjectParse));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeCodecCallback)(Codecs.bedrock, 'compile', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onBedrockCompile));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('select_mode', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onModeSelect));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('select_project', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onProjectSelect));
+    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeEventListener)('update_project_settings', (0,_utils__WEBPACK_IMPORTED_MODULE_0__.onlyIfStrutModel)(onSettingsChanged));
     (0,_utils__WEBPACK_IMPORTED_MODULE_0__.removeMonkeypatches)();
 }
 /**
  * When an existing GeckoLib project is being read from file
  */
 function onProjectParse(e) {
+    var _a;
     (0,_legacyMigration__WEBPACK_IMPORTED_MODULE_1__.migrateLegacyProjectFields)(e.model);
     onSettingsChanged();
     // Because the project hasn't had its model properties applied at this stage
-    Format.display_mode = (e.model[_constants__WEBPACK_IMPORTED_MODULE_2__.PROPERTY_MODEL_TYPE] && e.model[_constants__WEBPACK_IMPORTED_MODULE_2__.PROPERTY_MODEL_TYPE] === _constants__WEBPACK_IMPORTED_MODULE_2__.GeckoModelType.ITEM) || Boolean(settings[_constants__WEBPACK_IMPORTED_MODULE_2__.SETTING_ALWAYS_SHOW_DISPLAY].value);
+    Format.display_mode = (e.model[_constants__WEBPACK_IMPORTED_MODULE_2__.PROPERTY_MODEL_TYPE] && e.model[_constants__WEBPACK_IMPORTED_MODULE_2__.PROPERTY_MODEL_TYPE] === _constants__WEBPACK_IMPORTED_MODULE_2__.GeckoModelType.ITEM) || Boolean((_a = settings[_constants__WEBPACK_IMPORTED_MODULE_2__.SETTING_ALWAYS_SHOW_DISPLAY]) === null || _a === void 0 ? void 0 : _a.value);
 }
 /**
  * When the Blockbench project is being saved
@@ -19595,17 +19597,17 @@ async function loadPresets(folders) {
 
 /***/ }),
 
-/***/ "./ts/stage/actorsPanel.ts":
-/*!*********************************!*\
-  !*** ./ts/stage/actorsPanel.ts ***!
-  \*********************************/
+/***/ "./ts/stage/scenePanel.ts":
+/*!********************************!*\
+  !*** ./ts/stage/scenePanel.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createActorsPanel: () => (/* binding */ createActorsPanel),
-/* harmony export */   deleteActorsPanel: () => (/* binding */ deleteActorsPanel)
+/* harmony export */   createScenePanel: () => (/* binding */ createScenePanel),
+/* harmony export */   deleteScenePanel: () => (/* binding */ deleteScenePanel)
 /* harmony export */ });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
 /* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
@@ -19615,32 +19617,47 @@ __webpack_require__.r(__webpack_exports__);
 let panel = null;
 let styles = null;
 const CSS = `
-    .strut_actors { padding: 6px; }
-    .strut_actors .strut_actor { display: flex; align-items: center; gap: 4px; padding: 4px 6px; margin-bottom: 4px; background: var(--color-back); border: 1px solid var(--color-border); border-radius: 3px; }
-    .strut_actors .strut_actor.hidden_actor { opacity: 0.55; }
-    .strut_actors .strut_actor_text { flex: 1; min-width: 0; line-height: 1.25; }
-    .strut_actors .strut_actor_role { font-weight: bold; }
-    .strut_actors .strut_actor_note { color: var(--color-subtle_text); font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .strut_actors .strut_actor_button { cursor: pointer; padding: 2px 3px; border-radius: 3px; }
-    .strut_actors .strut_actor_button:hover { background: var(--color-button); color: var(--color-light); }
-    .strut_actors .strut_actor_add { display: inline-block; cursor: pointer; padding: 4px 10px; background: var(--color-button); border-radius: 3px; margin-top: 2px; }
-    .strut_actors .strut_actor_empty { color: var(--color-subtle_text); padding: 6px 2px 10px; }
+    .strut_scene { padding: 6px; }
+    .strut_scene .strut_scene_head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .strut_scene .strut_scene_title { flex: 1; min-width: 0; }
+    .strut_scene .strut_scene_name { font-weight: bold; }
+    .strut_scene .strut_scene_kind { color: var(--color-subtle_text); font-size: 0.85em; }
+    .strut_scene h4 { margin: 10px 0 4px 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-subtle_text); }
+    .strut_scene .strut_row { display: flex; align-items: center; gap: 4px; padding: 4px 6px; margin-bottom: 4px; background: var(--color-back); border: 1px solid var(--color-border); border-radius: 3px; }
+    .strut_scene .strut_row.empty { border-style: dashed; }
+    .strut_scene .strut_row.hidden_actor { opacity: 0.55; }
+    .strut_scene .strut_text { flex: 1; min-width: 0; line-height: 1.25; }
+    .strut_scene .strut_title { font-weight: bold; }
+    .strut_scene .strut_note { color: var(--color-subtle_text); font-size: 0.85em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .strut_scene .strut_wrap { white-space: normal; }
+    .strut_scene .strut_bad { color: var(--color-error, #e06c75); }
+    .strut_scene .strut_ok { color: var(--color-accent, #98c379); }
+    .strut_scene .strut_button { cursor: pointer; padding: 2px 3px; border-radius: 3px; }
+    .strut_scene .strut_button:hover { background: var(--color-button); color: var(--color-light); }
+    .strut_scene .strut_chip { display: inline-block; cursor: pointer; margin: 2px 4px 0 0; padding: 0 6px; border-radius: 9px; background: var(--color-button); font-size: 0.85em; }
+    .strut_scene .strut_chip:hover { filter: brightness(1.2); }
+    .strut_scene .strut_wide { display: inline-block; cursor: pointer; padding: 4px 10px; margin: 2px 6px 0 0; background: var(--color-button); border-radius: 3px; }
+    .strut_scene .strut_wide:hover { filter: brightness(1.15); }
+    .strut_scene .strut_primary { background: var(--color-accent, #3a7bd5); color: var(--color-light, #fff); }
+    .strut_scene .strut_empty { color: var(--color-subtle_text); padding: 4px 2px 8px; }
+    .strut_scene .strut_footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--color-border); }
+    .strut_scene .strut_status { margin-bottom: 6px; }
 `;
-function createActorsPanel(handlers) {
+function createScenePanel(handlers) {
     const Panel_ = globalThis.Panel;
     if (!Panel_ || panel)
         return;
     styles = Blockbench.addCSS(CSS);
-    panel = new Panel_('strut_actors', {
-        name: 'Actors',
-        icon: 'groups',
+    panel = new Panel_('strut_scene', {
+        name: 'Scene',
+        icon: 'theaters',
         growable: true,
         resizable: true,
         condition: { formats: [_constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID], modes: ['animate'] },
-        default_position: { slot: 'left_bar', float_position: [0, 0], float_size: [300, 300], height: 300 },
+        default_position: { slot: 'left_bar', float_position: [0, 0], float_size: [320, 460], height: 460 },
         component: {
             data() {
-                return { rows: [] };
+                return { overview: null };
             },
             created() {
                 this.refresh();
@@ -19649,27 +19666,34 @@ function createActorsPanel(handlers) {
             beforeDestroy() {
                 clearInterval(this.timer);
             },
+            computed: {
+                todo() {
+                    const o = this.overview;
+                    if (!o)
+                        return 0;
+                    return o.slots.filter(slot => slot.required && !slot.actor).length + o.phases.filter(phase => phase.missing.length > 0).length;
+                },
+            },
             methods: {
                 refresh() {
                     var _a;
                     if (((_a = globalThis.Format) === null || _a === void 0 ? void 0 : _a.id) !== _constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID) {
-                        this.rows = [];
+                        this.overview = null;
                         return;
                     }
-                    const rows = (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.actorRows)();
-                    // only when something changed, so the list does not redraw under the mouse
-                    if (JSON.stringify(rows) !== JSON.stringify(this.rows))
-                        this.rows = rows;
+                    const next = (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.sceneOverview)();
+                    // only when something changed, so the panel does not redraw under the mouse
+                    if (JSON.stringify(next) !== JSON.stringify(this.overview))
+                        this.overview = next;
                 },
-                add() {
-                    handlers.add();
+                addCharacter(slotId) {
+                    handlers.addCharacter(slotId);
                 },
-                preset() {
-                    handlers.preset();
+                addOther() {
+                    handlers.addOther();
                 },
-                toggle(row) {
-                    (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.setActorVisible)(row.role, !row.visible);
-                    this.refresh();
+                addFromFiles() {
+                    handlers.addFromFiles();
                 },
                 edit(row) {
                     handlers.edit(row.role);
@@ -19677,9 +19701,13 @@ function createActorsPanel(handlers) {
                 swap(row) {
                     handlers.swap(row.role);
                 },
+                toggle(row) {
+                    (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.setActorVisible)(row.role, !row.visible);
+                    this.refresh();
+                },
                 remove(row) {
                     Blockbench.showMessageBox({
-                        title: 'Remove actor',
+                        title: 'Remove character',
                         message: `Remove ${row.role}? Its model, textures and keyframes go with it.`,
                         buttons: ['Remove', 'Cancel'],
                         confirm: 0,
@@ -19691,33 +19719,347 @@ function createActorsPanel(handlers) {
                         }
                     });
                 },
+                addClip(phaseId) {
+                    handlers.addClip(phaseId);
+                },
+                select(name) {
+                    var _a, _b, _c;
+                    (_c = ((_b = (_a = globalThis.Animation) === null || _a === void 0 ? void 0 : _a.all) !== null && _b !== void 0 ? _b : []).find(animation => animation.name === name)) === null || _c === void 0 ? void 0 : _c.select();
+                },
+                settings() {
+                    handlers.settings();
+                },
+                check() {
+                    handlers.check();
+                },
+                exportScene() {
+                    handlers.export();
+                },
             },
             template: `
-                <div class="strut_actors">
-                    <div v-if="rows.length === 0" class="strut_actor_empty">No actors yet. Add the characters this scene is animated with: their models and textures are loaded for you.</div>
-                    <div v-for="row in rows" :key="row.role" class="strut_actor" :class="{hidden_actor: !row.visible}">
-                        <div class="strut_actor_text">
-                            <div class="strut_actor_role">{{ row.role }}<span v-if="row.lead"> (lead)</span><span v-if="!row.required"> (optional)</span></div>
-                            <div class="strut_actor_note" :title="row.skeleton">{{ row.skeleton }}</div>
-                            <div class="strut_actor_note" :title="row.model">{{ row.model }}</div>
+                <div class="strut_scene" v-if="overview">
+                    <div class="strut_scene_head">
+                        <div class="strut_scene_title">
+                            <div class="strut_scene_name">{{ overview.scene || 'unnamed scene' }}</div>
+                            <div class="strut_scene_kind">{{ overview.templateName || 'no kind of scene' }}{{ overview.namespace ? ' · ' + overview.namespace : '' }}</div>
                         </div>
-                        <i class="material-icons strut_actor_button" title="Show or hide" @click="toggle(row)">{{ row.visible ? 'visibility' : 'visibility_off' }}</i>
-                        <i class="material-icons strut_actor_button" title="Who this actor is" @click="edit(row)">edit</i>
-                        <i class="material-icons strut_actor_button" title="Give it another model" @click="swap(row)">swap_horiz</i>
-                        <i class="material-icons strut_actor_button" title="Remove" @click="remove(row)">delete</i>
+                        <i class="material-icons strut_button" title="Kind of scene, name and namespace" @click="settings()">settings</i>
                     </div>
-                    <div class="strut_actor_add" @click="preset()" title="A ready-made character: its model, texture, role and skeleton ID"><i class="material-icons" style="vertical-align: middle;">groups</i> Add from a preset</div>
-                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor from files</div>
-                </div>`,
+
+                    <h4>Characters</h4>
+                    <div v-for="slot in overview.slots" :key="slot.id" class="strut_row" :class="{empty: !slot.actor, hidden_actor: slot.actor && !slot.actor.visible}">
+                        <div class="strut_text">
+                            <div class="strut_title">{{ slot.name }}<span v-if="slot.lead"> (lead)</span><span v-if="!slot.required"> (optional)</span></div>
+                            <div class="strut_note" :title="slot.actor ? slot.actor.skeleton : slot.description">{{ slot.actor ? slot.actor.model || slot.actor.skeleton : (slot.description || (slot.skeleton ? 'on ' + slot.skeleton : 'nobody yet')) }}</div>
+                        </div>
+                        <template v-if="slot.actor">
+                            <i class="material-icons strut_button" title="Show or hide" @click="toggle(slot.actor)">{{ slot.actor.visible ? 'visibility' : 'visibility_off' }}</i>
+                            <i class="material-icons strut_button" title="Who this character is" @click="edit(slot.actor)">edit</i>
+                            <i class="material-icons strut_button" title="Give it another model" @click="swap(slot.actor)">swap_horiz</i>
+                            <i class="material-icons strut_button" title="Remove" @click="remove(slot.actor)">delete</i>
+                        </template>
+                        <span v-else class="strut_wide strut_primary" @click="addCharacter(slot.id)">Add</span>
+                    </div>
+                    <div v-for="row in overview.others" :key="row.role" class="strut_row" :class="{hidden_actor: !row.visible}">
+                        <div class="strut_text">
+                            <div class="strut_title">{{ row.role }}</div>
+                            <div class="strut_note" :title="row.skeleton">{{ row.model || row.skeleton }}</div>
+                        </div>
+                        <i class="material-icons strut_button" title="Show or hide" @click="toggle(row)">{{ row.visible ? 'visibility' : 'visibility_off' }}</i>
+                        <i class="material-icons strut_button" title="Who this character is" @click="edit(row)">edit</i>
+                        <i class="material-icons strut_button" title="Give it another model" @click="swap(row)">swap_horiz</i>
+                        <i class="material-icons strut_button" title="Remove" @click="remove(row)">delete</i>
+                    </div>
+                    <div v-if="overview.slots.length === 0 && overview.others.length === 0" class="strut_empty">Nobody yet. Add the characters this scene is animated with: their models and textures are loaded for you.</div>
+                    <div>
+                        <span class="strut_wide" @click="addOther()" title="A ready-made character: its model, texture, role and skeleton ID"><i class="material-icons" style="vertical-align: middle; font-size: 16px;">groups</i> {{ overview.slots.length ? 'Another from a preset' : 'From a preset' }}</span>
+                        <span class="strut_wide" @click="addFromFiles()" title="A model file and its textures"><i class="material-icons" style="vertical-align: middle; font-size: 16px;">person_add</i> {{ overview.slots.length ? 'Another from files' : 'From files' }}</span>
+                    </div>
+
+                    <h4>Clips</h4>
+                    <template v-if="!overview.free">
+                        <div v-for="phase in overview.phases" :key="phase.id" class="strut_row">
+                            <i class="material-icons" :class="phase.missing.length ? (phase.required || phase.clips.length ? 'strut_bad' : '') : 'strut_ok'" :title="phase.missing.join('; ')">{{ phase.missing.length ? (phase.required || phase.clips.length ? 'error_outline' : 'radio_button_unchecked') : 'check_circle' }}</i>
+                            <div class="strut_text">
+                                <div class="strut_title">{{ phase.name }}<span v-if="phase.required"> *</span></div>
+                                <div class="strut_note strut_wrap" v-if="phase.description && !phase.clips.length">{{ phase.description }}</div>
+                                <div class="strut_note strut_wrap strut_bad" v-if="phase.missing.length">{{ phase.missing.join('; ') }}</div>
+                                <div><span v-for="clip in phase.clips" :key="clip" class="strut_chip" :title="clip" @click="select(clip)">{{ clip.split('.').pop() }}</span></div>
+                            </div>
+                            <i class="material-icons strut_button" :title="'Add a ' + phase.name + ' clip'" @click="addClip(phase.id)">add_circle</i>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div v-if="!overview.clips.length" class="strut_empty">No clips yet.</div>
+                        <div><span v-for="clip in overview.clips" :key="clip" class="strut_chip" :title="clip" @click="select(clip)">{{ clip.split('.').pop() }}</span></div>
+                        <div style="margin-top: 4px;"><span class="strut_wide" @click="addClip()"><i class="material-icons" style="vertical-align: middle; font-size: 16px;">add</i> Add a clip</span></div>
+                    </template>
+
+                    <div class="strut_footer">
+                        <div class="strut_status" :class="todo ? '' : 'strut_ok'">{{ todo ? todo + (todo === 1 ? ' thing' : ' things') + ' still to do' : 'Nothing missing' }}</div>
+                        <span class="strut_wide" @click="check()">Check</span>
+                        <span class="strut_wide strut_primary" @click="exportScene()">Export</span>
+                    </div>
+                </div>
+                <div class="strut_scene" v-else><div class="strut_empty">This project is not a scene yet. Open Scene Settings to start one.</div><span class="strut_wide strut_primary" @click="settings()">Scene Settings</span></div>`,
         },
     });
 }
-function deleteActorsPanel() {
+function deleteScenePanel() {
     var _a, _b;
     (_a = panel === null || panel === void 0 ? void 0 : panel.delete) === null || _a === void 0 ? void 0 : _a.call(panel);
     panel = null;
     (_b = styles === null || styles === void 0 ? void 0 : styles.delete) === null || _b === void 0 ? void 0 : _b.call(styles);
     styles = null;
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/sceneTemplate.ts":
+/*!***********************************!*\
+  !*** ./ts/stage/sceneTemplate.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TEMPLATE_VERSION: () => (/* binding */ TEMPLATE_VERSION),
+/* harmony export */   checkAgainstTemplate: () => (/* binding */ checkAgainstTemplate),
+/* harmony export */   clipName: () => (/* binding */ clipName),
+/* harmony export */   identify: () => (/* binding */ identify),
+/* harmony export */   loopOf: () => (/* binding */ loopOf),
+/* harmony export */   parseTemplateList: () => (/* binding */ parseTemplateList),
+/* harmony export */   parseTemplates: () => (/* binding */ parseTemplates),
+/* harmony export */   phaseStatus: () => (/* binding */ phaseStatus)
+/* harmony export */ });
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
+
+/**
+ * Scene templates: what kind of scene is being made, who takes part in it, and which clips it has, in what form
+ * <p>
+ * Strut itself has no kinds of scene: a scene is roles that play clips. A mod has them (a scene on a bed, a scene with a player, a fight with two sides), each with its
+ * own roles, its own clips and its own rules for naming and timing them. A template says that once, so the person making a scene is told what is still missing instead
+ * of having to know it, and the export is checked against it. Templates are data: a mod, a pack tool or another plugin registers them ({@link ./templateRegistry})
+ * <pre>
+ * { "version": 1, "templates": [ {
+ *     "id": "mymod:on_bed", "name": "On a bed", "group": "Mymod", "description": "Two on a bed",
+ *     "roles": [ { "id": "host", "name": "Host", "skeleton": "mymod:humanoid", "lead": true, "presetGroup": "Characters" },
+ *                { "id": "guest", "name": "Guest", "required": false } ],
+ *     "clips": { "naming": "animation.{scene}.{phase}",
+ *                "phases": [ { "id": "intro", "name": "Intro", "loop": "loop", "required": true, "seconds": { "min": 1, "max": 10 } },
+ *                            { "id": "slow", "name": "Slow", "loop": "loop", "variants": { "min": 1, "max": 4 }, "sides": ["L", "R"] } ] },
+ *     "rules": { "keyedRoles": ["host"] } } ] }
+ * </pre>
+ * Pure: no Blockbench
+ */
+const TEMPLATE_VERSION = 1;
+const ID = /^[a-z0-9_.-]+(:[a-z0-9_./-]+)?$/;
+const ROLE = /^[a-z0-9_./-]+$/;
+const PHASE = /^[a-z0-9_]+$/;
+const LOOPS = ['once', 'loop', 'hold'];
+function text(value, fallback = '') {
+    return typeof value === 'string' ? value.trim() : fallback;
+}
+function range(value, fallback) {
+    const min = Number(value === null || value === void 0 ? void 0 : value.min);
+    const max = Number(value === null || value === void 0 ? void 0 : value.max);
+    return { min: Number.isFinite(min) ? min : fallback.min, max: Number.isFinite(max) ? max : fallback.max };
+}
+/** Reads a {@code templates.json}; a template that cannot be used is left out and reported, a part that can be mended is mended and reported */
+function parseTemplates(json, source) {
+    const problems = [];
+    let root;
+    try {
+        root = JSON.parse(json);
+    }
+    catch (_a) {
+        return { templates: [], problems: [`${source}: not valid JSON`] };
+    }
+    if (typeof (root === null || root === void 0 ? void 0 : root.version) === 'number' && root.version > TEMPLATE_VERSION)
+        return { templates: [], problems: [`${source}: templates of version ${root.version}, newer than this build reads (${TEMPLATE_VERSION})`] };
+    return parseTemplateList(Array.isArray(root === null || root === void 0 ? void 0 : root.templates) ? root.templates : [], source, problems);
+}
+/** The same for templates already as objects (a plugin handing them over) */
+function parseTemplateList(entries, source, problems = []) {
+    const templates = [];
+    const seen = new Set();
+    for (const entry of entries) {
+        const template = parseTemplate(entry, source, problems);
+        if (!template)
+            continue;
+        if (seen.has(template.id)) {
+            problems.push(`${source}: the template ${template.id} is listed twice; the first is kept`);
+            continue;
+        }
+        seen.add(template.id);
+        templates.push(template);
+    }
+    return { templates, problems };
+}
+function parseTemplate(entry, source, problems) {
+    var _a, _b;
+    const id = text(entry === null || entry === void 0 ? void 0 : entry.id);
+    if (!ID.test(id)) {
+        problems.push(`${source}: a template has no valid id ("${id}")`);
+        return null;
+    }
+    const where = `${source}: ${id}`;
+    const roles = [];
+    for (const role of Array.isArray(entry.roles) ? entry.roles : []) {
+        const roleId = text(role === null || role === void 0 ? void 0 : role.id);
+        if (!ROLE.test(roleId) || roles.some(each => each.id === roleId)) {
+            problems.push(`${where}: a role has no valid id, or the id is used twice ("${roleId}"); it is left out`);
+            continue;
+        }
+        const skeleton = text(role.skeleton);
+        if (skeleton !== '' && !(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_0__.isValidSkeletonId)(skeleton)) {
+            problems.push(`${where}: the role ${roleId} names "${skeleton}", which is not a skeleton id; it is read as any`);
+        }
+        roles.push({
+            id: roleId,
+            name: text(role.name, roleId) || roleId,
+            description: text(role.description),
+            skeleton: skeleton !== '' && (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_0__.isValidSkeletonId)(skeleton) ? skeleton : '',
+            compatible: (Array.isArray(role.compatible) ? role.compatible : []).map((each) => text(each)).filter((each) => (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_0__.isValidSkeletonId)(each)),
+            required: role.required !== false,
+            lead: role.lead === true,
+            camera: text(role.camera),
+            presetGroup: text(role.presetGroup),
+        });
+    }
+    if (roles.length === 0) {
+        problems.push(`${where}: a template needs at least one role; it is left out`);
+        return null;
+    }
+    const clips = (_a = entry.clips) !== null && _a !== void 0 ? _a : {};
+    const naming = text(clips.naming, 'animation.{scene}.{phase}') || 'animation.{scene}.{phase}';
+    if (!naming.includes('{phase}'))
+        problems.push(`${where}: the naming has no {phase}, so two phases would have one name`);
+    const phases = [];
+    for (const phase of Array.isArray(clips.phases) ? clips.phases : []) {
+        const phaseId = text(phase === null || phase === void 0 ? void 0 : phase.id);
+        if (!PHASE.test(phaseId) || phases.some(each => each.id === phaseId)) {
+            problems.push(`${where}: a phase has no valid id, or the id is used twice ("${phaseId}"); it is left out`);
+            continue;
+        }
+        const loop = text(phase.loop, 'loop');
+        // a phase that is required has one clip at least, one that is not may have none, unless it says how many
+        const variants = range(phase.variants, { min: phase.required === true ? 1 : 0, max: 1 });
+        phases.push({
+            id: phaseId,
+            name: text(phase.name, phaseId) || phaseId,
+            description: text(phase.description),
+            loop: (LOOPS.includes(loop) ? loop : 'loop'),
+            // asking for at least one variant is requiring the phase
+            required: phase.required === true || variants.min >= 1,
+            variants: { min: Math.max(0, Math.floor(variants.min)), max: Math.max(1, Math.floor(variants.max)) },
+            sides: (Array.isArray(phase.sides) ? phase.sides : []).map((each) => text(each)).filter((each) => /^[A-Za-z0-9_]+$/.test(each)),
+            seconds: range(phase.seconds, { min: 0, max: 0 }),
+        });
+    }
+    const rules = (_b = entry.rules) !== null && _b !== void 0 ? _b : {};
+    return {
+        id,
+        name: text(entry.name, id) || id,
+        group: text(entry.group, source) || source,
+        description: text(entry.description),
+        roles,
+        naming,
+        phases,
+        freeClips: clips.freeClips !== false && phases.length === 0 || clips.freeClips === true,
+        keyedRoles: (Array.isArray(rules.keyedRoles) ? rules.keyedRoles : []).map((each) => text(each)).filter((each) => roles.some(role => role.id === each)),
+    };
+}
+// ===============================================================
+// Clip names
+// ===============================================================
+/** The name of the clip for a phase of a scene: {@code variant} from 1 (1 adds nothing), {@code side} one of the phase's sides or empty */
+function clipName(template, scene, phase, variant = 1, side = '') {
+    const base = template.naming.split('{scene}').join(scene).split('{phase}').join(phase);
+    return base + (side !== '' ? `_${side}` : '') + (variant > 1 ? `_${variant}` : '');
+}
+/** What a clip of this scene is, from its name and the template: null for a name that is no phase of it */
+function identify(template, scene, name) {
+    for (const phase of template.phases) {
+        const sides = phase.sides.length > 0 ? phase.sides : [''];
+        for (const side of sides) {
+            for (let variant = 1; variant <= Math.max(phase.variants.max, 1) + 8; variant++) {
+                if (clipName(template, scene, phase.id, variant, side) === name)
+                    return { phase: phase.id, variant, side };
+            }
+        }
+    }
+    return null;
+}
+/** The loop mode name Blockbench and the stage use for a template's */
+function loopOf(loop) {
+    return loop === 'loop' ? 'LOOP' : loop === 'hold' ? 'HOLD_ON_LAST_FRAME' : 'PLAY_ONCE';
+}
+/** Each phase of the template against the scene's animations */
+function phaseStatus(template, scene, animations) {
+    return template.phases.map(phase => {
+        const mine = animations.filter(animation => { var _a; return ((_a = identify(template, scene, animation.name)) === null || _a === void 0 ? void 0 : _a.phase) === phase.id; });
+        const missing = [];
+        const variants = new Set();
+        const sides = new Map();
+        for (const animation of mine) {
+            const identity = identify(template, scene, animation.name);
+            variants.add(identity.variant);
+            if (!sides.has(identity.variant))
+                sides.set(identity.variant, new Set());
+            sides.get(identity.variant).add(identity.side);
+            if (loopOf(phase.loop) !== animation.loop)
+                missing.push(`${animation.name} should be ${phase.loop === 'once' ? 'play once' : phase.loop === 'loop' ? 'looping' : 'hold on last frame'}`);
+            if (phase.seconds.min > 0 && animation.duration < phase.seconds.min - 1e-6)
+                missing.push(`${animation.name} is shorter than ${phase.seconds.min}s`);
+            if (phase.seconds.max > 0 && animation.duration > phase.seconds.max + 1e-6)
+                missing.push(`${animation.name} is longer than ${phase.seconds.max}s`);
+        }
+        const needed = Math.max(phase.variants.min, phase.required ? 1 : 0);
+        if (variants.size < needed)
+            missing.unshift(needed === 1 ? 'no clip yet' : `${variants.size} of at least ${needed} variants`);
+        if (variants.size > phase.variants.max)
+            missing.push(`${variants.size} variants, at most ${phase.variants.max}`);
+        for (const [variant, have] of sides) {
+            for (const side of phase.sides) {
+                if (!have.has(side))
+                    missing.push(`variant ${variant} has no ${side} clip`);
+            }
+        }
+        return { phase, clips: mine.map(animation => animation.name), missing };
+    });
+}
+/** The template's own checks of a scene: who is missing, whose skeleton is wrong, which phases lack clips, which clips break a rule */
+function checkAgainstTemplate(template, stage) {
+    var _a, _b;
+    const problems = [];
+    const add = (severity, message) => void problems.push({ severity, message });
+    for (const role of template.roles) {
+        const actor = stage.actors.find(each => each.role === role.id);
+        if (!actor) {
+            if (role.required)
+                add('error', `the role ${role.name} (${role.id}) has no character yet`);
+            continue;
+        }
+        if (role.skeleton !== '' && actor.skeleton !== role.skeleton && !role.compatible.includes(actor.skeleton))
+            add('error', `${role.name} must be on the skeleton ${role.skeleton}${role.compatible.length > 0 ? ` (or ${role.compatible.join(', ')})` : ''}, not ${actor.skeleton}`);
+    }
+    for (const status of phaseStatus(template, stage.scene, stage.animations)) {
+        for (const message of status.missing)
+            add(status.phase.required || status.clips.length > 0 ? 'error' : 'warning', `${status.phase.name}: ${message}`);
+    }
+    for (const animation of stage.animations) {
+        if (identify(template, stage.scene, animation.name) === null && !template.freeClips)
+            add('warning', `${animation.name} is not a clip of this kind of scene (it should be named like ${clipName(template, stage.scene, (_b = (_a = template.phases[0]) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : 'phase')})`);
+        for (const role of template.keyedRoles) {
+            const track = animation.tracks[role];
+            if (stage.actors.some(actor => actor.role === role) && (!track || track.channels.length === 0))
+                add('warning', `${role} has no keys in ${animation.name}`);
+        }
+    }
+    return problems;
 }
 
 
@@ -20149,26 +20491,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   actorGroups: () => (/* binding */ actorGroups),
 /* harmony export */   actorRows: () => (/* binding */ actorRows),
 /* harmony export */   addActor: () => (/* binding */ addActor),
+/* harmony export */   addClipForPhase: () => (/* binding */ addClipForPhase),
+/* harmony export */   addFreeClip: () => (/* binding */ addFreeClip),
 /* harmony export */   exportWorkspaceFiles: () => (/* binding */ exportWorkspaceFiles),
 /* harmony export */   isUnder: () => (/* binding */ isUnder),
 /* harmony export */   metaOrNew: () => (/* binding */ metaOrNew),
+/* harmony export */   nextVariant: () => (/* binding */ nextVariant),
 /* harmony export */   offsetOf: () => (/* binding */ offsetOf),
 /* harmony export */   readMeta: () => (/* binding */ readMeta),
 /* harmony export */   readStage: () => (/* binding */ readStage),
 /* harmony export */   removeActor: () => (/* binding */ removeActor),
+/* harmony export */   sceneOverview: () => (/* binding */ sceneOverview),
 /* harmony export */   setActorVisible: () => (/* binding */ setActorVisible),
 /* harmony export */   swapActorModel: () => (/* binding */ swapActorModel),
 /* harmony export */   writeMeta: () => (/* binding */ writeMeta)
 /* harmony export */ });
-/* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../binary/animationMapping */ "./ts/binary/animationMapping.ts");
+/* harmony import */ var _binary_animationMapping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../binary/animationMapping */ "./ts/binary/animationMapping.ts");
 /* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _binary_writer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../binary/writer */ "./ts/binary/writer.ts");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
 /* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
 /* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../strutCodec */ "./ts/strutCodec.ts");
-/* harmony import */ var _stageExport__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./stageExport */ "./ts/stage/stageExport.ts");
-/* harmony import */ var _stageFormat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./stageFormat */ "./ts/stage/stageFormat.ts");
+/* harmony import */ var _stageExport__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./stageExport */ "./ts/stage/stageExport.ts");
+/* harmony import */ var _stageFormat__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./stageFormat */ "./ts/stage/stageFormat.ts");
+/* harmony import */ var _sceneTemplate__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./sceneTemplate */ "./ts/stage/sceneTemplate.ts");
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 
 
@@ -20199,7 +20547,7 @@ function readMeta() {
         return null;
     try {
         const meta = JSON.parse(text);
-        return { scene: (_b = meta.scene) !== null && _b !== void 0 ? _b : '', namespace: (_c = meta.namespace) !== null && _c !== void 0 ? _c : '', actors: (_d = meta.actors) !== null && _d !== void 0 ? _d : {}, animations: (_e = meta.animations) !== null && _e !== void 0 ? _e : {} };
+        return Object.assign(Object.assign({ scene: (_b = meta.scene) !== null && _b !== void 0 ? _b : '', namespace: (_c = meta.namespace) !== null && _c !== void 0 ? _c : '' }, (meta.template ? { template: meta.template } : {})), { actors: (_d = meta.actors) !== null && _d !== void 0 ? _d : {}, animations: (_e = meta.animations) !== null && _e !== void 0 ? _e : {} });
     }
     catch (_f) {
         console.warn('[Strut] The workspace data of this project is damaged and was ignored.');
@@ -20399,7 +20747,7 @@ function readStage() {
     const meta = readMeta();
     const problems = [];
     if (!meta)
-        return { stage: null, problems: [{ severity: 'error', message: 'this project is not a workspace yet: add an actor first' }] };
+        return { stage: null, problems: [{ severity: 'error', message: 'this project is not a scene yet: add a character first' }] };
     const groups = actorGroups();
     const actors = [];
     for (const [role, group] of groups) {
@@ -20432,7 +20780,9 @@ function readStage() {
     }
     const animations = ((_c = Project.animations) !== null && _c !== void 0 ? _c : []).map(animation => {
         var _a, _b, _c;
-        const tags = (_a = meta.animations[animation.name]) !== null && _a !== void 0 ? _a : {};
+        // what a clip is comes from the kind of scene when it has one (its name says), and from what was typed for it when not
+        const known = meta.template ? (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.identify)(meta.template, meta.scene, animation.name) : null;
+        const tags = Object.assign(Object.assign({}, (known ? { phase: known.phase, variant: known.variant, side: known.side } : {})), ((_a = meta.animations[animation.name]) !== null && _a !== void 0 ? _a : {}));
         const tracks = {};
         const strings = new _binary_writer__WEBPACK_IMPORTED_MODULE_4__.StringTable();
         let first = true;
@@ -20443,13 +20793,15 @@ function readStage() {
             first = false;
             tracks[role] = Object.assign({ channels: clip.channels, events }, (((_c = tags.shifts) === null || _c === void 0 ? void 0 : _c[role]) ? { shift: tags.shifts[role] } : {}));
         }
-        return Object.assign(Object.assign(Object.assign(Object.assign({ name: animation.name, duration: animation.length || 0, loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_5__.loopModeFromLive)(animation.loop) }, (tags.phase ? { phase: tags.phase } : {})), (tags.variant ? { variant: tags.variant } : {})), (tags.side ? { side: tags.side } : {})), { tracks });
+        return Object.assign(Object.assign(Object.assign(Object.assign({ name: animation.name, duration: animation.length || 0, loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_6__.loopModeFromLive)(animation.loop) }, (tags.phase ? { phase: tags.phase } : {})), (tags.variant ? { variant: tags.variant } : {})), (tags.side ? { side: tags.side } : {})), { tracks });
     });
-    const stage = Object.assign(Object.assign({}, (0,_stageFormat__WEBPACK_IMPORTED_MODULE_6__.newStage)(meta.scene, meta.namespace)), { actors, animations });
+    const stage = Object.assign(Object.assign({}, (0,_stageFormat__WEBPACK_IMPORTED_MODULE_7__.newStage)(meta.scene, meta.namespace)), { actors, animations });
     if (stage.scene === '')
-        problems.push({ severity: 'error', message: 'the workspace has no scene name' });
+        problems.push({ severity: 'error', message: 'the scene has no name' });
     if (stage.namespace === '')
-        problems.push({ severity: 'error', message: 'the workspace has no namespace' });
+        problems.push({ severity: 'error', message: 'the scene has no namespace' });
+    if (meta.template)
+        problems.push(...(0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.checkAgainstTemplate)(meta.template, stage));
     return { stage, problems };
 }
 /** The files of the workspace as exported, with every problem found reading the project and exporting it */
@@ -20457,8 +20809,74 @@ function exportWorkspaceFiles(options = {}) {
     const read = readStage();
     if (!read.stage || read.problems.some(problem => problem.severity === 'error'))
         return { files: [], problems: read.problems };
-    const exported = (0,_stageExport__WEBPACK_IMPORTED_MODULE_7__.exportStage)(read.stage, options);
+    const exported = (0,_stageExport__WEBPACK_IMPORTED_MODULE_8__.exportStage)(read.stage, options);
     return { files: exported.files, problems: [...read.problems, ...exported.problems] };
+}
+/** A light reading of the scene for the panel: no keys are read, so it can be asked for often */
+function sceneOverview() {
+    var _a, _b, _c, _d;
+    const meta = readMeta();
+    if (!meta)
+        return null;
+    const rows = actorRows();
+    const animations = ((_a = Project.animations) !== null && _a !== void 0 ? _a : []).map(animation => ({ name: String(animation.name), duration: Number(animation.length) || 0, loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_6__.loopModeFromLive)(animation.loop) }));
+    const template = (_b = meta.template) !== null && _b !== void 0 ? _b : null;
+    const slots = ((_c = template === null || template === void 0 ? void 0 : template.roles) !== null && _c !== void 0 ? _c : []).map(role => {
+        var _a;
+        return ({
+            id: role.id, name: role.name, description: role.description, required: role.required, lead: role.lead, skeleton: role.skeleton, presetGroup: role.presetGroup,
+            actor: (_a = rows.find(row => row.role === role.id)) !== null && _a !== void 0 ? _a : null,
+        });
+    });
+    const phases = template ? (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.phaseStatus)(template, meta.scene, animations).map((status) => ({
+        id: status.phase.id, name: status.phase.name, description: status.phase.description, required: status.phase.required, loop: status.phase.loop,
+        sides: status.phase.sides, maxVariants: status.phase.variants.max, clips: status.clips, missing: status.missing,
+    })) : [];
+    return {
+        scene: meta.scene,
+        namespace: meta.namespace,
+        templateName: (_d = template === null || template === void 0 ? void 0 : template.name) !== null && _d !== void 0 ? _d : '',
+        free: !template || template.phases.length === 0,
+        slots,
+        others: rows.filter(row => !slots.some(slot => slot.id === row.role)),
+        phases,
+        clips: animations.map(animation => animation.name),
+    };
+}
+/** The first variant of a phase, for a side, whose clip is not taken yet */
+function nextVariant(template, scene, phase, side, taken) {
+    let variant = 1;
+    while (taken.has((0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.clipName)(template, scene, phase.id, variant, side)))
+        variant++;
+    return variant;
+}
+/**
+ * Makes the clip a phase of the template asks for, named as the template names it and set as it says (loop mode, a length in its range), and selects it
+ *
+ * @returns its name, or null if the phase's variants are all made
+ */
+function addClipForPhase(phaseId, side = '') {
+    var _a;
+    const meta = readMeta();
+    const template = meta === null || meta === void 0 ? void 0 : meta.template;
+    const phase = template === null || template === void 0 ? void 0 : template.phases.find(each => each.id === phaseId);
+    if (!meta || !template || !phase)
+        return null;
+    const taken = new Set(((_a = Project.animations) !== null && _a !== void 0 ? _a : []).map(animation => String(animation.name)));
+    const variant = nextVariant(template, meta.scene, phase, side, taken);
+    if (variant > phase.variants.max)
+        return null;
+    const name = (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.clipName)(template, meta.scene, phase.id, variant, side);
+    const length = phase.seconds.min > 0 ? phase.seconds.min : phase.seconds.max > 0 ? Math.min(2, phase.seconds.max) : 2;
+    const animation = new Animation({ name, loop: (0,_binary_animationMapping__WEBPACK_IMPORTED_MODULE_6__.loopModeToLive)((0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_5__.loopOf)(phase.loop)), length }).add();
+    animation.select();
+    return name;
+}
+/** A clip of a scene with no kind, named as the person says */
+function addFreeClip(name) {
+    const animation = new Animation({ name, loop: 'loop', length: 2 }).add();
+    animation.select();
+    return name;
 }
 
 
@@ -20474,6 +20892,8 @@ function exportWorkspaceFiles(options = {}) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   addActorDialog: () => (/* binding */ addActorDialog),
+/* harmony export */   addCharacterDialog: () => (/* binding */ addCharacterDialog),
+/* harmony export */   addClipDialog: () => (/* binding */ addClipDialog),
 /* harmony export */   addPresetDialog: () => (/* binding */ addPresetDialog),
 /* harmony export */   animationTagsDialog: () => (/* binding */ animationTagsDialog),
 /* harmony export */   checkWorkspace: () => (/* binding */ checkWorkspace),
@@ -20486,15 +20906,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   unloadStageUi: () => (/* binding */ unloadStageUi),
 /* harmony export */   workspaceSettingsDialog: () => (/* binding */ workspaceSettingsDialog)
 /* harmony export */ });
-/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/model */ "./ts/binary/model.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
-/* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
+/* harmony import */ var _templateRegistry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./templateRegistry */ "./ts/stage/templateRegistry.ts");
 /* harmony import */ var _textureMatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./textureMatch */ "./ts/stage/textureMatch.ts");
-/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
-/* harmony import */ var _actorsPanel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./actorsPanel */ "./ts/stage/actorsPanel.ts");
+/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
+/* harmony import */ var _scenePanel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./scenePanel */ "./ts/stage/scenePanel.ts");
 /* harmony import */ var _actorPresets__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorPresets */ "./ts/stage/actorPresets.ts");
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 
 
@@ -20577,28 +20999,41 @@ function list(text) {
 // ===============================================================
 // Actors
 // ===============================================================
-/** Add Actor: a model and its textures, and who it is in the scene */
-function addActorDialog() {
-    pickModel((model, name) => pickTextures(name, model.textures.map(texture => texture.name), files => addActorDetails(model, name, files)));
+/** What a role of the scene's template says about whoever fills it, for the actor's own data */
+function slotExtra(slot) {
+    var _a, _b;
+    const role = slot ? (_b = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readMeta)()) === null || _a === void 0 ? void 0 : _a.template) === null || _b === void 0 ? void 0 : _b.roles.find(each => each.id === slot.id) : undefined;
+    return role ? Object.assign(Object.assign(Object.assign(Object.assign({}, (role.compatible.length > 0 ? { compatible: [...role.compatible] } : {})), (!role.required ? { required: false } : {})), (role.lead ? { lead: true } : {})), (role.camera !== '' ? { camera: role.camera } : {})) : {};
 }
-function addActorDetails(model, name, files) {
+/** Add Character from files: a model and its textures; for a role of the scene (a slot) it is the one the scene asks for */
+function addActorDialog(slot = null) {
+    pickModel((model, name) => pickTextures(name, model.textures.map(texture => texture.name), files => addActorDetails(model, name, files, slot)));
+}
+function addActorDetails(model, name, files, slot = null) {
     var _a;
     const report = textureReport(model, files);
     const section = (_a = model.extensions) === null || _a === void 0 ? void 0 : _a.get('strut:skeleton');
     const own = section ? new TextDecoder().decode(section.subarray(2)) : '';
     new Dialog({
         id: 'strut_add_actor',
-        title: `Add Actor (${name})`,
-        form: Object.assign(Object.assign({}, (report.note ? { textures: { label: 'Textures', type: 'info', text: report.note } } : {})), { role: { label: 'Role', type: 'text', value: '', placeholder: 'host', description: 'The scene role this actor is exported as' }, skeleton: { label: 'Skeleton ID', type: 'text', value: own, placeholder: 'my_modid:creature', description: 'The skeleton this actor is animated for; the model must be on it' }, compatible: { label: 'Also fits', type: 'text', value: '', description: 'Other skeleton IDs that may fill the role, separated by commas' }, required: { label: 'Required', type: 'checkbox', value: true, description: 'The scene cannot start without this role' }, lead: { label: 'Lead role', type: 'checkbox', value: false }, camera: { label: 'Camera bone', type: 'text', value: '', description: 'The bone a player in this role looks out of' } }),
+        title: slot ? `Add ${slot.name} (${name})` : `Add Character (${name})`,
+        form: Object.assign(Object.assign(Object.assign(Object.assign({}, (report.note ? { textures: { label: 'Textures', type: 'info', text: report.note } } : {})), (slot ? {} : { role: { label: 'Role', type: 'text', value: '', placeholder: 'host', description: 'The scene role this character is exported as' } })), { skeleton: { label: 'Skeleton ID', type: 'text', value: slot && slot.skeleton !== '' ? slot.skeleton : own, placeholder: 'my_modid:creature', description: 'The skeleton this character is animated for; the model must be on it' } }), (slot ? {} : {
+            compatible: { label: 'Also fits', type: 'text', value: '', description: 'Other skeleton IDs that may fill the role, separated by commas' },
+            required: { label: 'Required', type: 'checkbox', value: true, description: 'The scene cannot start without this role' },
+            lead: { label: 'Lead role', type: 'checkbox', value: false },
+            camera: { label: 'Camera bone', type: 'text', value: '', description: 'The bone a player in this role looks out of' },
+        })),
         onConfirm(form) {
+            var _a, _b;
             try {
-                if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__.isValidSkeletonId)(form.skeleton))
+                if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_3__.isValidSkeletonId)(form.skeleton))
                     throw new Error(`"${form.skeleton}" is not a skeleton ID (a namespace, a colon and a path, such as my_modid:creature)`);
-                const compatible = list(String(form.compatible));
-                (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.addActor)(String(form.role).trim(), String(form.skeleton).trim(), model, name, Object.assign(Object.assign(Object.assign(Object.assign({}, (compatible.length > 0 ? { compatible } : {})), (form.required === false ? { required: false } : {})), (form.lead ? { lead: true } : {})), (String(form.camera).trim() !== '' ? { camera: String(form.camera).trim() } : {})), report.images);
+                const compatible = list(String((_a = form.compatible) !== null && _a !== void 0 ? _a : ''));
+                const extra = slot ? slotExtra(slot) : Object.assign(Object.assign(Object.assign(Object.assign({}, (compatible.length > 0 ? { compatible } : {})), (form.required === false ? { required: false } : {})), (form.lead ? { lead: true } : {})), (String((_b = form.camera) !== null && _b !== void 0 ? _b : '').trim() !== '' ? { camera: String(form.camera).trim() } : {}));
+                (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addActor)(slot ? slot.id : String(form.role).trim(), String(form.skeleton).trim(), model, name, extra, report.images);
             }
             catch (error) {
-                say('Could not add the actor', error.message);
+                say('Could not add the character', error.message);
                 return false;
             }
         },
@@ -20616,37 +21051,44 @@ function storage() {
         return null;
     }
 }
-/** Add Actor from a preset: a character from the registered preset folders, loaded with its texture and its skeleton ID */
-function addPresetDialog() {
+/** Add Character from a preset: one from the registered preset folders, loaded with its texture and its skeleton ID. For a role of the scene (a slot) only those that can fill it are offered */
+function addPresetDialog(slot = null) {
     const folders = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFolders)(storage());
     if (folders.length === 0) {
-        say('Actor presets', 'No preset folder is registered yet. A preset folder holds ready-made actors (a model, its texture, its role and skeleton ID). A tool that makes them registers its folder by itself; you can also add one by hand.');
+        say('Character presets', 'No preset folder is registered yet. A preset folder holds ready-made characters (a model, its texture, its role and skeleton ID). A tool that makes them registers its folder by itself; you can also add one by hand.');
         presetFoldersDialog();
         return;
     }
     void (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.loadPresets)(folders).then(({ presets, problems }) => {
+        var _a;
         if (presets.length === 0) {
-            say('Actor presets', `There is no usable preset in the registered folders.${problems.length > 0 ? `\n\n${problems.join('\n')}` : ''}`);
+            say('Character presets', `There is no usable preset in the registered folders.${problems.length > 0 ? `\n\n${problems.join('\n')}` : ''}`);
             return;
         }
-        const taken = new Set((0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys());
+        const taken = new Set((0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.actorGroups)().keys());
+        const template = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readMeta)()) === null || _a === void 0 ? void 0 : _a.template;
+        const wanted = slot ? template === null || template === void 0 ? void 0 : template.roles.find(each => each.id === slot.id) : undefined;
+        // those that fit the role: its skeleton or one it also takes, else the heading the role asks for, else all of them
+        const fitting = wanted ? presets.filter(preset => wanted.skeleton === '' ? wanted.presetGroup === '' || preset.group === wanted.presetGroup : preset.skeleton === wanted.skeleton || wanted.compatible.includes(preset.skeleton)) : presets;
+        const offered = fitting.length > 0 ? fitting : presets;
         new Dialog({
             id: 'strut_add_preset',
-            title: 'Add Actor from a preset',
-            form: Object.assign(Object.assign({}, (problems.length > 0 ? { problems: { label: 'Left out', type: 'info', text: problems.join(' ') } } : {})), { preset: { label: 'Actor', type: 'select', options: Object.fromEntries(presets.map((preset, index) => [String(index), `${preset.group}: ${preset.name}`])), value: '0' }, role: { label: 'Role', type: 'text', value: '', placeholder: 'the preset\'s own', description: 'The scene role this actor is exported as; left empty it is the preset\'s role' } }),
+            title: slot ? `Add ${slot.name} from a preset` : 'Add Character from a preset',
+            form: Object.assign(Object.assign(Object.assign(Object.assign({}, (problems.length > 0 ? { problems: { label: 'Left out', type: 'info', text: problems.join(' ') } } : {})), (fitting.length === 0 && wanted ? { none: { label: 'Note', type: 'info', text: `No preset is on the skeleton ${wanted.skeleton || 'this role asks for'}, so all are listed.` } } : {})), { preset: { label: 'Character', type: 'select', options: Object.fromEntries(offered.map((preset, index) => [String(index), `${preset.group}: ${preset.name}`])), value: '0' } }), (slot ? {} : { role: { label: 'Role', type: 'text', value: '', placeholder: 'the preset\'s own', description: 'The scene role this character is exported as; left empty it is the preset\'s role' } })),
             onConfirm(form) {
-                const preset = presets[Number(form.preset)];
+                var _a;
+                const preset = offered[Number(form.preset)];
                 if (!preset)
                     return false;
-                const wanted = String(form.role).trim();
-                const role = wanted !== '' ? wanted : (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.freeRole)(preset.role, taken);
-                void addPresetActor(preset, role);
+                const named = String((_a = form.role) !== null && _a !== void 0 ? _a : '').trim();
+                const role = slot ? slot.id : named !== '' ? named : (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.freeRole)(preset.role, taken);
+                void addPresetActor(preset, role, slotExtra(slot));
             },
         }).show();
     });
 }
 /** Loads the preset's model and textures and adds it as an actor */
-async function addPresetActor(preset, role) {
+async function addPresetActor(preset, role, extra = {}) {
     try {
         const file = await (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFile)(preset.model, 'binary');
         if (!file || !(file.content instanceof ArrayBuffer))
@@ -20659,19 +21101,45 @@ async function addPresetActor(preset, role) {
                 images.push({ name: path, content: image.content });
         }
         const report = textureReport(model, images);
-        (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.addActor)(role, preset.skeleton, model, preset.name, Object.assign(Object.assign({}, (preset.compatible.length > 0 ? { compatible: [...preset.compatible] } : {})), (preset.camera !== '' ? { camera: preset.camera } : {})), report.images);
+        (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addActor)(role, preset.skeleton, model, preset.name, Object.assign(Object.assign(Object.assign({}, (preset.compatible.length > 0 ? { compatible: [...preset.compatible] } : {})), (preset.camera !== '' ? { camera: preset.camera } : {})), extra), report.images);
         if (report.note !== '')
-            say('Actor added', report.note);
+            say('Character added', report.note);
     }
     catch (error) {
-        say('Could not add the actor', error.message);
+        say('Could not add the character', error.message);
     }
+}
+/**
+ * Adds the character for a role of the scene: a preset when there are presets, else a file. One question: where does the character come from
+ */
+function addCharacterDialog(slotId) {
+    var _a, _b;
+    const slot = (_b = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.sceneOverview)()) === null || _a === void 0 ? void 0 : _a.slots.find(each => each.id === slotId)) !== null && _b !== void 0 ? _b : null;
+    if (!slot)
+        return;
+    const hasPresets = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFolders)(storage()).length > 0;
+    if (!hasPresets) {
+        addActorDialog(slot);
+        return;
+    }
+    Blockbench.showMessageBox({
+        title: `Add ${slot.name}`,
+        message: `${slot.description !== '' ? `${slot.description}\n\n` : ''}Where does the character come from?${slot.skeleton !== '' ? `\nIt must be on the skeleton ${slot.skeleton}.` : ''}`,
+        buttons: ['A preset', 'A model file...', 'Cancel'],
+        confirm: 0,
+        cancel: 2,
+    }, (button) => {
+        if (button === 0)
+            addPresetDialog(slot);
+        else if (button === 1)
+            addActorDialog(slot);
+    });
 }
 /** The folders the presets are looked for in: add one, or forget them all */
 function presetFoldersDialog() {
     const folders = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFolders)(storage());
     Blockbench.showMessageBox({
-        title: 'Actor preset folders',
+        title: 'Character preset folders',
         message: folders.length === 0 ? 'No folders are registered.' : `Registered folders:\n${folders.join('\n')}`,
         buttons: ['Add a folder...', ...(folders.length > 0 ? ['Forget them all'] : []), 'Close'],
         confirm: 0,
@@ -20679,7 +21147,7 @@ function presetFoldersDialog() {
     }, (button) => {
         if (button === 0) {
             if (!Blockbench.isApp || typeof Blockbench.pickDirectory !== 'function') {
-                say('Actor preset folders', 'Folders can only be chosen in the desktop app.');
+                say('Character preset folders', 'Folders can only be chosen in the desktop app.');
                 return;
             }
             const directory = Blockbench.pickDirectory({ title: 'A folder with a presets.json', resource_id: 'strut_actor_presets' });
@@ -20696,7 +21164,7 @@ function swapModelDialog(role) {
     pickModel((model, name) => pickTextures(name, model.textures.map(texture => texture.name), files => {
         const report = textureReport(model, files);
         try {
-            const dropped = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.swapActorModel)(role, model, name, report.images);
+            const dropped = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.swapActorModel)(role, model, name, report.images);
             const notes = [report.note, dropped > 0 ? `${dropped} tracks were for bones the new model does not have, and were dropped.` : ''].filter(note => note !== '');
             if (notes.length > 0)
                 say('Model swapped', notes.join('\n'));
@@ -20708,21 +21176,21 @@ function swapModelDialog(role) {
 }
 /** Edit Actor: who the actor is for the scene (which role it is is the name of its group); with no role, asks which actor */
 function editActorDialog(role) {
-    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.readMeta)();
-    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys()];
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readMeta)();
+    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.actorGroups)().keys()];
     if (role !== undefined && (meta === null || meta === void 0 ? void 0 : meta.actors[role])) {
         editActorDetails(meta, role);
         return;
     }
     if (!meta || roles.length === 0) {
-        say('Edit Actor', 'The workspace has no actors yet.');
+        say('Edit Character', 'The scene has no characters yet.');
         return;
     }
     new Dialog({
         id: 'strut_edit_actor',
-        title: 'Edit Actor',
+        title: 'Edit Character',
         form: {
-            role: { label: 'Actor', type: 'select', options: Object.fromEntries(roles.map(each => [each, each])), value: roles[0] },
+            role: { label: 'Character', type: 'select', options: Object.fromEntries(roles.map(each => [each, each])), value: roles[0] },
         },
         onConfirm(pick) {
             setTimeout(() => editActorDetails(meta, String(pick.role)), 0);
@@ -20736,21 +21204,21 @@ function editActorDetails(meta, role) {
         return;
     new Dialog({
         id: 'strut_edit_actor_details',
-        title: `Actor ${role}`,
+        title: `Character ${role}`,
         form: {
             skeleton: { label: 'Skeleton ID', type: 'text', value: actor.skeleton },
             compatible: { label: 'Also fits', type: 'text', value: ((_a = actor.compatible) !== null && _a !== void 0 ? _a : []).join(', ') },
             required: { label: 'Required', type: 'checkbox', value: actor.required !== false },
             lead: { label: 'Lead role', type: 'checkbox', value: actor.lead === true },
             camera: { label: 'Camera bone', type: 'text', value: (_b = actor.camera) !== null && _b !== void 0 ? _b : '' },
-            remove: { label: 'Remove this actor', type: 'checkbox', value: false, description: 'Takes the actor, its model, its textures and its keyframes out of the workspace' },
+            remove: { label: 'Remove this character', type: 'checkbox', value: false, description: 'Takes the character, its model, its textures and its keyframes out of the scene' },
         },
         onConfirm(form) {
             if (form.remove) {
-                (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.removeActor)(role);
+                (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.removeActor)(role);
                 return;
             }
-            if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__.isValidSkeletonId)(form.skeleton)) {
+            if (!(0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_3__.isValidSkeletonId)(form.skeleton)) {
                 say('Not saved', `"${form.skeleton}" is not a skeleton ID`);
                 return false;
             }
@@ -20759,28 +21227,84 @@ function editActorDetails(meta, role) {
             actor.required = form.required !== false;
             actor.lead = form.lead === true;
             actor.camera = String(form.camera).trim();
-            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.writeMeta)(meta);
         },
     }).show();
 }
 // ===============================================================
 // The scene
 // ===============================================================
-/** Workspace Settings: the scene's name and the namespace its layout is written under; also what a new workspace asks first */
+/** Scene Settings: what kind of scene it is, its name and the namespace its files are written under; also what a new scene asks first */
 function workspaceSettingsDialog() {
-    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.metaOrNew)(String(Project.name || 'scene'), '');
+    void sceneSettings();
+}
+async function sceneSettings() {
+    var _a;
+    // the templates other tools keep in folders are read now, so a scene can be made of one the moment it is registered
+    await _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.refreshFolders(storage());
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.metaOrNew)(String(Project.name || 'scene'), '');
+    const entries = _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.list();
+    const options = Object.fromEntries(entries.map(entry => [entry.template.id, `${entry.template.group}: ${entry.template.name}`]));
+    const current = meta.template && options[meta.template.id] ? meta.template.id : meta.template ? '' : 'strut:free';
+    // a scene made from a template that is no longer registered keeps the template it was made with
+    const withKept = meta.template && !options[meta.template.id] ? Object.assign(Object.assign({}, options), { [meta.template.id]: `${meta.template.group}: ${meta.template.name} (kept with the scene)` }) : options;
+    const notes = _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.problems.length > 0 ? { problems: { label: 'Left out', type: 'info', text: _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.problems.join(' ') } } : {};
     new Dialog({
-        id: 'strut_workspace_settings',
-        title: 'Workspace Settings',
-        form: {
-            scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'doggy', description: 'The scene\'s name: it names the layout and the clip sets' },
-            namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' },
-        },
+        id: 'strut_scene_settings',
+        title: meta.template || Object.keys(meta.actors).length > 0 ? 'Scene Settings' : 'New Strut Scene',
+        form: Object.assign(Object.assign({}, notes), { template: { label: 'Kind of scene', type: 'select', options: withKept, value: current || ((_a = meta.template) === null || _a === void 0 ? void 0 : _a.id) || 'strut:free', description: 'What roles it has and which clips it needs. The scene is checked against it, and the panel lists what is missing' }, scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'doggy', description: 'The scene\'s name: it names the layout and the clip sets' }, namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' } }),
         onConfirm(form) {
+            var _a, _b;
+            const chosen = (_a = _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.get(String(form.template))) !== null && _a !== void 0 ? _a : (((_b = meta.template) === null || _b === void 0 ? void 0 : _b.id) === form.template ? meta.template : undefined);
+            if (chosen)
+                meta.template = chosen;
             meta.scene = String(form.scene).trim().toLowerCase().replace(/[^a-z0-9_/-]+/g, '_');
             meta.namespace = String(form.namespace).trim().toLowerCase();
-            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.writeMeta)(meta);
             animateOnly();
+        },
+    }).show();
+}
+/** Add a clip: for a phase of the scene's kind it is made as the kind names and sets it; a scene with no phases is asked for a name */
+function addClipDialog(phaseId) {
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readMeta)();
+    const template = meta === null || meta === void 0 ? void 0 : meta.template;
+    const phase = template === null || template === void 0 ? void 0 : template.phases.find(each => each.id === phaseId);
+    if (!meta)
+        return;
+    if (phase && phase.sides.length === 0) {
+        if ((0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addClipForPhase)(phase.id) === null)
+            say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants.`);
+        return;
+    }
+    if (phase) {
+        new Dialog({
+            id: 'strut_add_clip_side',
+            title: `Add a clip: ${phase.name}`,
+            form: {
+                side: { label: 'Side', type: 'select', options: Object.fromEntries(phase.sides.map(side => [side, side])), value: phase.sides[0], description: 'Each variant of this phase has one clip for each side' },
+            },
+            onConfirm(form) {
+                if ((0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addClipForPhase)(phase.id, String(form.side)) === null)
+                    say('Add a clip', `${phase.name} already has all its ${phase.variants.max} variants for ${form.side}.`);
+            },
+        }).show();
+        return;
+    }
+    new Dialog({
+        id: 'strut_add_free_clip',
+        title: 'Add a clip',
+        form: {
+            name: { label: 'Name', type: 'text', value: `animation.${meta.scene || 'scene'}.`, description: 'The clip\'s name; every character of the scene plays the clip of this name from its own file' },
+        },
+        onConfirm(form) {
+            var _a;
+            const name = String(form.name).trim();
+            if (name === '' || ((_a = Project.animations) !== null && _a !== void 0 ? _a : []).some(animation => animation.name === name)) {
+                say('Add a clip', name === '' ? 'A clip needs a name.' : `There already is a clip called ${name}.`);
+                return false;
+            }
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.addFreeClip)(name);
         },
     }).show();
 }
@@ -20788,12 +21312,12 @@ function workspaceSettingsDialog() {
 function animationTagsDialog() {
     var _a, _b, _c, _d, _e, _f;
     const animation = Animation.selected;
-    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys()];
+    const roles = [...(0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.actorGroups)().keys()];
     if (!animation) {
         say('Animation Tags', 'Select an animation first.');
         return;
     }
-    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.metaOrNew)(String(Project.name || 'scene'), '');
+    const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.metaOrNew)(String(Project.name || 'scene'), '');
     const tags = (_a = meta.animations[animation.name]) !== null && _a !== void 0 ? _a : {};
     const form = {
         phase: { label: 'Phase', type: 'text', value: (_b = tags.phase) !== null && _b !== void 0 ? _b : '', description: 'What part of the scene this clip is, in the mod\'s own words; written to the layout and never worked out from the name' },
@@ -20814,27 +21338,27 @@ function animationTagsDialog() {
                     shifts[role] = shift;
             }
             meta.animations[animation.name] = Object.assign(Object.assign(Object.assign(Object.assign({}, (String(values.phase).trim() ? { phase: String(values.phase).trim() } : {})), (Number(values.variant) > 0 ? { variant: Math.floor(Number(values.variant)) } : {})), (String(values.side).trim() ? { side: String(values.side).trim() } : {})), (Object.keys(shifts).length > 0 ? { shifts } : {}));
-            (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.writeMeta)(meta);
+            (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.writeMeta)(meta);
         },
     }).show();
 }
 function checkWorkspace() {
-    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.exportWorkspaceFiles)();
-    showProblems(files.length > 0 ? 'Workspace Check' : 'Workspace Check: it cannot be exported yet', problems);
+    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.exportWorkspaceFiles)();
+    showProblems(files.length > 0 ? 'Scene Check' : 'Scene Check: it cannot be exported yet', problems);
 }
 /** Writes the exported files: into a folder when Blockbench has a file system (the app), else as one zip */
 function exportWorkspace() {
     var _a, _b;
-    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.exportWorkspaceFiles)();
+    const { files, problems } = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.exportWorkspaceFiles)();
     if (files.length === 0) {
-        showProblems('The workspace cannot be exported yet', problems);
+        showProblems('The scene cannot be exported yet', problems);
         return;
     }
     const done = (where) => {
-        say('Workspace exported', `${files.length} files written to ${where}.` + (problems.length > 0 ? `\n\n${problemsText(problems)}` : ''));
+        say('Scene exported', `${files.length} files written to ${where}.` + (problems.length > 0 ? `\n\n${problemsText(problems)}` : ''));
     };
     if (Blockbench.isApp && typeof Blockbench.pickDirectory === 'function') {
-        const directory = Blockbench.pickDirectory({ title: 'Export the workspace into the pack folder', resource_id: 'strut_workspace' });
+        const directory = Blockbench.pickDirectory({ title: 'Export the scene into the pack folder', resource_id: 'strut_workspace' });
         if (!directory)
             return;
         for (const file of files) {
@@ -20852,7 +21376,7 @@ function exportWorkspace() {
         var _a, _b;
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `${(_b = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.readStage)().stage) === null || _a === void 0 ? void 0 : _a.scene) !== null && _b !== void 0 ? _b : 'workspace'}.zip`;
+        link.download = `${(_b = (_a = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readStage)().stage) === null || _a === void 0 ? void 0 : _a.scene) !== null && _b !== void 0 ? _b : 'scene'}.zip`;
         link.click();
         done('a zip download');
     });
@@ -20860,51 +21384,265 @@ function exportWorkspace() {
 // ===============================================================
 // Wiring
 // ===============================================================
-/** Sets the workspace project type up: its new project dialog and the Actors panel */
+/** Sets the Strut Scenes project type up: its Scene panel, and the API other plugins add templates through */
 function loadStageUi() {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
-    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_5__.createActorsPanel)({ add: addActorDialog, preset: addPresetDialog, edit: editActorDialog, swap: swapModelDialog });
+    (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.installApi)();
+    void _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.refreshFolders(storage());
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_6__.createScenePanel)({
+        addCharacter: addCharacterDialog,
+        addOther: () => addPresetDialog(),
+        addFromFiles: () => addActorDialog(),
+        edit: editActorDialog,
+        swap: swapModelDialog,
+        addClip: addClipDialog,
+        settings: workspaceSettingsDialog,
+        check: checkWorkspace,
+        export: exportWorkspace,
+    });
 }
 /** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
 function animateOnly() {
     var _a;
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
         Modes.options.animate.select();
 }
 function unloadStageUi() {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
-    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_5__.deleteActorsPanel)();
-    _workspaceFormat__WEBPACK_IMPORTED_MODULE_7__.workspaceFormat.delete();
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_6__.deleteScenePanel)();
+    (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.uninstallApi)();
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_8__.workspaceFormat.delete();
 }
 /** The actions, for the Tools menu */
 function createStageMenuItems() {
     const item = (id, name, icon, description, click) => ({
-        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace, click }),
+        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace, click }),
         menuCategory: 'tools',
     });
     return [
-        item('strut_workspace_add_actor', 'Workspace: Add Actor...', 'person_add', 'Add a model and its textures as an actor of this workspace: it is loaded for you, animated with the normal tools, and exported per actor', addActorDialog),
-        item('strut_workspace_add_preset', 'Workspace: Add Actor from a Preset...', 'groups', 'Add a ready-made character (its model, texture, role and skeleton ID) from the registered preset folders', addPresetDialog),
-        item('strut_workspace_preset_folders', 'Workspace: Actor Preset Folders...', 'folder_open', 'The folders ready-made actors are looked for in', presetFoldersDialog),
-        item('strut_workspace_edit_actor', 'Workspace: Edit Actor...', 'manage_accounts', 'Change who an actor is for the scene, or remove it', () => editActorDialog()),
-        item('strut_workspace_settings', 'Workspace: Settings...', 'settings', 'The scene\'s name and the namespace its files are written under', workspaceSettingsDialog),
-        item('strut_workspace_animation_tags', 'Workspace: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout, and each actor\'s shift in time', animationTagsDialog),
-        item('strut_workspace_check', 'Workspace: Check', 'fact_check', 'Check the workspace for what would stop an export or make it wrong', checkWorkspace),
+        item('strut_workspace_add_actor', 'Strut Scenes: Add Character from a File...', 'person_add', 'Add a model and its textures as a character of this scene: it is loaded for you, animated with the normal tools, and exported character by character', () => addActorDialog()),
+        item('strut_workspace_add_preset', 'Strut Scenes: Add Character from a Preset...', 'groups', 'Add a ready-made character (its model, texture, role and skeleton ID) from the registered preset folders', () => addPresetDialog()),
+        item('strut_workspace_preset_folders', 'Strut Scenes: Character Preset Folders...', 'folder_open', 'The folders ready-made characters are looked for in', presetFoldersDialog),
+        item('strut_workspace_edit_actor', 'Strut Scenes: Edit Character...', 'manage_accounts', 'Change who a character is for the scene, or remove it', () => editActorDialog()),
+        item('strut_workspace_add_clip', 'Strut Scenes: Add Clip...', 'movie', 'Add a clip to the scene, named and set as the kind of scene asks', () => addClipDialog()),
+        item('strut_workspace_settings', 'Strut Scenes: Scene Settings...', 'settings', 'The kind of scene, its name and the namespace its files are written under', workspaceSettingsDialog),
+        item('strut_workspace_animation_tags', 'Strut Scenes: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout (filled in for you in a scene of a kind that names them), and each character\'s shift in time', animationTagsDialog),
+        item('strut_workspace_check', 'Strut Scenes: Check the Scene', 'fact_check', 'Check the scene for what would stop an export or make it wrong', checkWorkspace),
         {
             action: new Action('strut_workspace_export', {
-                name: 'Export Workspace...',
+                name: 'Export Strut Scene...',
                 icon: 'save',
-                description: 'Export every actor\'s clips into its clip set, and the scene\'s layout',
+                description: 'Export every character\'s clips into its clip set, and the scene\'s layout',
                 category: 'file',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace,
                 click: exportWorkspace,
             }),
             menuCategory: 'file.export',
         },
     ];
 }
+
+
+/***/ }),
+
+/***/ "./ts/stage/templateRegistry.ts":
+/*!**************************************!*\
+  !*** ./ts/stage/templateRegistry.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   API_VERSION: () => (/* binding */ API_VERSION),
+/* harmony export */   BUILT_IN: () => (/* binding */ BUILT_IN),
+/* harmony export */   PRESET_FOLDERS_KEY: () => (/* reexport safe */ _actorPresets__WEBPACK_IMPORTED_MODULE_1__.PRESET_FOLDERS_KEY),
+/* harmony export */   TEMPLATE_FOLDERS_KEY: () => (/* binding */ TEMPLATE_FOLDERS_KEY),
+/* harmony export */   TEMPLATE_INDEX: () => (/* binding */ TEMPLATE_INDEX),
+/* harmony export */   TemplateRegistry: () => (/* binding */ TemplateRegistry),
+/* harmony export */   createApi: () => (/* binding */ createApi),
+/* harmony export */   installApi: () => (/* binding */ installApi),
+/* harmony export */   readList: () => (/* binding */ readList),
+/* harmony export */   registry: () => (/* binding */ registry),
+/* harmony export */   uninstallApi: () => (/* binding */ uninstallApi)
+/* harmony export */ });
+/* harmony import */ var _sceneTemplate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sceneTemplate */ "./ts/stage/sceneTemplate.ts");
+/* harmony import */ var _actorPresets__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./actorPresets */ "./ts/stage/actorPresets.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+/**
+ * The scene templates Strut Scenes knows, and the API other plugins and tools use to add their own
+ * <p>
+ * Where templates come from, each with a source name so they can be taken away again:
+ * <ul>
+ * <li>the ones built in ({@code strut}): a free scene, and clips for one skeleton;</li>
+ * <li>a plugin, in code: {@code StrutScenes.registerTemplate(...)} (see {@link installApi});</li>
+ * <li>a folder with a {@code templates.json}, registered in the browser storage of Blockbench under {@link TEMPLATE_FOLDERS_KEY} (a JSON list of folder paths), so a
+ * tool that is not a Blockbench plugin (a pack editor) can add its templates by writing that one key; the folders are read when a scene is started or the list is
+ * refreshed. The actor preset folders ({@link PRESET_FOLDERS_KEY}) work the same way.</li>
+ * </ul>
+ */
+const TEMPLATE_FOLDERS_KEY = 'strut_scene_template_folders';
+const TEMPLATE_INDEX = 'templates.json';
+const API_VERSION = 1;
+const BUILT_IN = (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_0__.parseTemplateList)([
+    {
+        id: 'strut:free', name: 'Free scene', group: 'Strut',
+        description: 'Characters that play clips together, with no rules about what the clips are called or how many there are.',
+        roles: [
+            { id: 'actor_1', name: 'Actor 1', lead: true },
+            { id: 'actor_2', name: 'Actor 2', required: false },
+            { id: 'actor_3', name: 'Actor 3', required: false },
+        ],
+        clips: { naming: 'animation.{scene}.{phase}', freeClips: true },
+    },
+    {
+        id: 'strut:skeleton_clips', name: 'Clips for one skeleton', group: 'Strut',
+        description: 'One character animated for its skeleton, so every model with that skeleton can play the clips (a walk, an idle, a gesture).',
+        roles: [{ id: 'actor', name: 'Character', lead: true }],
+        clips: { naming: 'animation.{scene}.{phase}', freeClips: true },
+    },
+], 'strut').templates;
+class TemplateRegistry {
+    constructor() {
+        this.bySource = new Map();
+        this.listeners = new Set();
+        /** What was wrong with what was registered, for showing */
+        this.problems = [];
+        this.bySource.set('strut', [...BUILT_IN]);
+    }
+    /** Sets everything {@code source} registered to {@code templates} (a source registering again replaces what it had) */
+    set(source, templates) {
+        this.bySource.set(source, [...templates]);
+        this.changed();
+    }
+    remove(source) {
+        if (this.bySource.delete(source))
+            this.changed();
+    }
+    /** Every template, built in first; a template id that two sources have is listed once, from the first source */
+    list() {
+        const seen = new Set();
+        const found = [];
+        for (const [source, templates] of this.bySource) {
+            for (const template of templates) {
+                if (!seen.has(template.id)) {
+                    seen.add(template.id);
+                    found.push({ template, source });
+                }
+            }
+        }
+        return found;
+    }
+    get(id) {
+        var _a;
+        return (_a = this.list().find(entry => entry.template.id === id)) === null || _a === void 0 ? void 0 : _a.template;
+    }
+    onChange(listener) {
+        this.listeners.add(listener);
+        return () => void this.listeners.delete(listener);
+    }
+    changed() {
+        for (const listener of [...this.listeners]) {
+            try {
+                listener();
+            }
+            catch (error) {
+                console.warn('[Strut Scenes] a template listener threw', error);
+            }
+        }
+    }
+    /** Reads the folders registered in {@code storage}, replacing what the folders gave before */
+    async refreshFolders(storage) {
+        const folders = readList(storage, TEMPLATE_FOLDERS_KEY);
+        for (const source of [...this.bySource.keys()]) {
+            if (source.startsWith('folder:') && !folders.includes(source.slice('folder:'.length)))
+                this.bySource.delete(source);
+        }
+        this.problems.length = 0;
+        for (const folder of folders) {
+            const file = await (0,_actorPresets__WEBPACK_IMPORTED_MODULE_1__.readFile)(`${folder}/${TEMPLATE_INDEX}`, 'text');
+            if (!file || typeof file.content !== 'string') {
+                this.problems.push(`${folder}: no ${TEMPLATE_INDEX} could be read there`);
+                continue;
+            }
+            const parsed = (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_0__.parseTemplates)(file.content, folder);
+            this.problems.push(...parsed.problems);
+            this.bySource.set(`folder:${folder}`, [...parsed.templates]);
+        }
+        this.changed();
+    }
+}
+/** A list of strings kept under {@code key}, from a storage that may be missing or hold anything */
+function readList(storage, key) {
+    var _a;
+    try {
+        const value = JSON.parse((_a = storage === null || storage === void 0 ? void 0 : storage.getItem(key)) !== null && _a !== void 0 ? _a : '[]');
+        return Array.isArray(value) ? value.filter((each) => typeof each === 'string' && each !== '') : [];
+    }
+    catch (_b) {
+        return [];
+    }
+}
+const registry = new TemplateRegistry();
+function storage() {
+    var _a;
+    try {
+        return (_a = globalThis.localStorage) !== null && _a !== void 0 ? _a : null;
+    }
+    catch (_b) {
+        return null;
+    }
+}
+function createApi(target = registry) {
+    return {
+        apiVersion: API_VERSION,
+        registerTemplate(template, source = 'api') {
+            const parsed = (0,_sceneTemplate__WEBPACK_IMPORTED_MODULE_0__.parseTemplateList)(Array.isArray(template) ? template : [template], `api:${source}`);
+            if (parsed.templates.length > 0) {
+                const name = `api:${source}`;
+                const existing = target.list().filter(entry => entry.source === name).map(entry => entry.template);
+                const ids = new Set(parsed.templates.map(each => each.id));
+                target.set(name, [...existing.filter(each => !ids.has(each.id)), ...parsed.templates]);
+            }
+            return { ok: parsed.problems.length === 0 && parsed.templates.length > 0, problems: [...parsed.problems] };
+        },
+        unregisterTemplates(source) {
+            target.remove(`api:${source}`);
+        },
+        templates() {
+            return target.list().map(entry => ({ id: entry.template.id, name: entry.template.name, group: entry.template.group, source: entry.source }));
+        },
+        registerPresetFolder(path) {
+            const folders = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_1__.readFolders)(storage());
+            (0,_actorPresets__WEBPACK_IMPORTED_MODULE_1__.writeFolders)(storage(), [...folders, path]);
+        },
+        async registerTemplateFolder(path) {
+            const store = storage();
+            try {
+                const folders = readList(store, TEMPLATE_FOLDERS_KEY);
+                store === null || store === void 0 ? void 0 : store.setItem(TEMPLATE_FOLDERS_KEY, JSON.stringify([...new Set([...folders, path.split('\\').join('/')])]));
+            }
+            catch (_a) {
+                // no storage: the folder is not kept
+            }
+            await target.refreshFolders(store);
+        },
+        onTemplatesChanged(callback) {
+            return target.onChange(callback);
+        },
+    };
+}
+function installApi() {
+    globalThis.StrutScenes = createApi();
+}
+function uninstallApi() {
+    delete globalThis.StrutScenes;
+}
+
 
 
 /***/ }),
@@ -20973,7 +21711,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./ts/constants.ts");
 
 /**
- * The workspace project type: where a scene is animated
+ * The Strut Scenes project type: where a scene is animated
  * <p>
  * A project of this type has no model of its own and no modelling tools: no edit mode (nothing to move, add or reshape), no paint mode, no display settings. It holds
  * the actors of a scene (their models and textures are loaded for it, see {@code stageProject.ts}) and the animations, so the person animating only animates.
@@ -20981,9 +21719,9 @@ __webpack_require__.r(__webpack_exports__);
  * project, which keeps the actors, their textures and every keyframe
  */
 const workspaceFormat = new ModelFormat(_constants__WEBPACK_IMPORTED_MODULE_0__.STRUT_WORKSPACE_ID, {
-    name: 'Strut Workspace',
+    name: 'Strut Scenes',
     category: 'minecraft',
-    description: 'Animate a scene, or one skeleton, for several characters on one timeline. The characters are loaded as actors and exported one by one for Strut',
+    description: "Make a scene, or the clips of one skeleton, for several characters on one timeline. The characters are loaded for you, the kind of scene says what clips it needs, and each character is exported for Strut by itself",
     icon: 'groups',
     show_on_start_screen: true,
     // the actors are made of bones, cubes and meshes loaded from their models, never edited here
@@ -22238,6 +22976,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   isValidPath: () => (/* binding */ isValidPath),
 /* harmony export */   make: () => (/* binding */ make),
 /* harmony export */   onlyIfGeckoLib: () => (/* binding */ onlyIfGeckoLib),
+/* harmony export */   onlyIfStrutModel: () => (/* binding */ onlyIfStrutModel),
 /* harmony export */   removeCodecCallback: () => (/* binding */ removeCodecCallback),
 /* harmony export */   removeEventListener: () => (/* binding */ removeEventListener),
 /* harmony export */   removeMonkeypatches: () => (/* binding */ removeMonkeypatches)
@@ -22281,6 +23020,13 @@ const removeMonkeypatches = () => {
 /**
  * Wrap a callback object with a conditional check on the project being a GeckoLib project, for safety
  */
+/** Calls {@code callback} only while a Strut model project is focussed: what reads or writes a model's own properties does not run for a scene */
+const onlyIfStrutModel = (callback) => {
+    return e => {
+        if (isStrutModelProject())
+            callback(e);
+    };
+};
 const onlyIfGeckoLib = (callback) => {
     return e => {
         if (isGeckoLibModel())
@@ -22356,7 +23102,8 @@ const isStrutWorkspace = () => Format.id === _constants__WEBPACK_IMPORTED_MODULE
 // settings[x].value is typed SettingsValue (string | number | boolean); this setting is a
 // checkbox and is always boolean at runtime, but the cast keeps this function's own return type
 // boolean rather than widening to `boolean | SettingsValue`
-const hasModelDisplaySettings = () => Boolean(isGeckoLibModel() && Project && ((Project[_constants__WEBPACK_IMPORTED_MODULE_0__.PROPERTY_MODEL_TYPE] === _constants__WEBPACK_IMPORTED_MODULE_0__.GeckoModelType.ITEM || !isEmpty(Project.display_settings)) || settings[_constants__WEBPACK_IMPORTED_MODULE_0__.SETTING_ALWAYS_SHOW_DISPLAY].value));
+// a model project only: a scene has no model, so no display settings; and the setting may not exist (it is read as off)
+const hasModelDisplaySettings = () => { var _a; return Boolean(isStrutModelProject() && Project && ((Project[_constants__WEBPACK_IMPORTED_MODULE_0__.PROPERTY_MODEL_TYPE] === _constants__WEBPACK_IMPORTED_MODULE_0__.GeckoModelType.ITEM || !isEmpty(Project.display_settings)) || ((_a = settings[_constants__WEBPACK_IMPORTED_MODULE_0__.SETTING_ALWAYS_SHOW_DISPLAY]) === null || _a === void 0 ? void 0 : _a.value))); };
 
 
 /***/ }),

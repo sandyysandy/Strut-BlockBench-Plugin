@@ -2,8 +2,7 @@ import { workspaceSettingsDialog } from './stage/stageUi';
 import {
     addCodecCallback,
     addEventListener,
-    addMonkeypatch, hasModelDisplaySettings, isGeckoLibModel, isStrutWorkspace, Monkeypatches,
-    onlyIfGeckoLib,
+    addMonkeypatch, hasModelDisplaySettings, isGeckoLibModel, isStrutWorkspace, onlyIfStrutModel, Monkeypatches,
     removeCodecCallback,
     removeEventListener, removeMonkeypatches
 } from "./utils";
@@ -20,12 +19,12 @@ import {openProjectSettingsDialog} from "./codec";
 import {GeckolibKeyframe} from "./easing";
 
 export function addEventListeners() {
-    addCodecCallback(Codecs.project, 'parse', onlyIfGeckoLib(onProjectParse))
-    addCodecCallback(Codecs.bedrock, 'compile', onlyIfGeckoLib(onBedrockCompile))
-    addEventListener('select_mode', onlyIfGeckoLib(onModeSelect));
-    addEventListener('select_project', onlyIfGeckoLib(onProjectSelect));
-    addEventListener('update_project_settings', onlyIfGeckoLib(onSettingsChanged));
-    addEventListener('save_project', onlyIfGeckoLib(onProjectSave));
+    addCodecCallback(Codecs.project, 'parse', onlyIfStrutModel(onProjectParse))
+    addCodecCallback(Codecs.bedrock, 'compile', onlyIfStrutModel(onBedrockCompile))
+    addEventListener('select_mode', onlyIfStrutModel(onModeSelect));
+    addEventListener('select_project', onlyIfStrutModel(onProjectSelect));
+    addEventListener('update_project_settings', onlyIfStrutModel(onSettingsChanged));
+    addEventListener('save_project', onlyIfStrutModel(onProjectSave));
     addMonkeypatch(Animator, null, "buildFile", monkeypatchAnimatorBuildFile);
     addMonkeypatch(Animator, null, "loadFile", monkeypatchAnimatorLoadFile);
     addMonkeypatch(Blockbench, null, "export", monkeypatchBlockbenchExport);
@@ -33,11 +32,11 @@ export function addEventListeners() {
 }
 
 export function removeEventListeners() {
-    removeCodecCallback(Codecs.project, 'parse', onlyIfGeckoLib(onProjectParse))
-    removeCodecCallback(Codecs.bedrock, 'compile', onlyIfGeckoLib(onBedrockCompile))
-    removeEventListener('select_mode', onlyIfGeckoLib(onModeSelect));
-    removeEventListener('select_project', onlyIfGeckoLib(onProjectSelect));
-    removeEventListener('update_project_settings', onlyIfGeckoLib(onSettingsChanged));
+    removeCodecCallback(Codecs.project, 'parse', onlyIfStrutModel(onProjectParse))
+    removeCodecCallback(Codecs.bedrock, 'compile', onlyIfStrutModel(onBedrockCompile))
+    removeEventListener('select_mode', onlyIfStrutModel(onModeSelect));
+    removeEventListener('select_project', onlyIfStrutModel(onProjectSelect));
+    removeEventListener('update_project_settings', onlyIfStrutModel(onSettingsChanged));
     removeMonkeypatches();
 }
 
@@ -50,7 +49,7 @@ function onProjectParse(e: any) {
     onSettingsChanged();
 
     // Because the project hasn't had its model properties applied at this stage
-    Format.display_mode = (e.model[PROPERTY_MODEL_TYPE] && e.model[PROPERTY_MODEL_TYPE] === GeckoModelType.ITEM) || Boolean(settings[SETTING_ALWAYS_SHOW_DISPLAY].value);
+    Format.display_mode = (e.model[PROPERTY_MODEL_TYPE] && e.model[PROPERTY_MODEL_TYPE] === GeckoModelType.ITEM) || Boolean(settings[SETTING_ALWAYS_SHOW_DISPLAY]?.value);
 }
 
 /**
