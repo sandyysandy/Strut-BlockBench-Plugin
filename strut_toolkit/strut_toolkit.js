@@ -21799,9 +21799,10 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Groups the timeline of a scene by character
  * <p>
- * Blockbench's timeline lists the bones that are selected, one row each, by their bone name, so in a scene two characters that have a bone called {@code root} are two
- * rows both called {@code root}. This puts each row under its character: a coloured band down its left edge, and a heading with the character's name over the first row of
- * each. It only sets data attributes on the rows the timeline makes (Vue owns their classes and content and would undo anything else), and the style does the rest, so
+ * Blockbench's timeline lists the bones that are selected, one row each, by their bone name and in the order they were selected, so in a scene two characters that have a
+ * bone called {@code root} are two rows both called {@code root}, mixed together. This puts the rows of each character together (the list is sorted by character, in the
+ * outliner's order), under a heading with the character's name that can be folded away, and a coloured band down their left edge. Only the order of the list is
+ * changed, and data attributes are set on the rows the timeline makes (Vue owns their classes and content and would undo anything else); the style does the rest, so
  * nothing is added to or taken out of what the timeline draws
  */
 const PALETTE = ['#4fa3e0', '#e0735b', '#6cc17a', '#c98ae0', '#e0c24f', '#4fd0c0', '#e07fa6', '#a0a0a0'];
@@ -21809,7 +21810,8 @@ const STYLE_ID = 'strut_timeline_grouping';
 const CSS = `
     #timeline_body .animator[data-character] { border-left: 3px solid var(--strut-character-colour, #888); }
     #timeline_body .animator[data-character-first]::before {
-        content: attr(data-character);
+        content: attr(data-chevron) "  " attr(data-character);
+        cursor: pointer;
         display: block;
         position: sticky;
         left: 0;
@@ -21823,11 +21825,15 @@ const CSS = `
         background: var(--color-back);
         border-left: 3px solid var(--strut-character-colour, #888);
     }
+    #timeline_body .animator[data-character][data-collapsed]:not([data-character-first]) { display: none; }
+    #timeline_body .animator[data-character-first][data-collapsed] > * { display: none; }
 `;
 let observer = null;
 let style = null;
 let pending = false;
 let listeners = [];
+/** The characters whose rows are folded away */
+const collapsed = new Set();
 /** The role of the character whose bone {@code node} is, or null */
 function characterOf(node) {
     for (let at = node; at; at = at.parent) {
@@ -21840,12 +21846,37 @@ function characterOf(node) {
 function colourOf(index) {
     return PALETTE[index % PALETTE.length];
 }
+/** Where a character's rows come in the list: the order of the characters in the outliner; rows that are no character's (the effects) come first */
+function rankOf(animator, order) {
+    var _a, _b;
+    const node = (_b = (_a = globalThis.OutlinerNode) === null || _a === void 0 ? void 0 : _a.uuids) === null || _b === void 0 ? void 0 : _b[animator.uuid];
+    const role = node ? characterOf(node) : null;
+    return role === null ? -1 : order.indexOf(role);
+}
+/** Puts the rows of each character together, keeping their order inside it; true if the list had to be changed */
+function sortByCharacter() {
+    var _a, _b, _c;
+    const animators = (_a = globalThis.Timeline) === null || _a === void 0 ? void 0 : _a.animators;
+    if (!animators || animators.length < 2)
+        return false;
+    const order = ((_c = (_b = globalThis.Outliner) === null || _b === void 0 ? void 0 : _b.root) !== null && _c !== void 0 ? _c : []).filter(node => typeof (node === null || node === void 0 ? void 0 : node.name) === 'string' && node.name.startsWith(_stageProject__WEBPACK_IMPORTED_MODULE_0__.ACTOR_PREFIX)).map(node => node.name.slice(_stageProject__WEBPACK_IMPORTED_MODULE_0__.ACTOR_PREFIX.length));
+    const sorted = animators.map((animator, index) => ({ animator, index, rank: rankOf(animator, order) })).sort((a, b) => a.rank - b.rank || a.index - b.index);
+    if (sorted.every((entry, index) => entry.animator === animators[index]))
+        return false;
+    animators.splice(0, animators.length, ...sorted.map(entry => entry.animator));
+    return true;
+}
 function decorate() {
     var _a, _b, _c;
     pending = false;
     const body = document.getElementById('timeline_body');
     if (!body)
         return;
+    // the list changes, the timeline draws it again, and this runs again on what it drew
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_1__.isStrutWorkspace)() && sortByCharacter()) {
+        setTimeout(schedule, 60);
+        return;
+    }
     const rows = [...body.querySelectorAll('li.animator[uuid]')];
     const scene = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isStrutWorkspace)();
     const roles = [];
@@ -21854,9 +21885,7 @@ function decorate() {
         const node = scene ? (_b = (_a = globalThis.OutlinerNode) === null || _a === void 0 ? void 0 : _a.uuids) === null || _b === void 0 ? void 0 : _b[(_c = row.getAttribute('uuid')) !== null && _c !== void 0 ? _c : ''] : null;
         const role = node ? characterOf(node) : null;
         if (role === null) {
-            row.removeAttribute('data-character');
-            row.removeAttribute('data-character-first');
-            row.style.removeProperty('--strut-character-colour');
+            clear(row);
             last = null;
             continue;
         }
@@ -21865,18 +21894,57 @@ function decorate() {
         const first = role !== last;
         row.setAttribute('data-character', role);
         row.style.setProperty('--strut-character-colour', colourOf(roles.indexOf(role)));
-        if (first)
-            row.setAttribute('data-character-first', '');
+        if (collapsed.has(role))
+            row.setAttribute('data-collapsed', '');
         else
+            row.removeAttribute('data-collapsed');
+        if (first) {
+            row.setAttribute('data-character-first', '');
+            row.setAttribute('data-chevron', collapsed.has(role) ? '\u25B8' : '\u25BE');
+        }
+        else {
             row.removeAttribute('data-character-first');
+            row.removeAttribute('data-chevron');
+        }
         last = role;
     }
+}
+function clear(row) {
+    row.removeAttribute('data-character');
+    row.removeAttribute('data-character-first');
+    row.removeAttribute('data-collapsed');
+    row.removeAttribute('data-chevron');
+    row.style.removeProperty('--strut-character-colour');
+}
+/** A click on a character's heading (the top of its first row) folds the character's rows away, or opens them again */
+function onClick(event) {
+    var _a;
+    const row = event.target;
+    if (!row || row.tagName !== 'LI' || !row.hasAttribute('data-character-first'))
+        return;
+    const height = parseFloat(getComputedStyle(row, '::before').height) || 18;
+    if (event.offsetY > height)
+        return;
+    const role = (_a = row.getAttribute('data-character')) !== null && _a !== void 0 ? _a : '';
+    if (collapsed.has(role))
+        collapsed.delete(role);
+    else
+        collapsed.add(role);
+    event.stopPropagation();
+    event.preventDefault();
+    schedule();
 }
 function schedule() {
     if (pending)
         return;
     pending = true;
-    requestAnimationFrame(decorate);
+    // on the next frame, or soon after if frames are not being drawn (a hidden window): whichever comes first
+    const run = () => {
+        if (pending)
+            decorate();
+    };
+    requestAnimationFrame(run);
+    setTimeout(run, 50);
 }
 function loadTimelineGrouping() {
     const body = document.getElementById('timeline_body');
@@ -21888,6 +21956,7 @@ function loadTimelineGrouping() {
     document.head.append(style);
     observer = new MutationObserver(schedule);
     observer.observe(body, { childList: true, subtree: true });
+    body.addEventListener('click', onClick, true);
     for (const event of ['select_project', 'select_mode', 'update_selection', 'finish_edit']) {
         const listener = () => schedule();
         globalThis.Blockbench.on(event, listener);
@@ -21896,18 +21965,17 @@ function loadTimelineGrouping() {
     schedule();
 }
 function unloadTimelineGrouping() {
+    var _a;
     observer === null || observer === void 0 ? void 0 : observer.disconnect();
     observer = null;
+    (_a = document.getElementById('timeline_body')) === null || _a === void 0 ? void 0 : _a.removeEventListener('click', onClick, true);
     style === null || style === void 0 ? void 0 : style.remove();
     style = null;
     for (const [event, listener] of listeners)
         globalThis.Blockbench.removeListener(event, listener);
     listeners = [];
-    for (const row of document.querySelectorAll('#timeline_body li.animator[data-character]')) {
-        row.removeAttribute('data-character');
-        row.removeAttribute('data-character-first');
-        row.style.removeProperty('--strut-character-colour');
-    }
+    for (const row of document.querySelectorAll('#timeline_body li.animator[data-character]'))
+        clear(row);
 }
 
 
