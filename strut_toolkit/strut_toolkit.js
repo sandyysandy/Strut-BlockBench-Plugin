@@ -20927,14 +20927,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/model */ "./ts/binary/model.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
 /* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
 /* harmony import */ var _templateRegistry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./templateRegistry */ "./ts/stage/templateRegistry.ts");
 /* harmony import */ var _textureMatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./textureMatch */ "./ts/stage/textureMatch.ts");
-/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
-/* harmony import */ var _scenePanel__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./scenePanel */ "./ts/stage/scenePanel.ts");
+/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
+/* harmony import */ var _scenePanel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./scenePanel */ "./ts/stage/scenePanel.ts");
+/* harmony import */ var _timelineGrouping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./timelineGrouping */ "./ts/stage/timelineGrouping.ts");
 /* harmony import */ var _actorPresets__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorPresets */ "./ts/stage/actorPresets.ts");
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 
 
@@ -21419,8 +21421,9 @@ function loadStageUi() {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
     (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.installApi)();
+    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_6__.loadTimelineGrouping)();
     void _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.refreshFolders(storage());
-    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_6__.createScenePanel)({
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_7__.createScenePanel)({
         addCharacter: addCharacterDialog,
         addOther: () => addPresetDialog(),
         addFromFiles: () => addActorDialog(),
@@ -21446,7 +21449,7 @@ function applyVariablesVisibility() {
     if (originalVariablesCondition === null)
         originalVariablesCondition = (_b = panel.condition) !== null && _b !== void 0 ? _b : true;
     const original = originalVariablesCondition;
-    panel.condition = () => globalThis.Condition(original) && (!(0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)() || variablesShown);
+    panel.condition = () => globalThis.Condition(original) && (!(0,_utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace)() || variablesShown);
     (_d = (_c = globalThis).updateInterface) === null || _d === void 0 ? void 0 : _d.call(_c);
 }
 function restoreVariables() {
@@ -21465,7 +21468,7 @@ function toggleVariablePlaceholders() {
 /** A scene is for animating only: it is opened in Animate mode (a scene has no Edit mode to start in) */
 function animateOnly() {
     var _a;
-    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace)())
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace)())
         return;
     (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.unlockGeometry)();
     applyVariablesVisibility();
@@ -21475,15 +21478,16 @@ function animateOnly() {
 function unloadStageUi() {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
+    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_6__.unloadTimelineGrouping)();
     restoreVariables();
-    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_6__.deleteScenePanel)();
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_7__.deleteScenePanel)();
     (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.uninstallApi)();
-    _workspaceFormat__WEBPACK_IMPORTED_MODULE_8__.workspaceFormat.delete();
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_9__.workspaceFormat.delete();
 }
 /** The actions, for the Tools menu */
 function createStageMenuItems() {
     const item = (id, name, icon, description, click) => ({
-        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace, click }),
+        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace, click }),
         menuCategory: 'tools',
     });
     return [
@@ -21500,7 +21504,7 @@ function createStageMenuItems() {
                 icon: 'data_object',
                 description: 'The Variable Placeholders panel is hidden in a scene, which has no use for it; this shows it or hides it again',
                 category: 'view',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace,
                 click: toggleVariablePlaceholders,
             }),
             menuCategory: 'view',
@@ -21512,7 +21516,7 @@ function createStageMenuItems() {
                 icon: 'save',
                 description: 'Export every character\'s clips into its clip set, and the scene\'s layout',
                 category: 'file',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_7__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace,
                 click: exportWorkspace,
             }),
             menuCategory: 'file.export',
@@ -21768,6 +21772,142 @@ function matchTextures(textureNames, files) {
         missing: textureNames.filter(texture => !images.has(texture)),
         unused: files.filter(file => !taken.has(file)).map(file => file.name),
     };
+}
+
+
+/***/ }),
+
+/***/ "./ts/stage/timelineGrouping.ts":
+/*!**************************************!*\
+  !*** ./ts/stage/timelineGrouping.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   characterOf: () => (/* binding */ characterOf),
+/* harmony export */   colourOf: () => (/* binding */ colourOf),
+/* harmony export */   loadTimelineGrouping: () => (/* binding */ loadTimelineGrouping),
+/* harmony export */   unloadTimelineGrouping: () => (/* binding */ unloadTimelineGrouping)
+/* harmony export */ });
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+/**
+ * Groups the timeline of a scene by character
+ * <p>
+ * Blockbench's timeline lists the bones that are selected, one row each, by their bone name, so in a scene two characters that have a bone called {@code root} are two
+ * rows both called {@code root}. This puts each row under its character: a coloured band down its left edge, and a heading with the character's name over the first row of
+ * each. It only sets data attributes on the rows the timeline makes (Vue owns their classes and content and would undo anything else), and the style does the rest, so
+ * nothing is added to or taken out of what the timeline draws
+ */
+const PALETTE = ['#4fa3e0', '#e0735b', '#6cc17a', '#c98ae0', '#e0c24f', '#4fd0c0', '#e07fa6', '#a0a0a0'];
+const STYLE_ID = 'strut_timeline_grouping';
+const CSS = `
+    #timeline_body .animator[data-character] { border-left: 3px solid var(--strut-character-colour, #888); }
+    #timeline_body .animator[data-character-first]::before {
+        content: attr(data-character);
+        display: block;
+        position: sticky;
+        left: 0;
+        padding: 1px 8px 1px 6px;
+        margin-left: -3px;
+        font-size: 0.78em;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--strut-character-colour, #888);
+        background: var(--color-back);
+        border-left: 3px solid var(--strut-character-colour, #888);
+    }
+`;
+let observer = null;
+let style = null;
+let pending = false;
+let listeners = [];
+/** The role of the character whose bone {@code node} is, or null */
+function characterOf(node) {
+    for (let at = node; at; at = at.parent) {
+        if (typeof at.name === 'string' && at.name.startsWith(_stageProject__WEBPACK_IMPORTED_MODULE_0__.ACTOR_PREFIX) && at.name.length > _stageProject__WEBPACK_IMPORTED_MODULE_0__.ACTOR_PREFIX.length && (at.parent === undefined || at.parent === 'root'))
+            return at.name.slice(_stageProject__WEBPACK_IMPORTED_MODULE_0__.ACTOR_PREFIX.length);
+    }
+    return null;
+}
+/** The colour of the {@code index}th character */
+function colourOf(index) {
+    return PALETTE[index % PALETTE.length];
+}
+function decorate() {
+    var _a, _b, _c;
+    pending = false;
+    const body = document.getElementById('timeline_body');
+    if (!body)
+        return;
+    const rows = [...body.querySelectorAll('li.animator[uuid]')];
+    const scene = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.isStrutWorkspace)();
+    const roles = [];
+    let last = null;
+    for (const row of rows) {
+        const node = scene ? (_b = (_a = globalThis.OutlinerNode) === null || _a === void 0 ? void 0 : _a.uuids) === null || _b === void 0 ? void 0 : _b[(_c = row.getAttribute('uuid')) !== null && _c !== void 0 ? _c : ''] : null;
+        const role = node ? characterOf(node) : null;
+        if (role === null) {
+            row.removeAttribute('data-character');
+            row.removeAttribute('data-character-first');
+            row.style.removeProperty('--strut-character-colour');
+            last = null;
+            continue;
+        }
+        if (!roles.includes(role))
+            roles.push(role);
+        const first = role !== last;
+        row.setAttribute('data-character', role);
+        row.style.setProperty('--strut-character-colour', colourOf(roles.indexOf(role)));
+        if (first)
+            row.setAttribute('data-character-first', '');
+        else
+            row.removeAttribute('data-character-first');
+        last = role;
+    }
+}
+function schedule() {
+    if (pending)
+        return;
+    pending = true;
+    requestAnimationFrame(decorate);
+}
+function loadTimelineGrouping() {
+    const body = document.getElementById('timeline_body');
+    if (!body || observer)
+        return;
+    style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = CSS;
+    document.head.append(style);
+    observer = new MutationObserver(schedule);
+    observer.observe(body, { childList: true, subtree: true });
+    for (const event of ['select_project', 'select_mode', 'update_selection', 'finish_edit']) {
+        const listener = () => schedule();
+        globalThis.Blockbench.on(event, listener);
+        listeners.push([event, listener]);
+    }
+    schedule();
+}
+function unloadTimelineGrouping() {
+    observer === null || observer === void 0 ? void 0 : observer.disconnect();
+    observer = null;
+    style === null || style === void 0 ? void 0 : style.remove();
+    style = null;
+    for (const [event, listener] of listeners)
+        globalThis.Blockbench.removeListener(event, listener);
+    listeners = [];
+    for (const row of document.querySelectorAll('#timeline_body li.animator[data-character]')) {
+        row.removeAttribute('data-character');
+        row.removeAttribute('data-character-first');
+        row.style.removeProperty('--strut-character-colour');
+    }
 }
 
 

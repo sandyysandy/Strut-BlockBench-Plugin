@@ -9,6 +9,7 @@ import { Problem } from './stageFormat';
 import { ImageFile, matchTextures } from './textureMatch';
 import { workspaceFormat } from './workspaceFormat';
 import { createScenePanel, deleteScenePanel } from './scenePanel';
+import { loadTimelineGrouping, unloadTimelineGrouping } from './timelineGrouping';
 import { ActorPreset, freeRole, loadPresets, readFile, readFolders, writeFolders } from './actorPresets';
 
 /**
@@ -629,6 +630,7 @@ export function loadStageUi(): void {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
     installApi();
+    loadTimelineGrouping();
     void registry.refreshFolders(storage());
     createScenePanel({
         addCharacter: addCharacterDialog,
@@ -695,6 +697,7 @@ function animateOnly(): void {
 export function unloadStageUi(): void {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
+    unloadTimelineGrouping();
     restoreVariables();
     deleteScenePanel();
     uninstallApi();

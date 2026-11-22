@@ -49,6 +49,7 @@
           "Characters are loaded for you with their models and textures; show or hide, change who one is, give one another model of the same skeleton without losing a keyframe, or remove it. Where a character stands is its own move and turn in the viewport. Export writes each character's clips into its own clip set, made for its skeleton ID with its stage position folded into its root bone, and the scene's layout. The web version exports one zip",
           "A scene is saved as a normal Blockbench project: characters, textures, keyframes and the kind of scene come back when it is opened. Sounds and particles are given to the first character. A timeline grouped by character and importing existing animations are not built yet",
           "Character presets: folders of ready-made characters a tool registers once, so adding one is a single choice",
+          "The timeline of a scene is grouped by character: each bone row has a coloured band down its left edge and a heading with the character's name over the first row of each, so two characters' bones of the same name are told apart",
           "The Variable Placeholders panel is hidden in a scene, which has no use for it; View, Strut Scenes: Show or Hide Variable Placeholders brings it back. Other projects keep their layout",
           "A character's bones are picked by clicking its geometry in the viewport, as in any animation (the geometry was locked, which stopped clicks; scenes made before are unlocked when opened)"
         ]
