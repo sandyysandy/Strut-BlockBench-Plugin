@@ -9,6 +9,7 @@ import { Problem } from './stageFormat';
 import { ImageFile, matchTextures } from './textureMatch';
 import { workspaceFormat } from './workspaceFormat';
 import { createScenePanel, deleteScenePanel } from './scenePanel';
+import { startTour } from '../tour/tourManager';
 import { loadTimelineGrouping, unloadTimelineGrouping } from './timelineGrouping';
 import { ActorPreset, freeRole, loadPresets, readFile, readFolders, writeFolders } from './actorPresets';
 
@@ -459,6 +460,21 @@ async function sceneSettings(): Promise<void> {
     }).show();
 }
 
+/** A free scene named practice, made without asking: what the tour of making a scene follows along in */
+export async function startPracticeScene(): Promise<void> {
+    workspaceFormat.new();
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    const dialog = (Dialog as any).open;
+
+    // the new scene's own questions are answered for the person
+    if (dialog?.id === 'strut_scene_settings') {
+        dialog.setFormValues({ template: 'strut:free', scene: 'practice', namespace: 'practice' });
+        await dialog.confirm();
+        await new Promise(resolve => setTimeout(resolve, 600));
+    }
+}
+
 /** Add a clip: for a phase of the scene's kind it is made as the kind names and sets it; a scene with no phases is asked for a name */
 export function addClipDialog(phaseId?: string): void {
     const meta = readMeta();
@@ -640,6 +656,7 @@ export function loadStageUi(): void {
         swap: swapModelDialog,
         addClip: addClipDialog,
         settings: workspaceSettingsDialog,
+        tour: () => startTour('scenes'),
         check: checkWorkspace,
         export: exportWorkspace,
     });

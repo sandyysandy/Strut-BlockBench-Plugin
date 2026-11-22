@@ -19729,6 +19729,9 @@ function createScenePanel(handlers) {
                 settings() {
                     handlers.settings();
                 },
+                tour() {
+                    handlers.tour();
+                },
                 check() {
                     handlers.check();
                 },
@@ -19743,6 +19746,7 @@ function createScenePanel(handlers) {
                             <div class="strut_scene_name">{{ overview.scene || 'unnamed scene' }}</div>
                             <div class="strut_scene_kind">{{ overview.templateName || 'no kind of scene' }}{{ overview.namespace ? ' · ' + overview.namespace : '' }}</div>
                         </div>
+                        <i class="material-icons strut_button" title="A tour of making a scene" @click="tour()">help_outline</i>
                         <i class="material-icons strut_button" title="Kind of scene, name and namespace" @click="settings()">settings</i>
                     </div>
 
@@ -20920,6 +20924,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   exportWorkspace: () => (/* binding */ exportWorkspace),
 /* harmony export */   loadStageUi: () => (/* binding */ loadStageUi),
 /* harmony export */   presetFoldersDialog: () => (/* binding */ presetFoldersDialog),
+/* harmony export */   startPracticeScene: () => (/* binding */ startPracticeScene),
 /* harmony export */   swapModelDialog: () => (/* binding */ swapModelDialog),
 /* harmony export */   toggleVariablePlaceholders: () => (/* binding */ toggleVariablePlaceholders),
 /* harmony export */   unloadStageUi: () => (/* binding */ unloadStageUi),
@@ -20927,15 +20932,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/model */ "./ts/binary/model.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
 /* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
 /* harmony import */ var _templateRegistry__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./templateRegistry */ "./ts/stage/templateRegistry.ts");
 /* harmony import */ var _textureMatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./textureMatch */ "./ts/stage/textureMatch.ts");
-/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
-/* harmony import */ var _scenePanel__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./scenePanel */ "./ts/stage/scenePanel.ts");
-/* harmony import */ var _timelineGrouping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./timelineGrouping */ "./ts/stage/timelineGrouping.ts");
+/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
+/* harmony import */ var _scenePanel__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./scenePanel */ "./ts/stage/scenePanel.ts");
+/* harmony import */ var _tour_tourManager__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../tour/tourManager */ "./ts/tour/tourManager.ts");
+/* harmony import */ var _timelineGrouping__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./timelineGrouping */ "./ts/stage/timelineGrouping.ts");
 /* harmony import */ var _actorPresets__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorPresets */ "./ts/stage/actorPresets.ts");
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 
 
@@ -21288,6 +21295,18 @@ async function sceneSettings() {
         },
     }).show();
 }
+/** A free scene named practice, made without asking: what the tour of making a scene follows along in */
+async function startPracticeScene() {
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__.workspaceFormat.new();
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const dialog = Dialog.open;
+    // the new scene's own questions are answered for the person
+    if ((dialog === null || dialog === void 0 ? void 0 : dialog.id) === 'strut_scene_settings') {
+        dialog.setFormValues({ template: 'strut:free', scene: 'practice', namespace: 'practice' });
+        await dialog.confirm();
+        await new Promise(resolve => setTimeout(resolve, 600));
+    }
+}
 /** Add a clip: for a phase of the scene's kind it is made as the kind names and sets it; a scene with no phases is asked for a name */
 function addClipDialog(phaseId) {
     const meta = (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.readMeta)();
@@ -21421,9 +21440,9 @@ function loadStageUi() {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
     (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.installApi)();
-    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_6__.loadTimelineGrouping)();
+    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_7__.loadTimelineGrouping)();
     void _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.refreshFolders(storage());
-    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_7__.createScenePanel)({
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_8__.createScenePanel)({
         addCharacter: addCharacterDialog,
         addOther: () => addPresetDialog(),
         addFromFiles: () => addActorDialog(),
@@ -21431,6 +21450,7 @@ function loadStageUi() {
         swap: swapModelDialog,
         addClip: addClipDialog,
         settings: workspaceSettingsDialog,
+        tour: () => (0,_tour_tourManager__WEBPACK_IMPORTED_MODULE_9__.startTour)('scenes'),
         check: checkWorkspace,
         export: exportWorkspace,
     });
@@ -21449,7 +21469,7 @@ function applyVariablesVisibility() {
     if (originalVariablesCondition === null)
         originalVariablesCondition = (_b = panel.condition) !== null && _b !== void 0 ? _b : true;
     const original = originalVariablesCondition;
-    panel.condition = () => globalThis.Condition(original) && (!(0,_utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace)() || variablesShown);
+    panel.condition = () => globalThis.Condition(original) && (!(0,_utils__WEBPACK_IMPORTED_MODULE_10__.isStrutWorkspace)() || variablesShown);
     (_d = (_c = globalThis).updateInterface) === null || _d === void 0 ? void 0 : _d.call(_c);
 }
 function restoreVariables() {
@@ -21468,7 +21488,7 @@ function toggleVariablePlaceholders() {
 /** A scene is for animating only: it is opened in Animate mode (a scene has no Edit mode to start in) */
 function animateOnly() {
     var _a;
-    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace)())
+    if (!(0,_utils__WEBPACK_IMPORTED_MODULE_10__.isStrutWorkspace)())
         return;
     (0,_stageProject__WEBPACK_IMPORTED_MODULE_2__.unlockGeometry)();
     applyVariablesVisibility();
@@ -21478,16 +21498,16 @@ function animateOnly() {
 function unloadStageUi() {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
-    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_6__.unloadTimelineGrouping)();
+    (0,_timelineGrouping__WEBPACK_IMPORTED_MODULE_7__.unloadTimelineGrouping)();
     restoreVariables();
-    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_7__.deleteScenePanel)();
+    (0,_scenePanel__WEBPACK_IMPORTED_MODULE_8__.deleteScenePanel)();
     (0,_templateRegistry__WEBPACK_IMPORTED_MODULE_5__.uninstallApi)();
-    _workspaceFormat__WEBPACK_IMPORTED_MODULE_9__.workspaceFormat.delete();
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__.workspaceFormat.delete();
 }
 /** The actions, for the Tools menu */
 function createStageMenuItems() {
     const item = (id, name, icon, description, click) => ({
-        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace, click }),
+        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_10__.isStrutWorkspace, click }),
         menuCategory: 'tools',
     });
     return [
@@ -21504,7 +21524,7 @@ function createStageMenuItems() {
                 icon: 'data_object',
                 description: 'The Variable Placeholders panel is hidden in a scene, which has no use for it; this shows it or hides it again',
                 category: 'view',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_10__.isStrutWorkspace,
                 click: toggleVariablePlaceholders,
             }),
             menuCategory: 'view',
@@ -21516,7 +21536,7 @@ function createStageMenuItems() {
                 icon: 'save',
                 description: 'Export every character\'s clips into its clip set, and the scene\'s layout',
                 category: 'file',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_8__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_10__.isStrutWorkspace,
                 click: exportWorkspace,
             }),
             menuCategory: 'file.export',
@@ -23238,6 +23258,796 @@ function createStrutJsonAnimationCodec() {
 
 /***/ }),
 
+/***/ "./ts/tour/tourEngine.ts":
+/*!*******************************!*\
+  !*** ./ts/tour/tourEngine.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TourRunner: () => (/* binding */ TourRunner),
+/* harmony export */   TourStore: () => (/* binding */ TourStore)
+/* harmony export */ });
+/**
+ * The guided tours: what a tour is, and the runner that walks a person through one
+ * <p>
+ * A tour is a list of steps. Each step points at a part of the screen (or at nothing, for a plain card), says what it is for in a few short paragraphs, and may offer one
+ * button that does something for the person (open a panel, start a practice scene). The runner knows nothing about the screen: it asks a view to show a step, and the
+ * person's presses come back as {@link TourRunner#next}, {@link TourRunner#back}, {@link TourRunner#skip} and {@link TourRunner#finish}. A tour can be left at any
+ * step, and started again from any of its menus. Pure: no Blockbench and no DOM, so it is tested without either
+ */
+const DONE = 'strut_tour_done:';
+const DISMISSED = 'strut_tour_dismissed:';
+/** Which tours have been taken or turned away, so they are offered once and never pushed */
+class TourStore {
+    constructor(storage) {
+        this.storage = storage;
+    }
+    read(key) {
+        var _a;
+        try {
+            return ((_a = this.storage) === null || _a === void 0 ? void 0 : _a.getItem(key)) === '1';
+        }
+        catch (_b) {
+            return false;
+        }
+    }
+    write(key, value) {
+        var _a;
+        try {
+            (_a = this.storage) === null || _a === void 0 ? void 0 : _a.setItem(key, value ? '1' : '0');
+        }
+        catch (_b) {
+            // no storage: it is offered again next time, which is harmless
+        }
+    }
+    /** Taken to the end, or skipped */
+    isDone(id) {
+        return this.read(DONE + id);
+    }
+    markDone(id) {
+        this.write(DONE + id, true);
+    }
+    /** "Do not ask again" */
+    isDismissed(id) {
+        return this.read(DISMISSED + id);
+    }
+    dismiss(id) {
+        this.write(DISMISSED + id, true);
+    }
+    /** Whether it is time to offer the tour: not taken, not skipped, not turned away */
+    shouldOffer(id) {
+        return !this.isDone(id) && !this.isDismissed(id);
+    }
+    reset(id) {
+        this.write(DONE + id, false);
+        this.write(DISMISSED + id, false);
+    }
+}
+class TourRunner {
+    constructor(view, store) {
+        this.view = view;
+        this.store = store;
+        this.tour = null;
+        this.steps = [];
+        this.index = 0;
+        this.busy = false;
+    }
+    get running() {
+        return this.tour !== null;
+    }
+    get current() {
+        var _a;
+        return this.tour ? (_a = this.steps[this.index]) !== null && _a !== void 0 ? _a : null : null;
+    }
+    get tourId() {
+        var _a, _b;
+        return (_b = (_a = this.tour) === null || _a === void 0 ? void 0 : _a.id) !== null && _b !== void 0 ? _b : null;
+    }
+    /** Starts {@code tour} at its first step (or step {@code at} of those that are shown); a tour already running is left */
+    async start(tour, at = 0) {
+        if (this.tour)
+            this.close();
+        this.tour = tour;
+        this.steps = tour.steps.filter(step => { var _a; return ((_a = step.when) === null || _a === void 0 ? void 0 : _a.call(step)) !== false; });
+        this.index = Math.max(0, Math.min(at, this.steps.length - 1));
+        if (this.steps.length === 0) {
+            this.tour = null;
+            return;
+        }
+        await this.render();
+    }
+    async next() {
+        if (!this.tour || this.busy)
+            return;
+        if (this.index >= this.steps.length - 1) {
+            this.finish();
+            return;
+        }
+        this.index++;
+        await this.render();
+    }
+    async back() {
+        if (!this.tour || this.busy || this.index === 0)
+            return;
+        this.index--;
+        await this.render();
+    }
+    /** Leaves the tour now. It counts as seen: a person who skips is not offered it again, but can start it from its menu whenever they like */
+    skip() {
+        this.end();
+    }
+    /** The last step's button */
+    finish() {
+        this.end();
+    }
+    /** Leaves without remembering anything (the tour was replaced, or Blockbench is closing) */
+    close() {
+        this.tour = null;
+        this.steps = [];
+        this.view.hide();
+    }
+    /** Runs a step's own button, if it has one, and shows the step again: what it did may have changed what is on the screen */
+    async runAction() {
+        const step = this.current;
+        if (!(step === null || step === void 0 ? void 0 : step.action) || this.busy)
+            return;
+        this.busy = true;
+        try {
+            await step.action.run();
+        }
+        finally {
+            this.busy = false;
+        }
+        // the action may have made steps that were left out meaningful: they are looked at again, staying on the same step
+        if (this.tour) {
+            const id = step.id;
+            const was = this.index;
+            this.steps = this.tour.steps.filter(each => { var _a; return ((_a = each.when) === null || _a === void 0 ? void 0 : _a.call(each)) !== false; });
+            const found = this.steps.findIndex(each => each.id === id);
+            // a step that did its job and is now left out (a practice scene was started) leaves the tour at the step that follows it
+            this.index = found >= 0 ? found : Math.max(0, Math.min(was, this.steps.length - 1));
+            await this.render();
+        }
+    }
+    end() {
+        var _a;
+        const id = (_a = this.tour) === null || _a === void 0 ? void 0 : _a.id;
+        this.close();
+        if (id)
+            this.store.markDone(id);
+    }
+    async render() {
+        var _a;
+        const step = this.steps[this.index];
+        this.busy = true;
+        try {
+            await ((_a = step.before) === null || _a === void 0 ? void 0 : _a.call(step));
+        }
+        catch (error) {
+            console.warn(`[Strut tour] the step "${step.id}" could not be prepared`, error);
+        }
+        finally {
+            this.busy = false;
+        }
+        // the tour may have been left while the step was being prepared
+        if (this.tour && this.steps[this.index] === step)
+            this.view.show(step, { index: this.index, total: this.steps.length, first: this.index === 0, last: this.index === this.steps.length - 1 });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./ts/tour/tourManager.ts":
+/*!********************************!*\
+  !*** ./ts/tour/tourManager.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createTourMenuItems: () => (/* binding */ createTourMenuItems),
+/* harmony export */   loadTours: () => (/* binding */ loadTours),
+/* harmony export */   startTour: () => (/* binding */ startTour),
+/* harmony export */   unloadTours: () => (/* binding */ unloadTours)
+/* harmony export */ });
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _tourEngine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tourEngine */ "./ts/tour/tourEngine.ts");
+/* harmony import */ var _tours__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tours */ "./ts/tour/tours.ts");
+/* harmony import */ var _tourUi__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tourUi */ "./ts/tour/tourUi.ts");
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+
+
+/**
+ * The tours as the plugin uses them: one runner, the Help menu entries that start each tour, and the one-time offer when someone first opens a project of a kind a tour is
+ * about. A tour is offered once and never pushed: "Not now" asks again next time, "Do not ask again" and finishing or skipping do not
+ */
+function storage() {
+    var _a;
+    try {
+        return (_a = globalThis.localStorage) !== null && _a !== void 0 ? _a : null;
+    }
+    catch (_b) {
+        return null;
+    }
+}
+const store = new _tourEngine__WEBPACK_IMPORTED_MODULE_0__.TourStore(storage());
+let runner = null;
+let tours = [];
+let startPractice = async () => undefined;
+let offeredThisSession = new Set();
+function theRunner() {
+    if (!runner)
+        runner = new _tourEngine__WEBPACK_IMPORTED_MODULE_0__.TourRunner((0,_tourUi__WEBPACK_IMPORTED_MODULE_1__.createTourView)(theRunner), store);
+    return runner;
+}
+function startTour(id) {
+    const tour = tours.find(each => each.id === id);
+    if (tour)
+        void theRunner().start(tour);
+}
+/** What an opened project makes worth offering */
+function offerFor() {
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__.isStrutWorkspace)())
+        return _tours__WEBPACK_IMPORTED_MODULE_3__.SCENES_TOUR;
+    return (0,_utils__WEBPACK_IMPORTED_MODULE_2__.isStrutModelProject)() ? _tours__WEBPACK_IMPORTED_MODULE_3__.TOOLKIT_TOUR : null;
+}
+function maybeOffer() {
+    const id = offerFor();
+    if (id === null || offeredThisSession.has(id) || !store.shouldOffer(id) || theRunner().running)
+        return;
+    const tour = tours.find(each => each.id === id);
+    if (!tour)
+        return;
+    offeredThisSession.add(id);
+    // a moment after the project is on the screen, so the offer does not cover what is still being drawn
+    window.setTimeout(() => {
+        if (offerFor() !== id || theRunner().running)
+            return;
+        (0,_tourUi__WEBPACK_IMPORTED_MODULE_1__.showOffer)({
+            title: id === _tours__WEBPACK_IMPORTED_MODULE_3__.SCENES_TOUR ? 'New to Strut Scenes?' : 'New to the Strut Toolkit?',
+            text: id === _tours__WEBPACK_IMPORTED_MODULE_3__.SCENES_TOUR ? 'A short tour shows how to make a scene: characters, clips, checking and exporting.' : 'A short tour shows what the Toolkit adds to Blockbench and how it fits together.',
+            start: () => startTour(id),
+            never: () => store.dismiss(id),
+        });
+    }, 1200);
+}
+function loadTours(options) {
+    startPractice = options.startPracticeScene;
+    offeredThisSession = new Set();
+    tours = (0,_tours__WEBPACK_IMPORTED_MODULE_3__.createTours)({
+        inScene: () => (0,_utils__WEBPACK_IMPORTED_MODULE_2__.isStrutWorkspace)(),
+        startPracticeScene: () => startPractice(),
+        showAnimate: () => {
+            var _a;
+            if ((0,_utils__WEBPACK_IMPORTED_MODULE_2__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
+                Modes.options.animate.select();
+        },
+        start: startTour,
+    });
+    Blockbench.on('select_project', maybeOffer);
+}
+function unloadTours() {
+    Blockbench.removeListener('select_project', maybeOffer);
+    runner === null || runner === void 0 ? void 0 : runner.close();
+    runner = null;
+    (0,_tourUi__WEBPACK_IMPORTED_MODULE_1__.dismissOffer)();
+}
+/** The Help menu entries: each tour can be played at any time, whether or not it was taken */
+function createTourMenuItems() {
+    const item = (id, name, icon, description, tour) => ({
+        action: new Action(id, { name, icon, description, category: 'help', click: () => startTour(tour) }),
+        menuCategory: 'help',
+    });
+    return [
+        item('strut_tour_toolkit', 'Strut Toolkit Tour', 'school', 'A short guided tour of what the Strut Toolkit adds to Blockbench. It can be skipped at any step and played again at any time', _tours__WEBPACK_IMPORTED_MODULE_3__.TOOLKIT_TOUR),
+        item('strut_tour_scenes', 'Strut Scenes Tour', 'theaters', 'A guided tour of making a scene for several characters, with a practice scene to follow along. It can be skipped at any step and played again at any time', _tours__WEBPACK_IMPORTED_MODULE_3__.SCENES_TOUR),
+    ];
+}
+
+
+/***/ }),
+
+/***/ "./ts/tour/tourUi.ts":
+/*!***************************!*\
+  !*** ./ts/tour/tourUi.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cardPosition: () => (/* binding */ cardPosition),
+/* harmony export */   createTourView: () => (/* binding */ createTourView),
+/* harmony export */   dismissOffer: () => (/* binding */ dismissOffer),
+/* harmony export */   findTarget: () => (/* binding */ findTarget),
+/* harmony export */   showOffer: () => (/* binding */ showOffer)
+/* harmony export */ });
+/**
+ * Draws a tour on the screen: the part of the screen a step is about is lit and the rest dimmed, with a card beside it that says what it is for
+ * <p>
+ * The card has Back, Next (Done on the last step) and Skip tour, and the keys do the same (Right and Enter go on, Left goes back, Escape skips), so a tour can be left
+ * at any step in one press. A step whose target is not on the screen is a card in the middle. The lit part follows the target while the card is up, so a panel that
+ * moves or a window that is resized does not leave it behind
+ */
+const STYLE_ID = 'strut_tour_style';
+const Z = 100000;
+const CSS = `
+    .strut_tour_dim { position: fixed; inset: 0; z-index: ${Z}; background: rgba(0, 0, 0, 0.6); }
+    .strut_tour_spot { position: fixed; z-index: ${Z + 1}; border-radius: 6px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--color-accent, #3a7bd5), 0 0 14px 2px var(--color-accent, #3a7bd5); transition: left 0.18s, top 0.18s, width 0.18s, height 0.18s; }
+    .strut_tour_card { position: fixed; z-index: ${Z + 2}; width: 340px; max-width: calc(100vw - 24px); box-sizing: border-box; padding: 14px 16px 12px; border-radius: 8px;
+        background: var(--color-ui, #2b2e35); color: var(--color-text, #ddd); border: 1px solid var(--color-border, #444); box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55); font-size: 0.95em; line-height: 1.4; }
+    .strut_tour_card h3 { margin: 0 0 8px 0; font-size: 1.15em; }
+    .strut_tour_card p { margin: 0 0 8px 0; }
+    .strut_tour_card .strut_tour_action { display: inline-block; margin: 2px 0 8px 0; padding: 5px 12px; cursor: pointer; border-radius: 4px; background: var(--color-accent, #3a7bd5); color: var(--color-light, #fff); }
+    .strut_tour_card .strut_tour_foot { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .strut_tour_card .strut_tour_count { flex: 1; color: var(--color-subtle_text, #999); font-size: 0.85em; }
+    .strut_tour_button { padding: 4px 12px; cursor: pointer; border-radius: 4px; background: var(--color-button, #444); }
+    .strut_tour_button:hover { filter: brightness(1.2); }
+    .strut_tour_button.primary { background: var(--color-accent, #3a7bd5); color: var(--color-light, #fff); }
+    .strut_tour_button.quiet { background: transparent; color: var(--color-subtle_text, #999); }
+    .strut_tour_button.disabled { opacity: 0.4; pointer-events: none; }
+    .strut_tour_card .strut_tour_dots { display: flex; gap: 4px; margin-top: 10px; }
+    .strut_tour_card .strut_tour_dot { width: 6px; height: 6px; border-radius: 3px; background: var(--color-border, #555); }
+    .strut_tour_card .strut_tour_dot.on { background: var(--color-accent, #3a7bd5); }
+    .strut_tour_offer { position: fixed; right: 16px; bottom: 16px; z-index: ${Z}; width: 320px; box-sizing: border-box; padding: 12px 14px; border-radius: 8px;
+        background: var(--color-ui, #2b2e35); color: var(--color-text, #ddd); border: 1px solid var(--color-border, #444); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); font-size: 0.95em; line-height: 1.4; }
+    .strut_tour_offer h3 { margin: 0 0 6px 0; font-size: 1.1em; }
+    .strut_tour_offer p { margin: 0 0 8px 0; }
+    .strut_tour_offer .row { display: flex; gap: 6px; flex-wrap: wrap; }
+`;
+let dim = null;
+let spot = null;
+let card = null;
+let follow;
+let keys = null;
+let current = null;
+let offer = null;
+function ensureStyle() {
+    if (document.getElementById(STYLE_ID))
+        return;
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = CSS;
+    document.head.append(style);
+}
+function element(tag, className = '', text = '') {
+    const node = document.createElement(tag);
+    if (className)
+        node.className = className;
+    if (text)
+        node.textContent = text;
+    return node;
+}
+/** The first element on the screen that a selector finds; a selector may also be {@code text:<tag>:<words>} for the first element of a kind that holds those words */
+function findTarget(selector) {
+    var _a;
+    if (!selector)
+        return null;
+    try {
+        if (selector.startsWith('text:')) {
+            const [, tag, words] = selector.split(':');
+            return (_a = [...document.querySelectorAll(tag)].find(node => { var _a; return node.getBoundingClientRect().width > 0 && ((_a = node.textContent) !== null && _a !== void 0 ? _a : '').trim().toLowerCase().startsWith(words.toLowerCase()); })) !== null && _a !== void 0 ? _a : null;
+        }
+        const found = document.querySelector(selector);
+        const box = found === null || found === void 0 ? void 0 : found.getBoundingClientRect();
+        // on the screen if it has a size (an element in a fixed or flex parent has no offsetParent, and is still there)
+        return found && box && box.width > 0 && box.height > 0 ? found : null;
+    }
+    catch (_b) {
+        return null;
+    }
+}
+/** Where the card goes beside {@code rect}, kept inside the window */
+function cardPosition(rect, cardSize, view, placement = 'right') {
+    const gap = 14;
+    const clamp = (value, size, limit) => Math.max(10, Math.min(value, limit - size - 10));
+    if (!rect || placement === 'center')
+        return { left: (view.width - cardSize.width) / 2, top: Math.max(10, (view.height - cardSize.height) / 2) };
+    const order = [placement, 'right', 'left', 'bottom', 'top'];
+    for (const side of order) {
+        let left;
+        let top;
+        if (side === 'right') {
+            left = rect.left + rect.width + gap;
+            top = rect.top;
+        }
+        else if (side === 'left') {
+            left = rect.left - cardSize.width - gap;
+            top = rect.top;
+        }
+        else if (side === 'bottom') {
+            left = rect.left;
+            top = rect.top + rect.height + gap;
+        }
+        else {
+            left = rect.left;
+            top = rect.top - cardSize.height - gap;
+        }
+        const fits = left >= 10 && top >= 10 && left + cardSize.width <= view.width - 10 && top + cardSize.height <= view.height - 10;
+        // right and left may hang off the bottom: they slide up, which keeps them beside the target
+        if (fits || ((side === 'right' || side === 'left') && left >= 10 && left + cardSize.width <= view.width - 10))
+            return { left: clamp(left, cardSize.width, view.width), top: clamp(top, cardSize.height, view.height) };
+        if (fits)
+            return { left, top };
+    }
+    // nowhere beside it: over the middle of it, which at least keeps the card on the screen
+    return { left: clamp(rect.left, cardSize.width, view.width), top: clamp(rect.top + rect.height / 2 - cardSize.height / 2, cardSize.height, view.height) };
+}
+function place() {
+    if (!card || !current)
+        return;
+    const target = findTarget(current.step.target);
+    const rect = target ? target.getBoundingClientRect() : null;
+    if (spot) {
+        if (rect && rect.width > 0 && rect.height > 0) {
+            spot.style.display = 'block';
+            spot.style.left = `${rect.left - 5}px`;
+            spot.style.top = `${rect.top - 5}px`;
+            spot.style.width = `${rect.width + 10}px`;
+            spot.style.height = `${rect.height + 10}px`;
+        }
+        else {
+            spot.style.display = 'none';
+        }
+    }
+    if (dim)
+        dim.style.display = rect ? 'none' : 'block';
+    const size = { width: card.offsetWidth, height: card.offsetHeight };
+    const where = cardPosition(rect && rect.width > 0 ? rect : null, size, { width: window.innerWidth, height: window.innerHeight }, current.step.placement);
+    card.style.left = `${where.left}px`;
+    card.style.top = `${where.top}px`;
+}
+function detach() {
+    dim === null || dim === void 0 ? void 0 : dim.remove();
+    spot === null || spot === void 0 ? void 0 : spot.remove();
+    card === null || card === void 0 ? void 0 : card.remove();
+    dim = spot = card = null;
+    current = null;
+    if (follow !== undefined) {
+        clearInterval(follow);
+        follow = undefined;
+    }
+    if (keys) {
+        document.removeEventListener('keydown', keys, true);
+        keys = null;
+    }
+    window.removeEventListener('resize', place);
+}
+function createTourView(getRunner) {
+    return {
+        show(step, position) {
+            ensureStyle();
+            dismissOffer();
+            if (!card) {
+                dim = element('div', 'strut_tour_dim');
+                spot = element('div', 'strut_tour_spot');
+                card = element('div', 'strut_tour_card');
+                document.body.append(dim, spot, card);
+                window.addEventListener('resize', place);
+                follow = window.setInterval(place, 250);
+                keys = event => {
+                    const runner = getRunner();
+                    if (!runner.running)
+                        return;
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        runner.skip();
+                    }
+                    else if (event.key === 'ArrowRight' || event.key === 'Enter') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        void runner.next();
+                    }
+                    else if (event.key === 'ArrowLeft') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        void runner.back();
+                    }
+                };
+                document.addEventListener('keydown', keys, true);
+            }
+            current = { step, first: position.first, last: position.last };
+            card.replaceChildren();
+            card.append(element('h3', '', step.title));
+            for (const paragraph of step.body)
+                card.append(element('p', '', paragraph));
+            const runner = getRunner();
+            if (step.action) {
+                const action = element('div', 'strut_tour_action', step.action.label);
+                action.addEventListener('click', () => void runner.runAction());
+                card.append(action);
+            }
+            const foot = element('div', 'strut_tour_foot');
+            const skip = element('div', 'strut_tour_button quiet', position.last ? 'Close' : 'Skip tour');
+            const back = element('div', `strut_tour_button${position.first ? ' disabled' : ''}`, 'Back');
+            const next = element('div', 'strut_tour_button primary', position.last ? 'Done' : 'Next');
+            skip.addEventListener('click', () => runner.skip());
+            back.addEventListener('click', () => void runner.back());
+            next.addEventListener('click', () => void runner.next());
+            foot.append(element('div', 'strut_tour_count', `Step ${position.index + 1} of ${position.total}`), skip, back, next);
+            card.append(foot);
+            const dots = element('div', 'strut_tour_dots');
+            for (let i = 0; i < position.total; i++)
+                dots.append(element('div', `strut_tour_dot${i === position.index ? ' on' : ''}`));
+            card.append(dots);
+            place();
+            // the step may have opened a panel that is still drawing
+            window.setTimeout(place, 80);
+        },
+        hide() {
+            detach();
+        },
+    };
+}
+// ===============================================================
+// The invitation
+// ===============================================================
+function dismissOffer() {
+    offer === null || offer === void 0 ? void 0 : offer.remove();
+    offer = null;
+}
+/** A small card in the corner that offers a tour once: start it, not now, or never */
+function showOffer(options) {
+    ensureStyle();
+    dismissOffer();
+    offer = element('div', 'strut_tour_offer');
+    offer.append(element('h3', '', options.title), element('p', '', options.text));
+    const row = element('div', 'row');
+    const start = element('div', 'strut_tour_button primary', 'Take the tour');
+    const later = element('div', 'strut_tour_button', 'Not now');
+    const never = element('div', 'strut_tour_button quiet', 'Do not ask again');
+    start.addEventListener('click', () => {
+        dismissOffer();
+        options.start();
+    });
+    later.addEventListener('click', dismissOffer);
+    never.addEventListener('click', () => {
+        dismissOffer();
+        options.never();
+    });
+    row.append(start, later, never);
+    offer.append(row);
+    document.body.append(offer);
+}
+
+
+/***/ }),
+
+/***/ "./ts/tour/tours.ts":
+/*!**************************!*\
+  !*** ./ts/tour/tours.ts ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SCENES_TOUR: () => (/* binding */ SCENES_TOUR),
+/* harmony export */   TOOLKIT_TOUR: () => (/* binding */ TOOLKIT_TOUR),
+/* harmony export */   createTours: () => (/* binding */ createTours)
+/* harmony export */ });
+const TOOLKIT_TOUR = 'toolkit';
+const SCENES_TOUR = 'scenes';
+function createTours(context) {
+    return [
+        {
+            id: TOOLKIT_TOUR,
+            name: 'Strut Toolkit: the basics',
+            description: 'What the Toolkit adds to Blockbench, from a model to a file the game reads',
+            steps: [
+                {
+                    id: 'welcome',
+                    title: 'Welcome to the Strut Toolkit',
+                    body: [
+                        'Strut is a mod that animates and simulates models. This plugin is where those models and their animations are made: it exports the files Strut reads.',
+                        'This tour takes a couple of minutes. You can skip it at any step with Skip tour or Escape, and play it again from the Help menu whenever you like.',
+                    ],
+                },
+                {
+                    id: 'projects',
+                    title: 'Two kinds of project',
+                    body: [
+                        'A Strut Animated Model is one character, block or item: its bones (groups), its cubes and meshes, its animations and its physics.',
+                        'Strut Scenes is for scenes that several characters take part in, animated together on one timeline. The second tour is about that.',
+                        'Both are in File, New.',
+                    ],
+                    target: 'text:li:file',
+                    placement: 'bottom',
+                },
+                {
+                    id: 'skeleton',
+                    title: 'The skeleton ID',
+                    body: [
+                        'Models that share a rig share a skeleton ID, such as my_mod:humanoid. Set it in File, Project (the Skeleton ID field).',
+                        'It is written into the model and into every animation exported from it. An animation made for a skeleton plays on every model with that ID, and a scene only lets a character fill a role made for its skeleton.',
+                        'Leave it empty for a model that is not used in scenes.',
+                    ],
+                },
+                {
+                    id: 'physics',
+                    title: 'Physics',
+                    body: [
+                        'The Physics mode (beside Edit, Paint and Animate) makes bones springs or chains, meshes cloth or flesh, and fits collision shapes. Simulate runs the real solvers on your model.',
+                        'The physics is saved with the model. Tools, Physics as JSON shows the same data as text.',
+                    ],
+                },
+                {
+                    id: 'animate',
+                    title: 'Animating',
+                    body: [
+                        'Animate as usual. Strut adds easing to keyframes (the Keyframe panel), expressions, and sounds, particles and events on the timeline.',
+                        'Animations are exported in one file for the model, and carry its skeleton ID.',
+                    ],
+                },
+                {
+                    id: 'armour',
+                    title: 'Armour',
+                    body: [
+                        'Armour is its own model, made on top of a character\'s skeleton. Mark the groups that hold a piece with Armour slot, and export a slot model from them. Armour that sits on a bone with flesh moves with it.',
+                    ],
+                },
+                {
+                    id: 'export',
+                    title: 'Exporting',
+                    body: [
+                        'File, Export has Export Strut Model (Binary) and Export Strut Animations (Binary), plus the armour exports. The files go into your mod\'s assets, or a pack made with the Pack Creator.',
+                    ],
+                    target: 'text:li:file',
+                    placement: 'bottom',
+                },
+                {
+                    id: 'to-scenes',
+                    title: 'Next: Strut Scenes',
+                    body: ['Making a scene for several characters works differently. The next tour shows how, with a practice scene you can throw away.'],
+                    action: { label: 'Take the Strut Scenes tour', run: () => context.start(SCENES_TOUR) },
+                },
+                {
+                    id: 'help',
+                    title: 'Find this again',
+                    body: ['Help, Strut Toolkit Tour plays this tour, and Help, Strut Scenes Tour the other. The plugin\'s documentation is in its repository, in the docs folder.'],
+                    target: 'text:li:help',
+                    placement: 'bottom',
+                },
+            ],
+        },
+        {
+            id: SCENES_TOUR,
+            name: 'Strut Scenes: making a scene',
+            description: 'Several characters, one timeline: roles, characters, clips, checking and exporting',
+            steps: [
+                {
+                    id: 'welcome',
+                    title: 'Making a scene',
+                    body: [
+                        'A scene is a few characters playing clips together. You animate all of them on one timeline, and the export splits it: each character gets its own file of clips, and the scene gets a layout that says who takes part and what the clips are.',
+                        'You can skip at any step and replay the tour from Help.',
+                    ],
+                },
+                {
+                    id: 'practice',
+                    title: 'A practice scene',
+                    body: ['No scene is open. Start a practice scene to follow along; it is an ordinary project you can close without saving.'],
+                    action: { label: 'Start a practice scene', run: () => context.startPracticeScene() },
+                    when: () => !context.inScene(),
+                },
+                {
+                    id: 'panel',
+                    title: 'The Scene panel',
+                    body: [
+                        'Everything about the scene is here: its name and kind at the top, then its characters, its clips, and Check and Export at the foot.',
+                        'The line above Check says how many things are still to do.',
+                    ],
+                    target: '#panel_strut_scene',
+                    placement: 'right',
+                    before: () => context.showAnimate(),
+                },
+                {
+                    id: 'kind',
+                    title: 'The kind of scene',
+                    body: [
+                        'A scene has a kind. A kind says who takes part, which skeleton each role needs, and which clips there are: what they are called, whether they loop, how long they may be.',
+                        'The gear at the top of the panel opens Scene Settings, where you choose the kind, name the scene and set its namespace (your mod\'s id). A free scene has no rules; a mod or a tool that knows your game adds the real kinds.',
+                    ],
+                    target: '#panel_strut_scene',
+                    placement: 'right',
+                },
+                {
+                    id: 'characters',
+                    title: 'Characters',
+                    body: [
+                        'Each role of the kind is a row with an Add button. Press it and pick the character: a ready-made one from a preset, or a model file with its texture. Its model and texture are loaded for you.',
+                        'A role can ask for a skeleton, and a character on another skeleton is refused. Roles marked optional can stay empty.',
+                        'Use the buttons on a row to show or hide the character, change who it is, give it another model of the same skeleton (your keyframes stay), or remove it.',
+                    ],
+                    target: '#panel_strut_scene',
+                    placement: 'right',
+                },
+                {
+                    id: 'viewport',
+                    title: 'Posing and standing',
+                    body: [
+                        'Click a character in the viewport to pick the bone you clicked, as in any animation. Rotate and move it, and key it.',
+                        'Where a character stands is its own move and turn: select its group (the one with an @ in the Outliner) and move or turn it. That position is built into its clips when you export, so in the game every character plays at the scene\'s origin.',
+                    ],
+                    target: '#preview',
+                    placement: 'left',
+                },
+                {
+                    id: 'clips',
+                    title: 'Clips',
+                    body: [
+                        'The Clips section lists what the kind of scene needs. Each row says what is missing, with a red mark for what is required.',
+                        'The plus button makes the next clip of that phase with the right name, loop mode and a length in range, and writes its phase, variant and side into the layout for you. In a free scene you name the clips yourself.',
+                        'Every character plays the clip of the same name from its own file, so key all of them in every clip.',
+                    ],
+                    target: '#panel_strut_scene',
+                    placement: 'right',
+                },
+                {
+                    id: 'animations',
+                    title: 'The clip list',
+                    body: ['Clips are the animations in this list. Select one to animate it. Animation, Animation Properties changes its length and loop mode, which a kind of scene may check.'],
+                    target: '#panel_animations',
+                    placement: 'right',
+                },
+                {
+                    id: 'timeline',
+                    title: 'The timeline',
+                    body: [
+                        'The timeline shows the bones you have selected, grouped by character: each character has a heading and a coloured band. Click a heading to fold that character\'s rows away or open them again.',
+                        'Everything you know from Blockbench works: keyframes, the graph editor, and the easing Strut adds.',
+                    ],
+                    target: '#panel_timeline',
+                    placement: 'top',
+                },
+                {
+                    id: 'tags',
+                    title: 'Tags and timing',
+                    body: [
+                        'Tools, Strut Scenes: Animation Tags sets a clip\'s phase, variant and side by hand when its kind does not name them, and moves one character\'s keys and events later or earlier than the others (a reaction a moment behind).',
+                    ],
+                    target: 'text:li:tools',
+                    placement: 'bottom',
+                },
+                {
+                    id: 'check',
+                    title: 'Check and Export',
+                    body: [
+                        'Check lists what is wrong. Errors stop an export (a required role with nobody in it, a character on the wrong skeleton, a clip that does not loop as its phase says); warnings are shown with it.',
+                        'Export writes each character\'s clips into its own clip set, made for its skeleton, and the scene\'s layout, into the pack folder you choose (a zip in the web version).',
+                    ],
+                    target: '#panel_strut_scene',
+                    placement: 'right',
+                },
+                {
+                    id: 'saving',
+                    title: 'Saving',
+                    body: ['A scene is saved as an ordinary Blockbench project (File, Save Project): the characters, their textures, the keyframes and the kind of scene all come back when you open it.'],
+                },
+                {
+                    id: 'done',
+                    title: 'That is the whole scene',
+                    body: [
+                        'Add the characters, make the clips, key them, Check, Export.',
+                        'To play this again: the ? at the top of the Scene panel, or Help, Strut Scenes Tour. View, Strut Scenes: Show or Hide Variable Placeholders brings back the panel that is hidden in scenes.',
+                    ],
+                },
+            ],
+        },
+    ];
+}
+
+
+/***/ }),
+
 /***/ "./ts/utils.ts":
 /*!*********************!*\
   !*** ./ts/utils.ts ***!
@@ -23596,21 +24406,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../package.json */ "./package.json");
 /* harmony import */ var _animationUi__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./animationUi */ "./ts/animationUi.ts");
-/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./binary/skeletonId */ "./ts/binary/skeletonId.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
+/* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./binary/skeletonId */ "./ts/binary/skeletonId.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./utils */ "./ts/utils.ts");
 /* harmony import */ var _keyframe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./keyframe */ "./ts/keyframe.ts");
-/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
-/* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./strutCodec */ "./ts/strutCodec.ts");
-/* harmony import */ var _armourUi__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./armourUi */ "./ts/armourUi.ts");
-/* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
-/* harmony import */ var _strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./strutJsonAnimationCodec */ "./ts/strutJsonAnimationCodec.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
+/* harmony import */ var _codec__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./codec */ "./ts/codec.ts");
+/* harmony import */ var _strutCodec__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./strutCodec */ "./ts/strutCodec.ts");
+/* harmony import */ var _armourUi__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./armourUi */ "./ts/armourUi.ts");
+/* harmony import */ var _strutAnimationCodec__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./strutAnimationCodec */ "./ts/strutAnimationCodec.ts");
+/* harmony import */ var _strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./strutJsonAnimationCodec */ "./ts/strutJsonAnimationCodec.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./constants */ "./ts/constants.ts");
 /* harmony import */ var _events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./events */ "./ts/events.ts");
-/* harmony import */ var _physicsUi__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./physicsUi */ "./ts/physicsUi.ts");
+/* harmony import */ var _physicsUi__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./physicsUi */ "./ts/physicsUi.ts");
 /* harmony import */ var _physicsTab__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./physicsTab */ "./ts/physicsTab.ts");
 /* harmony import */ var _armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./armaturePasteFix */ "./ts/armaturePasteFix.ts");
 /* harmony import */ var _uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./uvBoxSelectFix */ "./ts/uvBoxSelectFix.ts");
 /* harmony import */ var _stage_stageUi__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./stage/stageUi */ "./ts/stage/stageUi.ts");
+/* harmony import */ var _tour_tourManager__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tour/tourManager */ "./ts/tour/tourManager.ts");
+
 
 
 
@@ -23655,15 +24467,16 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
             (0,_armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__.loadArmaturePasteFix)();
             (0,_uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__.loadUvBoxSelectFix)();
             (0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.loadStageUi)();
+            (0,_tour_tourManager__WEBPACK_IMPORTED_MODULE_10__.loadTours)({ startPracticeScene: _stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.startPracticeScene });
             // Fixes GeckoLib .animation.json import - live-verified that Blockbench's own "Import
             // Animations" panel button dispatches through AnimationCodec.getCodec(), which falls
             // back to Blockbench's generic, GeckoLib-unaware `bedrock` codec whenever a format (like
             // Strut, until now) has none of its own. See strutJsonAnimationCodec.ts's own top
             // comment for the full investigation
-            _codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec = (0,_strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_11__.createStrutJsonAnimationCodec)();
+            _codec__WEBPACK_IMPORTED_MODULE_11__.format.animation_codec = (0,_strutJsonAnimationCodec__WEBPACK_IMPORTED_MODULE_12__.createStrutJsonAnimationCodec)();
             pluginSettings = createPluginSettings();
-            pluginProperties = [...createPluginProperties(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.createArmourProperties)()];
-            pluginMenuItems = [...createPluginMenuItems(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.createArmourMenuItems)(), ...(0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.createStageMenuItems)()];
+            pluginProperties = [...createPluginProperties(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_13__.createArmourProperties)()];
+            pluginMenuItems = [...createPluginMenuItems(), ...(0,_armourUi__WEBPACK_IMPORTED_MODULE_13__.createArmourMenuItems)(), ...(0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.createStageMenuItems)(), ...(0,_tour_tourManager__WEBPACK_IMPORTED_MODULE_10__.createTourMenuItems)()];
             for (const menuItem of pluginMenuItems) {
                 MenuBar.addAction(menuItem.action, menuItem.menuCategory);
             }
@@ -23679,6 +24492,7 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
             for (const menuItem of pluginMenuItems) {
                 menuItem.action.delete();
             }
+            (0,_tour_tourManager__WEBPACK_IMPORTED_MODULE_10__.unloadTours)();
             (0,_stage_stageUi__WEBPACK_IMPORTED_MODULE_9__.unloadStageUi)();
             (0,_uvBoxSelectFix__WEBPACK_IMPORTED_MODULE_8__.unloadUvBoxSelectFix)();
             (0,_armaturePasteFix__WEBPACK_IMPORTED_MODULE_7__.unloadArmaturePasteFix)();
@@ -23686,12 +24500,12 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
             (0,_keyframe__WEBPACK_IMPORTED_MODULE_5__.unloadKeyframeOverrides)();
             (0,_animationUi__WEBPACK_IMPORTED_MODULE_4__.unloadAnimationUI)();
             (0,_events__WEBPACK_IMPORTED_MODULE_3__.removeEventListeners)();
-            if (_codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec) {
-                delete AnimationCodec.codecs[_codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec.id];
-                _codec__WEBPACK_IMPORTED_MODULE_10__.format.animation_codec = undefined;
+            if (_codec__WEBPACK_IMPORTED_MODULE_11__.format.animation_codec) {
+                delete AnimationCodec.codecs[_codec__WEBPACK_IMPORTED_MODULE_11__.format.animation_codec.id];
+                _codec__WEBPACK_IMPORTED_MODULE_11__.format.animation_codec = undefined;
             }
-            _codec__WEBPACK_IMPORTED_MODULE_10__.format.delete();
-            delete Formats[_constants__WEBPACK_IMPORTED_MODULE_13__.LEGACY_MODEL_ID];
+            _codec__WEBPACK_IMPORTED_MODULE_11__.format.delete();
+            delete Formats[_constants__WEBPACK_IMPORTED_MODULE_14__.LEGACY_MODEL_ID];
             console.clear();
         },
     }));
@@ -23703,31 +24517,31 @@ if (!semver_functions_satisfies__WEBPACK_IMPORTED_MODULE_1___default()(semver_fu
  */
 function createPluginSettings() {
     return [
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_AUTO_PARTICLE_TEXTURE, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_14__.SETTING_AUTO_PARTICLE_TEXTURE, {
             value: true,
             category: "export",
             name: "Auto-compute block/item particle texture",
             description: "Attempt to auto-compute the particle texture for a Strut block/item model if one isn't already specified when exporting the display settings json"
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.BAKE_IN_BEZIER_KEYFRAMES, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_14__.BAKE_IN_BEZIER_KEYFRAMES, {
             value: false,
             category: "export",
             name: "Bake in bezier keyframes",
             description: "When true Blockbench makes a ton of linear keyframes to form the illusion of a bezier easing, rather than properly setting the easing to bezier."
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_ALWAYS_SHOW_DISPLAY, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_14__.SETTING_ALWAYS_SHOW_DISPLAY, {
             value: false,
             category: "edit",
             name: "Always show display tab",
             description: "Force the Display tab to always show, even when not an Item type model"
         }),
-        new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_REMEMBER_EXPORT_LOCATIONS, {
+        new Setting(_constants__WEBPACK_IMPORTED_MODULE_14__.SETTING_REMEMBER_EXPORT_LOCATIONS, {
             value: true,
             category: "export",
             name: "Remember file export locations",
             description: "Remember where you export model/display/animation files to for re-use. Stores the file paths in the bbmodel project file."
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Setting(_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_DEFAULT_MODID, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Setting(_constants__WEBPACK_IMPORTED_MODULE_14__.SETTING_DEFAULT_MODID, {
             // The below is absolutely disgusting, but I have no choice because this is a bug in Blockbench's API
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -23753,66 +24567,66 @@ function createPluginSettings() {
  */
 function createPluginProperties() {
     return [
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_MODID, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_MODID, {
             label: "Mod ID",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_MODEL_ID]
             },
             values: [],
-            merge_validation: _utils__WEBPACK_IMPORTED_MODULE_14__.isValidNamespace
+            merge_validation: _utils__WEBPACK_IMPORTED_MODULE_15__.isValidNamespace
         }), property => {
             property['placeholder'] = 'my_modid';
             property['description'] = 'The modid of the mod this model is for';
             property.getDefault = function () {
-                return String(settings[_constants__WEBPACK_IMPORTED_MODULE_13__.SETTING_DEFAULT_MODID].value);
+                return String(settings[_constants__WEBPACK_IMPORTED_MODULE_14__.SETTING_DEFAULT_MODID].value);
             };
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "enum", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_MODEL_TYPE, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "enum", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_MODEL_TYPE, {
             label: "Model Type",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_MODEL_ID]
             },
             exposed: false,
-            options: _constants__WEBPACK_IMPORTED_MODULE_13__.GeckoModelType,
-            values: Object.values(_constants__WEBPACK_IMPORTED_MODULE_13__.GeckoModelType)
+            options: _constants__WEBPACK_IMPORTED_MODULE_14__.GeckoModelType,
+            values: Object.values(_constants__WEBPACK_IMPORTED_MODULE_14__.GeckoModelType)
         }), property => {
             property['description'] = 'The type of Strut object this model is for. Leave as the default value if unsure';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_SKELETON_ID, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_SKELETON_ID, {
             label: "Skeleton ID",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_MODEL_ID]
             },
             values: [],
-            merge_validation: (id) => id === '' || (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_15__.isValidSkeletonId)(id)
+            merge_validation: (id) => id === '' || (0,_binary_skeletonId__WEBPACK_IMPORTED_MODULE_16__.isValidSkeletonId)(id)
         }), property => {
             property['placeholder'] = 'my_modid:creature';
             property['description'] = 'The rig this model is built on. A scene only lets a model fill a role made for its skeleton ID, and animations exported from this project carry it. Leave empty if the model is not used in scenes';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_STAGE, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_STAGE, {
             label: "Strut Workspace",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_WORKSPACE_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_WORKSPACE_ID]
             },
             exposed: false,
             values: []
         }), property => {
             property['description'] = 'The workspace data of the project as JSON (use the Workspace actions under Tools)';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_PHYSICS, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "string", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_PHYSICS, {
             label: "Strut Physics",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_MODEL_ID]
             },
             exposed: false,
             values: []
         }), property => {
             property['description'] = 'The physics of the model as JSON (edit it under Tools, Strut Physics)';
         }),
-        (0,_utils__WEBPACK_IMPORTED_MODULE_14__.make)(new Property(ModelProject, "instance", _constants__WEBPACK_IMPORTED_MODULE_13__.PROPERTY_FILEPATH_CACHE, {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_15__.make)(new Property(ModelProject, "instance", _constants__WEBPACK_IMPORTED_MODULE_14__.PROPERTY_FILEPATH_CACHE, {
             label: "Strut Filepath Cache",
             condition: {
-                formats: [_constants__WEBPACK_IMPORTED_MODULE_13__.STRUT_MODEL_ID]
+                formats: [_constants__WEBPACK_IMPORTED_MODULE_14__.STRUT_MODEL_ID]
             },
             exposed: false,
             values: []
@@ -23837,9 +24651,9 @@ function createPluginMenuItems() {
                 icon: "save",
                 description: "Export your model geometry as a .strutmodel binary file for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)(),
                 click: function () {
-                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_16__.exportBinaryModel)();
+                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_17__.exportBinaryModel)();
                 },
             }),
             menuCategory: 'file.export'
@@ -23850,9 +24664,9 @@ function createPluginMenuItems() {
                 icon: "shield",
                 description: "Select the bones (groups) that hold an armour piece in the outliner first, then pick its slot: exports only their geometry, on top of the bones above them, so it is worn by bone name.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)(),
                 click: function () {
-                    (0,_armourUi__WEBPACK_IMPORTED_MODULE_12__.exportSelectedSlot)();
+                    (0,_armourUi__WEBPACK_IMPORTED_MODULE_13__.exportSelectedSlot)();
                 },
             }),
             menuCategory: 'file.export'
@@ -23866,7 +24680,7 @@ function createPluginMenuItems() {
                 description: "Open a .strutmodel binary file as a new Strut project.",
                 category: "file",
                 click: function () {
-                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_16__.importBinaryModel)();
+                    (0,_strutCodec__WEBPACK_IMPORTED_MODULE_17__.importBinaryModel)();
                 },
             }),
             menuCategory: 'file.import'
@@ -23877,8 +24691,8 @@ function createPluginMenuItems() {
                 icon: "icon-bb_interface",
                 description: "Export your item/block display settings for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)() && (0,_utils__WEBPACK_IMPORTED_MODULE_14__.hasModelDisplaySettings)(),
-                click: _codec__WEBPACK_IMPORTED_MODULE_10__.buildDisplaySettingsJson,
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)() && (0,_utils__WEBPACK_IMPORTED_MODULE_15__.hasModelDisplaySettings)(),
+                click: _codec__WEBPACK_IMPORTED_MODULE_11__.buildDisplaySettingsJson,
             }),
             menuCategory: 'file.export'
         },
@@ -23901,9 +24715,9 @@ function createPluginMenuItems() {
                 icon: "save",
                 description: "Export your model animations as a .strutanim binary file for Strut.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)() && !(0,_utils__WEBPACK_IMPORTED_MODULE_14__.isEmpty)(AnimationItem.all),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)() && !(0,_utils__WEBPACK_IMPORTED_MODULE_15__.isEmpty)(AnimationItem.all),
                 click: function () {
-                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__.exportBinaryAnimations)();
+                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_18__.exportBinaryAnimations)();
                 },
             }),
             menuCategory: 'file.export'
@@ -23914,9 +24728,9 @@ function createPluginMenuItems() {
                 icon: "waves",
                 description: "Edit the model's physics as JSON, check it and preview the response curves. The Physics tab is the visual way.",
                 category: "edit",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)(),
                 click: function () {
-                    (0,_physicsUi__WEBPACK_IMPORTED_MODULE_18__.openPhysicsDialog)();
+                    (0,_physicsUi__WEBPACK_IMPORTED_MODULE_19__.openPhysicsDialog)();
                 },
             }),
             menuCategory: 'tools'
@@ -23929,9 +24743,9 @@ function createPluginMenuItems() {
                 icon: "movie",
                 description: "Import a .strutanim binary file's animations into the current project.",
                 category: "file",
-                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_14__.isStrutModelProject)(),
+                condition: () => (0,_utils__WEBPACK_IMPORTED_MODULE_15__.isStrutModelProject)(),
                 click: function () {
-                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_17__.importBinaryAnimations)();
+                    (0,_strutAnimationCodec__WEBPACK_IMPORTED_MODULE_18__.importBinaryAnimations)();
                 },
             }),
             menuCategory: 'file.import'

@@ -7,6 +7,13 @@ It adds the Strut model format to Blockbench and the tools a Strut model needs, 
 - Controller-based animation with 30+ easings (including the ones that take an argument, and bezier, step and smooth keyframes), Molang expressions, and markers
   and event instructions on the timeline that a mod's event bindings react to.
 
+**Strut Scenes**
+- Make a scene for several characters on one timeline: a new project type with a Scene panel, characters loaded with their models and textures, one-press clips named and set as the kind of scene says, a timeline grouped by character, checks, and an export that gives each character its own clips and the scene a layout.
+- Kinds of scene (templates) and ready-made characters are added by mods, tools and other plugins through an API, so the Toolkit knows no game's rules itself.
+
+**Learn it in the app**
+- Help, Strut Toolkit Tour and Strut Scenes Tour are guided tours that can be skipped at any step and played again at any time.
+
 **Physics**
 - A Strut Physics tab: springs, chains, cloth, flesh (a cage a mesh or a bone of cubes follows, with a preview of its swing) and ragdoll, colliders, a response-curve preview and presets, saved with the model.
 
@@ -24,7 +31,7 @@ Must be paired with a Minecraft: Java mod that uses the Strut library.
 </a>
 </div>
 <div style="flex:1">
-<a href="https://github.com/sandyymandy/Strut/tree/master/doc">
+<a href="https://github.com/sandyymandy/Strut-BlockBench-Plugin/tree/master/docs">
 <p style="font-size:1.25em; color:#AAAAAA">Documentation</p>
 </a>
 </div>

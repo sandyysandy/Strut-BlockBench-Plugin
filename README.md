@@ -4,9 +4,12 @@ This readme is for developers working on the Strut Blockbench plugin.
 
 Some of the code in this project was written with the help of AI tools. The design and direction are mine, and the build runs its tests, but it is an early project, so expect rough edges and please report anything you run into.
 
-# Strut Scenes
+# Documentation
 
-The scene maker, its kinds of scene (templates), character presets and the API other plugins and tools use to add their own are described in [docs/STRUT_SCENES_API.md](docs/STRUT_SCENES_API.md).
+* [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md): what the Toolkit is, a model from start to export, the skeleton ID, physics and armour. Start here.
+* [docs/STRUT_SCENES.md](docs/STRUT_SCENES.md): making a scene, step by step.
+* [docs/STRUT_SCENES_API.md](docs/STRUT_SCENES_API.md): for mod, tool and plugin authors: kinds of scene (templates), character presets and the `StrutScenes` API.
+* The in-app tours (Help, Strut Toolkit Tour and Strut Scenes Tour) teach the same, on the screen. They are in `strut_toolkit/src/ts/tour/`: `tourEngine.ts` (the runner, tested), `tourUi.ts` (the overlay), `tours.ts` (the steps), `tourManager.ts` (the Help entries and the one-time offer). A new tour is a new entry in `tours.ts`.
 
 # Environment setup
 ## Windows

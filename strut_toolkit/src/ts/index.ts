@@ -24,7 +24,8 @@ import {loadPhysicsTab, unloadPhysicsTab} from './physicsTab';
 import {loadArmaturePasteFix, unloadArmaturePasteFix} from './armaturePasteFix';
 import {loadUvBoxSelectFix, unloadUvBoxSelectFix} from './uvBoxSelectFix';
 import {createArmourMenuItems, createArmourProperties} from './armourUi';
-import {createStageMenuItems, loadStageUi, unloadStageUi} from './stage/stageUi';
+import {createStageMenuItems, loadStageUi, startPracticeScene, unloadStageUi} from './stage/stageUi';
+import {createTourMenuItems, loadTours, unloadTours} from './tour/tourManager';
 
 const { version, blockbenchConfig } = packageJson;
 
@@ -59,6 +60,7 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
           loadArmaturePasteFix();
           loadUvBoxSelectFix();
           loadStageUi();
+          loadTours({startPracticeScene});
 
           // Fixes GeckoLib .animation.json import - live-verified that Blockbench's own "Import
           // Animations" panel button dispatches through AnimationCodec.getCodec(), which falls
@@ -69,7 +71,7 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
 
           pluginSettings = createPluginSettings();
           pluginProperties = [...createPluginProperties(), ...createArmourProperties()];
-          pluginMenuItems = [...createPluginMenuItems(), ...createArmourMenuItems(), ...createStageMenuItems()];
+          pluginMenuItems = [...createPluginMenuItems(), ...createArmourMenuItems(), ...createStageMenuItems(), ...createTourMenuItems()];
 
           for (const menuItem of pluginMenuItems as { action: Action, menuCategory: string }[]) {
             MenuBar.addAction(menuItem.action, menuItem.menuCategory);
@@ -90,6 +92,7 @@ if (!semverSatisfies(semverCoerce(Blockbench.version), SUPPORTED_BB_VERSION_RANG
             menuItem.action.delete();
           }
 
+          unloadTours();
           unloadStageUi();
           unloadUvBoxSelectFix();
           unloadArmaturePasteFix();

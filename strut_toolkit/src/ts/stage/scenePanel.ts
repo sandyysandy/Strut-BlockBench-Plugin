@@ -20,6 +20,8 @@ export interface ScenePanelHandlers {
     swap(role: string): void;
     addClip(phaseId?: string): void;
     settings(): void;
+    /** Plays the tour of making a scene */
+    tour(): void;
     check(): void;
     export(): void;
 }
@@ -146,6 +148,9 @@ export function createScenePanel(handlers: ScenePanelHandlers): void {
                 settings() {
                     handlers.settings();
                 },
+                tour() {
+                    handlers.tour();
+                },
                 check() {
                     handlers.check();
                 },
@@ -160,6 +165,7 @@ export function createScenePanel(handlers: ScenePanelHandlers): void {
                             <div class="strut_scene_name">{{ overview.scene || 'unnamed scene' }}</div>
                             <div class="strut_scene_kind">{{ overview.templateName || 'no kind of scene' }}{{ overview.namespace ? ' · ' + overview.namespace : '' }}</div>
                         </div>
+                        <i class="material-icons strut_button" title="A tour of making a scene" @click="tour()">help_outline</i>
                         <i class="material-icons strut_button" title="Kind of scene, name and namespace" @click="settings()">settings</i>
                     </div>
 
