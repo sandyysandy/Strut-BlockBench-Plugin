@@ -7,6 +7,7 @@ import { Problem } from './stageFormat';
 import { ImageFile, matchTextures } from './textureMatch';
 import { workspaceFormat } from './workspaceFormat';
 import { createActorsPanel, deleteActorsPanel } from './actorsPanel';
+import { ActorPreset, freeRole, loadPresets, readFile, readFolders, writeFolders } from './actorPresets';
 
 /**
  * The workspace's menu actions and dialogs. They only collect what the user types and call {@code stageProject.ts}; nothing here decides how a workspace is read or
@@ -148,6 +149,124 @@ function addActorDetails(model: Model, name: string, files: readonly ImageFile[]
             }
         },
     }).show();
+}
+
+// ===============================================================
+// Actor presets
+// ===============================================================
+
+function storage(): Storage | null {
+    try {
+        return globalThis.localStorage ?? null;
+    }
+    catch {
+        return null;
+    }
+}
+
+/** Add Actor from a preset: a character from the registered preset folders, loaded with its texture and its skeleton ID */
+export function addPresetDialog(): void {
+    const folders = readFolders(storage());
+
+    if (folders.length === 0) {
+        say('Actor presets', 'No preset folder is registered yet. A preset folder holds ready-made actors (a model, its texture, its role and skeleton ID). A tool that makes them registers its folder by itself; you can also add one by hand.');
+        presetFoldersDialog();
+
+        return;
+    }
+
+    void loadPresets(folders).then(({ presets, problems }) => {
+        if (presets.length === 0) {
+            say('Actor presets', `There is no usable preset in the registered folders.${problems.length > 0 ? `\n\n${problems.join('\n')}` : ''}`);
+
+            return;
+        }
+
+        const taken = new Set(actorGroups().keys());
+
+        new (Dialog as any)({
+            id: 'strut_add_preset',
+            title: 'Add Actor from a preset',
+            form: {
+                ...(problems.length > 0 ? { problems: { label: 'Left out', type: 'info', text: problems.join(' ') } } : {}),
+                preset: { label: 'Actor', type: 'select', options: Object.fromEntries(presets.map((preset, index) => [String(index), `${preset.group}: ${preset.name}`])), value: '0' },
+                role: { label: 'Role', type: 'text', value: '', placeholder: 'the preset\'s own', description: 'The scene role this actor is exported as; left empty it is the preset\'s role' },
+            },
+            onConfirm(form: any) {
+                const preset = presets[Number(form.preset)];
+
+                if (!preset)
+                    return false;
+
+                const wanted = String(form.role).trim();
+                const role = wanted !== '' ? wanted : freeRole(preset.role, taken);
+
+                void addPresetActor(preset, role);
+            },
+        }).show();
+    });
+}
+
+/** Loads the preset's model and textures and adds it as an actor */
+async function addPresetActor(preset: ActorPreset, role: string): Promise<void> {
+    try {
+        const file = await readFile(preset.model, 'binary');
+
+        if (!file || !(file.content instanceof ArrayBuffer))
+            throw new Error(`the model ${preset.model} could not be read`);
+
+        const model = decodeModel(new Uint8Array(file.content), file.name || `${preset.id}.strutmodel`);
+        const images: ImageFile[] = [];
+
+        for (const path of preset.textures) {
+            const image = await readFile(path, 'image');
+
+            if (image && typeof image.content === 'string')
+                images.push({ name: path, content: image.content });
+        }
+
+        const report = textureReport(model, images);
+
+        addActor(role, preset.skeleton, model, preset.name, {
+            ...(preset.compatible.length > 0 ? { compatible: [...preset.compatible] } : {}),
+            ...(preset.camera !== '' ? { camera: preset.camera } : {}),
+        }, report.images);
+
+        if (report.note !== '')
+            say('Actor added', report.note);
+    }
+    catch (error) {
+        say('Could not add the actor', (error as Error).message);
+    }
+}
+
+/** The folders the presets are looked for in: add one, or forget them all */
+export function presetFoldersDialog(): void {
+    const folders = readFolders(storage());
+
+    (Blockbench as any).showMessageBox({
+        title: 'Actor preset folders',
+        message: folders.length === 0 ? 'No folders are registered.' : `Registered folders:\n${folders.join('\n')}`,
+        buttons: ['Add a folder...', ...(folders.length > 0 ? ['Forget them all'] : []), 'Close'],
+        confirm: 0,
+        cancel: folders.length > 0 ? 2 : 1,
+    }, (button: number) => {
+        if (button === 0) {
+            if (!(Blockbench as any).isApp || typeof (Blockbench as any).pickDirectory !== 'function') {
+                say('Actor preset folders', 'Folders can only be chosen in the desktop app.');
+
+                return;
+            }
+
+            const directory = (Blockbench as any).pickDirectory({ title: 'A folder with a presets.json', resource_id: 'strut_actor_presets' });
+
+            if (directory)
+                writeFolders(storage(), [...folders, String(directory)]);
+        }
+        else if (button === 1 && folders.length > 0) {
+            writeFolders(storage(), []);
+        }
+    });
 }
 
 /** Swap Model: another model of the same skeleton for the actor; every keyframe stays */
@@ -369,7 +488,7 @@ export function exportWorkspace(): void {
 export function loadStageUi(): void {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
-    createActorsPanel({ add: addActorDialog, edit: editActorDialog, swap: swapModelDialog });
+    createActorsPanel({ add: addActorDialog, preset: addPresetDialog, edit: editActorDialog, swap: swapModelDialog });
 }
 
 /** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
@@ -394,6 +513,8 @@ export function createStageMenuItems(): { action: Action; menuCategory: string }
 
     return [
         item('strut_workspace_add_actor', 'Workspace: Add Actor...', 'person_add', 'Add a model and its textures as an actor of this workspace: it is loaded for you, animated with the normal tools, and exported per actor', addActorDialog),
+        item('strut_workspace_add_preset', 'Workspace: Add Actor from a Preset...', 'groups', 'Add a ready-made character (its model, texture, role and skeleton ID) from the registered preset folders', addPresetDialog),
+        item('strut_workspace_preset_folders', 'Workspace: Actor Preset Folders...', 'folder_open', 'The folders ready-made actors are looked for in', presetFoldersDialog),
         item('strut_workspace_edit_actor', 'Workspace: Edit Actor...', 'manage_accounts', 'Change who an actor is for the scene, or remove it', () => editActorDialog()),
         item('strut_workspace_settings', 'Workspace: Settings...', 'settings', 'The scene\'s name and the namespace its files are written under', workspaceSettingsDialog),
         item('strut_workspace_animation_tags', 'Workspace: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout, and each actor\'s shift in time', animationTagsDialog),

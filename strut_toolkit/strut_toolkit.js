@@ -19431,6 +19431,170 @@ function openPhysicsDialog() {
 
 /***/ }),
 
+/***/ "./ts/stage/actorPresets.ts":
+/*!**********************************!*\
+  !*** ./ts/stage/actorPresets.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PRESET_FOLDERS_KEY: () => (/* binding */ PRESET_FOLDERS_KEY),
+/* harmony export */   PRESET_INDEX: () => (/* binding */ PRESET_INDEX),
+/* harmony export */   freeRole: () => (/* binding */ freeRole),
+/* harmony export */   inside: () => (/* binding */ inside),
+/* harmony export */   loadPresets: () => (/* binding */ loadPresets),
+/* harmony export */   parsePresetIndex: () => (/* binding */ parsePresetIndex),
+/* harmony export */   readFile: () => (/* binding */ readFile),
+/* harmony export */   readFolders: () => (/* binding */ readFolders),
+/* harmony export */   writeFolders: () => (/* binding */ writeFolders)
+/* harmony export */ });
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * Actor presets: ready-made actors for the workspace. A preset is a character's model, its texture and who it is in a scene (its role and skeleton id), so that adding it is
+ * one choice instead of picking a model, then images, then typing an id.
+ * <p>
+ * Presets live in folders. A folder has a {@code presets.json} that lists them, and the files it names, with paths relative to the folder:
+ * <pre>
+ * { "version": 1, "name": "My Mod",
+ *   "presets": [ { "id": "momo", "name": "Momo", "group": "Girls", "role": "host", "skeleton": "mymod:humanoid",
+ *                  "model": "models/momo.strutmodel", "textures": ["textures/momo.png"], "compatible": [], "camera": "" } ] }
+ * </pre>
+ * Which folders are looked in is kept in the browser storage of Blockbench ({@code strut_actor_preset_folders}, a JSON list of folder paths), so a tool that makes presets (a
+ * pack editor) can register its folder by writing that one key, and a person can add a folder from the Actors panel
+ */
+const PRESET_FOLDERS_KEY = 'strut_actor_preset_folders';
+const PRESET_INDEX = 'presets.json';
+const SKELETON_ID = /^[a-z0-9_.-]+:[a-z0-9_./-]+$/;
+const ROLE = /^[a-z0-9_./-]+$/;
+/** Joins a folder and a relative path with {@code /}, refusing paths that climb out of the folder */
+function inside(folder, relative) {
+    const parts = relative.split('\\').join('/').split('/');
+    if (relative === '' || relative.startsWith('/') || /^[a-zA-Z]:/.test(relative) || parts.includes('..'))
+        return null;
+    return `${folder.split('\\').join('/').replace(/\/+$/, '')}/${parts.filter(part => part !== '' && part !== '.').join('/')}`;
+}
+function text(value) {
+    return typeof value === 'string' ? value.trim() : '';
+}
+/** Reads a folder's {@code presets.json}; entries that are not usable are left out and reported */
+function parsePresetIndex(json, folder) {
+    const problems = [];
+    let root;
+    try {
+        root = JSON.parse(json);
+    }
+    catch (_a) {
+        return { presets: [], problems: [`${folder}: ${PRESET_INDEX} is not valid JSON`] };
+    }
+    const source = text(root === null || root === void 0 ? void 0 : root.name) || folder.split('\\').join('/').split('/').filter(part => part !== '').pop() || folder;
+    const presets = [];
+    const seen = new Set();
+    for (const entry of Array.isArray(root === null || root === void 0 ? void 0 : root.presets) ? root.presets : []) {
+        const id = text(entry === null || entry === void 0 ? void 0 : entry.id);
+        const label = id || '(no id)';
+        if (id === '' || seen.has(id)) {
+            problems.push(`${source}: ${label} has no id, or the id is used twice`);
+            continue;
+        }
+        const model = inside(folder, text(entry.model));
+        const skeleton = text(entry.skeleton);
+        const role = text(entry.role) || 'actor';
+        if (!model) {
+            problems.push(`${source}: ${id} has no model inside the folder`);
+            continue;
+        }
+        if (!SKELETON_ID.test(skeleton)) {
+            problems.push(`${source}: ${id} has no valid skeleton ID`);
+            continue;
+        }
+        if (!ROLE.test(role)) {
+            problems.push(`${source}: ${id} has a role that is not a role name`);
+            continue;
+        }
+        seen.add(id);
+        presets.push({
+            id,
+            name: text(entry.name) || id,
+            group: text(entry.group) || source,
+            role,
+            skeleton,
+            compatible: (Array.isArray(entry.compatible) ? entry.compatible : []).map(text).filter(each => SKELETON_ID.test(each)),
+            camera: text(entry.camera),
+            model,
+            textures: (Array.isArray(entry.textures) ? entry.textures : []).map((each) => inside(folder, text(each))).filter((each) => each !== null),
+            source,
+        });
+    }
+    return { presets, problems };
+}
+/** The registered folders, from a storage that may be missing or hold anything */
+function readFolders(storage) {
+    var _a;
+    try {
+        const value = JSON.parse((_a = storage === null || storage === void 0 ? void 0 : storage.getItem(PRESET_FOLDERS_KEY)) !== null && _a !== void 0 ? _a : '[]');
+        return Array.isArray(value) ? value.filter((each) => typeof each === 'string' && each !== '') : [];
+    }
+    catch (_b) {
+        return [];
+    }
+}
+function writeFolders(storage, folders) {
+    try {
+        storage === null || storage === void 0 ? void 0 : storage.setItem(PRESET_FOLDERS_KEY, JSON.stringify([...new Set(folders.map(folder => folder.split('\\').join('/')))]));
+    }
+    catch (_a) {
+        // no storage: the folders are not kept
+    }
+}
+/** A role that is not taken: {@code wanted}, or {@code wanted_2}, {@code wanted_3}... */
+function freeRole(wanted, taken) {
+    if (!taken.has(wanted))
+        return wanted;
+    let number = 2;
+    while (taken.has(`${wanted}_${number}`))
+        number++;
+    return `${wanted}_${number}`;
+}
+/** One file read through Blockbench's own reader, or null if it could not be read */
+function readFile(path, type) {
+    return new Promise(resolve => {
+        var _a, _b, _c, _d;
+        const reader = (_b = (_a = globalThis.Filesystem) === null || _a === void 0 ? void 0 : _a.readFile) !== null && _b !== void 0 ? _b : (_c = globalThis.Blockbench) === null || _c === void 0 ? void 0 : _c.read;
+        if (typeof reader !== 'function') {
+            resolve(null);
+            return;
+        }
+        try {
+            const owner = ((_d = globalThis.Filesystem) === null || _d === void 0 ? void 0 : _d.readFile) ? globalThis.Filesystem : globalThis.Blockbench;
+            reader.call(owner, [path], { readtype: type }, (files) => { var _a; return resolve(files && files[0] ? { name: String((_a = files[0].name) !== null && _a !== void 0 ? _a : path), content: files[0].content } : null); });
+        }
+        catch (_e) {
+            resolve(null);
+        }
+    });
+}
+/** Every preset of every registered folder, and what was wrong with the folders and entries that could not be used */
+async function loadPresets(folders) {
+    const presets = [];
+    const problems = [];
+    for (const folder of folders) {
+        const file = await readFile(`${folder}/${PRESET_INDEX}`, 'text');
+        if (!file || typeof file.content !== 'string') {
+            problems.push(`${folder}: no ${PRESET_INDEX} could be read there`);
+            continue;
+        }
+        const index = parsePresetIndex(file.content, folder);
+        presets.push(...index.presets);
+        problems.push(...index.problems);
+    }
+    return { presets, problems };
+}
+
+
+/***/ }),
+
 /***/ "./ts/stage/actorsPanel.ts":
 /*!*********************************!*\
   !*** ./ts/stage/actorsPanel.ts ***!
@@ -19500,6 +19664,9 @@ function createActorsPanel(handlers) {
                 add() {
                     handlers.add();
                 },
+                preset() {
+                    handlers.preset();
+                },
                 toggle(row) {
                     (0,_stageProject__WEBPACK_IMPORTED_MODULE_1__.setActorVisible)(row.role, !row.visible);
                     this.refresh();
@@ -19539,7 +19706,8 @@ function createActorsPanel(handlers) {
                         <i class="material-icons strut_actor_button" title="Give it another model" @click="swap(row)">swap_horiz</i>
                         <i class="material-icons strut_actor_button" title="Remove" @click="remove(row)">delete</i>
                     </div>
-                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor</div>
+                    <div class="strut_actor_add" @click="preset()" title="A ready-made character: its model, texture, role and skeleton ID"><i class="material-icons" style="vertical-align: middle;">groups</i> Add from a preset</div>
+                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor from files</div>
                 </div>`,
         },
     });
@@ -20306,24 +20474,28 @@ function exportWorkspaceFiles(options = {}) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   addActorDialog: () => (/* binding */ addActorDialog),
+/* harmony export */   addPresetDialog: () => (/* binding */ addPresetDialog),
 /* harmony export */   animationTagsDialog: () => (/* binding */ animationTagsDialog),
 /* harmony export */   checkWorkspace: () => (/* binding */ checkWorkspace),
 /* harmony export */   createStageMenuItems: () => (/* binding */ createStageMenuItems),
 /* harmony export */   editActorDialog: () => (/* binding */ editActorDialog),
 /* harmony export */   exportWorkspace: () => (/* binding */ exportWorkspace),
 /* harmony export */   loadStageUi: () => (/* binding */ loadStageUi),
+/* harmony export */   presetFoldersDialog: () => (/* binding */ presetFoldersDialog),
 /* harmony export */   swapModelDialog: () => (/* binding */ swapModelDialog),
 /* harmony export */   unloadStageUi: () => (/* binding */ unloadStageUi),
 /* harmony export */   workspaceSettingsDialog: () => (/* binding */ workspaceSettingsDialog)
 /* harmony export */ });
 /* harmony import */ var _binary_skeletonId__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../binary/skeletonId */ "./ts/binary/skeletonId.ts");
 /* harmony import */ var _binary_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../binary/model */ "./ts/binary/model.ts");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../utils */ "./ts/utils.ts");
 /* harmony import */ var _stageProject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stageProject */ "./ts/stage/stageProject.ts");
 /* harmony import */ var _textureMatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./textureMatch */ "./ts/stage/textureMatch.ts");
-/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
-/* harmony import */ var _actorsPanel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorsPanel */ "./ts/stage/actorsPanel.ts");
+/* harmony import */ var _workspaceFormat__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./workspaceFormat */ "./ts/stage/workspaceFormat.ts");
+/* harmony import */ var _actorsPanel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./actorsPanel */ "./ts/stage/actorsPanel.ts");
+/* harmony import */ var _actorPresets__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./actorPresets */ "./ts/stage/actorPresets.ts");
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 
 
 
@@ -20431,6 +20603,93 @@ function addActorDetails(model, name, files) {
             }
         },
     }).show();
+}
+// ===============================================================
+// Actor presets
+// ===============================================================
+function storage() {
+    var _a;
+    try {
+        return (_a = globalThis.localStorage) !== null && _a !== void 0 ? _a : null;
+    }
+    catch (_b) {
+        return null;
+    }
+}
+/** Add Actor from a preset: a character from the registered preset folders, loaded with its texture and its skeleton ID */
+function addPresetDialog() {
+    const folders = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFolders)(storage());
+    if (folders.length === 0) {
+        say('Actor presets', 'No preset folder is registered yet. A preset folder holds ready-made actors (a model, its texture, its role and skeleton ID). A tool that makes them registers its folder by itself; you can also add one by hand.');
+        presetFoldersDialog();
+        return;
+    }
+    void (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.loadPresets)(folders).then(({ presets, problems }) => {
+        if (presets.length === 0) {
+            say('Actor presets', `There is no usable preset in the registered folders.${problems.length > 0 ? `\n\n${problems.join('\n')}` : ''}`);
+            return;
+        }
+        const taken = new Set((0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.actorGroups)().keys());
+        new Dialog({
+            id: 'strut_add_preset',
+            title: 'Add Actor from a preset',
+            form: Object.assign(Object.assign({}, (problems.length > 0 ? { problems: { label: 'Left out', type: 'info', text: problems.join(' ') } } : {})), { preset: { label: 'Actor', type: 'select', options: Object.fromEntries(presets.map((preset, index) => [String(index), `${preset.group}: ${preset.name}`])), value: '0' }, role: { label: 'Role', type: 'text', value: '', placeholder: 'the preset\'s own', description: 'The scene role this actor is exported as; left empty it is the preset\'s role' } }),
+            onConfirm(form) {
+                const preset = presets[Number(form.preset)];
+                if (!preset)
+                    return false;
+                const wanted = String(form.role).trim();
+                const role = wanted !== '' ? wanted : (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.freeRole)(preset.role, taken);
+                void addPresetActor(preset, role);
+            },
+        }).show();
+    });
+}
+/** Loads the preset's model and textures and adds it as an actor */
+async function addPresetActor(preset, role) {
+    try {
+        const file = await (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFile)(preset.model, 'binary');
+        if (!file || !(file.content instanceof ArrayBuffer))
+            throw new Error(`the model ${preset.model} could not be read`);
+        const model = (0,_binary_model__WEBPACK_IMPORTED_MODULE_0__.decodeModel)(new Uint8Array(file.content), file.name || `${preset.id}.strutmodel`);
+        const images = [];
+        for (const path of preset.textures) {
+            const image = await (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFile)(path, 'image');
+            if (image && typeof image.content === 'string')
+                images.push({ name: path, content: image.content });
+        }
+        const report = textureReport(model, images);
+        (0,_stageProject__WEBPACK_IMPORTED_MODULE_3__.addActor)(role, preset.skeleton, model, preset.name, Object.assign(Object.assign({}, (preset.compatible.length > 0 ? { compatible: [...preset.compatible] } : {})), (preset.camera !== '' ? { camera: preset.camera } : {})), report.images);
+        if (report.note !== '')
+            say('Actor added', report.note);
+    }
+    catch (error) {
+        say('Could not add the actor', error.message);
+    }
+}
+/** The folders the presets are looked for in: add one, or forget them all */
+function presetFoldersDialog() {
+    const folders = (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.readFolders)(storage());
+    Blockbench.showMessageBox({
+        title: 'Actor preset folders',
+        message: folders.length === 0 ? 'No folders are registered.' : `Registered folders:\n${folders.join('\n')}`,
+        buttons: ['Add a folder...', ...(folders.length > 0 ? ['Forget them all'] : []), 'Close'],
+        confirm: 0,
+        cancel: folders.length > 0 ? 2 : 1,
+    }, (button) => {
+        if (button === 0) {
+            if (!Blockbench.isApp || typeof Blockbench.pickDirectory !== 'function') {
+                say('Actor preset folders', 'Folders can only be chosen in the desktop app.');
+                return;
+            }
+            const directory = Blockbench.pickDirectory({ title: 'A folder with a presets.json', resource_id: 'strut_actor_presets' });
+            if (directory)
+                (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.writeFolders)(storage(), [...folders, String(directory)]);
+        }
+        else if (button === 1 && folders.length > 0) {
+            (0,_actorPresets__WEBPACK_IMPORTED_MODULE_4__.writeFolders)(storage(), []);
+        }
+    });
 }
 /** Swap Model: another model of the same skeleton for the actor; every keyframe stays */
 function swapModelDialog(role) {
@@ -20605,28 +20864,30 @@ function exportWorkspace() {
 function loadStageUi() {
     Blockbench.on('select_project', animateOnly);
     Blockbench.on('load_project', animateOnly);
-    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_4__.createActorsPanel)({ add: addActorDialog, edit: editActorDialog, swap: swapModelDialog });
+    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_5__.createActorsPanel)({ add: addActorDialog, preset: addPresetDialog, edit: editActorDialog, swap: swapModelDialog });
 }
 /** A workspace is for animating only: it is opened in Animate mode (it has no Edit mode to start in) */
 function animateOnly() {
     var _a;
-    if ((0,_utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
+    if ((0,_utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace)() && ((_a = Mode.selected) === null || _a === void 0 ? void 0 : _a.id) !== 'animate')
         Modes.options.animate.select();
 }
 function unloadStageUi() {
     Blockbench.removeListener('select_project', animateOnly);
     Blockbench.removeListener('load_project', animateOnly);
-    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_4__.deleteActorsPanel)();
-    _workspaceFormat__WEBPACK_IMPORTED_MODULE_6__.workspaceFormat.delete();
+    (0,_actorsPanel__WEBPACK_IMPORTED_MODULE_5__.deleteActorsPanel)();
+    _workspaceFormat__WEBPACK_IMPORTED_MODULE_7__.workspaceFormat.delete();
 }
 /** The actions, for the Tools menu */
 function createStageMenuItems() {
     const item = (id, name, icon, description, click) => ({
-        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace, click }),
+        action: new Action(id, { name, icon, description, category: 'edit', condition: _utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace, click }),
         menuCategory: 'tools',
     });
     return [
         item('strut_workspace_add_actor', 'Workspace: Add Actor...', 'person_add', 'Add a model and its textures as an actor of this workspace: it is loaded for you, animated with the normal tools, and exported per actor', addActorDialog),
+        item('strut_workspace_add_preset', 'Workspace: Add Actor from a Preset...', 'groups', 'Add a ready-made character (its model, texture, role and skeleton ID) from the registered preset folders', addPresetDialog),
+        item('strut_workspace_preset_folders', 'Workspace: Actor Preset Folders...', 'folder_open', 'The folders ready-made actors are looked for in', presetFoldersDialog),
         item('strut_workspace_edit_actor', 'Workspace: Edit Actor...', 'manage_accounts', 'Change who an actor is for the scene, or remove it', () => editActorDialog()),
         item('strut_workspace_settings', 'Workspace: Settings...', 'settings', 'The scene\'s name and the namespace its files are written under', workspaceSettingsDialog),
         item('strut_workspace_animation_tags', 'Workspace: Animation Tags...', 'label', 'The selected animation\'s phase, variant and side for the layout, and each actor\'s shift in time', animationTagsDialog),
@@ -20637,7 +20898,7 @@ function createStageMenuItems() {
                 icon: 'save',
                 description: 'Export every actor\'s clips into its clip set, and the scene\'s layout',
                 category: 'file',
-                condition: _utils__WEBPACK_IMPORTED_MODULE_5__.isStrutWorkspace,
+                condition: _utils__WEBPACK_IMPORTED_MODULE_6__.isStrutWorkspace,
                 click: exportWorkspace,
             }),
             menuCategory: 'file.export',

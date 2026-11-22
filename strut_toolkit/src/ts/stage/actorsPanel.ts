@@ -9,6 +9,7 @@ import { actorRows, ActorRow, removeActor, setActorVisible } from './stageProjec
 
 export interface ActorPanelHandlers {
     add(): void;
+    preset(): void;
     edit(role: string): void;
     swap(role: string): void;
 }
@@ -71,6 +72,9 @@ export function createActorsPanel(handlers: ActorPanelHandlers): void {
                 add() {
                     handlers.add();
                 },
+                preset() {
+                    handlers.preset();
+                },
                 toggle(this: any, row: ActorRow) {
                     setActorVisible(row.role, !row.visible);
                     this.refresh();
@@ -110,7 +114,8 @@ export function createActorsPanel(handlers: ActorPanelHandlers): void {
                         <i class="material-icons strut_actor_button" title="Give it another model" @click="swap(row)">swap_horiz</i>
                         <i class="material-icons strut_actor_button" title="Remove" @click="remove(row)">delete</i>
                     </div>
-                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor</div>
+                    <div class="strut_actor_add" @click="preset()" title="A ready-made character: its model, texture, role and skeleton ID"><i class="material-icons" style="vertical-align: middle;">groups</i> Add from a preset</div>
+                    <div class="strut_actor_add" @click="add()"><i class="material-icons" style="vertical-align: middle;">person_add</i> Add actor from files</div>
                 </div>`,
         },
     });
