@@ -19460,8 +19460,8 @@ __webpack_require__.r(__webpack_exports__);
  * Presets live in folders. A folder has a {@code presets.json} that lists them, and the files it names, with paths relative to the folder:
  * <pre>
  * { "version": 1, "name": "My Mod",
- *   "presets": [ { "id": "momo", "name": "Momo", "group": "Girls", "role": "host", "skeleton": "mymod:humanoid",
- *                  "model": "models/momo.strutmodel", "textures": ["textures/momo.png"], "compatible": [], "camera": "" } ] }
+ *   "presets": [ { "id": "ava", "name": "Ava", "group": "Characters", "role": "host", "skeleton": "mymod:humanoid",
+ *                  "model": "models/ava.strutmodel", "textures": ["textures/ava.png"], "compatible": [], "camera": "" } ] }
  * </pre>
  * Which folders are looked in is kept in the browser storage of Blockbench ({@code strut_actor_preset_folders}, a JSON list of folder paths), so a tool that makes presets (a
  * pack editor) can register its folder by writing that one key, and a person can add a folder from the Actors panel
@@ -21282,7 +21282,7 @@ async function sceneSettings() {
     new Dialog({
         id: 'strut_scene_settings',
         title: meta.template || Object.keys(meta.actors).length > 0 ? 'Scene Settings' : 'New Strut Scene',
-        form: Object.assign(Object.assign({}, notes), { template: { label: 'Kind of scene', type: 'select', options: withKept, value: current || ((_a = meta.template) === null || _a === void 0 ? void 0 : _a.id) || 'strut:free', description: 'What roles it has and which clips it needs. The scene is checked against it, and the panel lists what is missing' }, scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'doggy', description: 'The scene\'s name: it names the layout and the clip sets' }, namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' } }),
+        form: Object.assign(Object.assign({}, notes), { template: { label: 'Kind of scene', type: 'select', options: withKept, value: current || ((_a = meta.template) === null || _a === void 0 ? void 0 : _a.id) || 'strut:free', description: 'What roles it has and which clips it needs. The scene is checked against it, and the panel lists what is missing' }, scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'tango', description: 'The scene\'s name: it names the layout and the clip sets' }, namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' } }),
         onConfirm(form) {
             var _a, _b;
             const chosen = (_a = _templateRegistry__WEBPACK_IMPORTED_MODULE_5__.registry.get(String(form.template))) !== null && _a !== void 0 ? _a : (((_b = meta.template) === null || _b === void 0 ? void 0 : _b.id) === form.template ? meta.template : undefined);
@@ -21759,7 +21759,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   matchTextures: () => (/* binding */ matchTextures)
 /* harmony export */ });
 /**
- * Which image is the texture of which model texture: by name first (the file {@code jenny.png} for the model's texture {@code jenny}, with a path or the extension
+ * Which image is the texture of which model texture: by name first (the file {@code eve.png} for the model's texture {@code eve}, with a path or the extension
  * left off either way), and a model with one texture given one image takes it whatever it is called. What is left over is reported, never guessed
  */
 /** The last part of a path, lower case, with the extension cut off */

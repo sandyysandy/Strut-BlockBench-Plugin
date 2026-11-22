@@ -443,7 +443,7 @@ async function sceneSettings(): Promise<void> {
         form: {
             ...notes,
             template: { label: 'Kind of scene', type: 'select', options: withKept, value: current || meta.template?.id || 'strut:free', description: 'What roles it has and which clips it needs. The scene is checked against it, and the panel lists what is missing' },
-            scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'doggy', description: 'The scene\'s name: it names the layout and the clip sets' },
+            scene: { label: 'Scene', type: 'text', value: meta.scene, placeholder: 'tango', description: 'The scene\'s name: it names the layout and the clip sets' },
             namespace: { label: 'Namespace', type: 'text', value: meta.namespace, placeholder: 'my_modid', description: 'The namespace the scene layout is written under' },
         },
         onConfirm(form: any) {

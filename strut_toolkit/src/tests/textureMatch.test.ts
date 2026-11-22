@@ -4,9 +4,9 @@ const file = (name: string): { name: string; content: string } => ({ name, conte
 
 describe('which image is which texture', () => {
     test('by name, with the extension and any path left off either side', () => {
-        const match = matchTextures(['jenny', 'textures/entities/jenny_body.png'], [file('C:/packs/jenny_body.PNG'), file('Jenny.png')]);
+        const match = matchTextures(['eve', 'textures/entities/jenny_body.png'], [file('C:/packs/jenny_body.PNG'), file('Eve.png')]);
 
-        expect(match.images.get('jenny')).toBe('data:Jenny.png');
+        expect(match.images.get('eve')).toBe('data:Eve.png');
         expect(match.images.get('textures/entities/jenny_body.png')).toBe('data:C:/packs/jenny_body.PNG');
         expect(match.missing).toEqual([]);
         expect(match.unused).toEqual([]);

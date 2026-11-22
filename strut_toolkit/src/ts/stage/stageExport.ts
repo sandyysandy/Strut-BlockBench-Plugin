@@ -12,7 +12,7 @@ import { checkStage, Problem, Stage, StageActor, StageAnimation } from './stageF
  */
 
 export interface ExportedFile {
-    /** From the root of the pack, such as {@code assets/mymod/strut/animations/scenes/doggy/host/skeletons/creature.strutanim} */
+    /** From the root of the pack, such as {@code assets/mymod/strut/animations/scenes/tango/host/skeletons/creature.strutanim} */
     readonly path: string;
     readonly bytes?: Uint8Array;
     readonly text?: string;

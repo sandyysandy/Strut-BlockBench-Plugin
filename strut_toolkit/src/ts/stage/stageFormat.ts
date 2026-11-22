@@ -69,7 +69,7 @@ export interface StageAnimation {
 export interface Stage {
     readonly format: typeof STAGE_FORMAT;
     readonly version: number;
-    /** The scene's path ({@code doggy}), which names its layout and its clip sets */
+    /** The scene's path ({@code tango}), which names its layout and its clip sets */
     readonly scene: string;
     /** The namespace the scene layout is written under */
     readonly namespace: string;

@@ -1,5 +1,5 @@
 /**
- * Which image is the texture of which model texture: by name first (the file {@code jenny.png} for the model's texture {@code jenny}, with a path or the extension
+ * Which image is the texture of which model texture: by name first (the file {@code eve.png} for the model's texture {@code eve}, with a path or the extension
  * left off either way), and a model with one texture given one image takes it whatever it is called. What is left over is reported, never guessed
  */
 

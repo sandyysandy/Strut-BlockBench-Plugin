@@ -5,14 +5,14 @@ const index = (presets: unknown[], name = 'My Mod'): string => JSON.stringify({ 
 describe('actor presets', () => {
     test('a preset is read with its files made absolute, inside its folder', () => {
         const found = parsePresetIndex(index([
-            { id: 'momo', name: 'Momo', group: 'Girls', role: 'host', skeleton: 'mymod:humanoid', model: 'models/momo.strutmodel', textures: ['textures/momo.png'], compatible: ['mymod:other', 'not an id'], camera: 'eye' },
+            { id: 'ava', name: 'Ava', group: 'Characters', role: 'host', skeleton: 'mymod:humanoid', model: 'models/ava.strutmodel', textures: ['textures/ava.png'], compatible: ['mymod:other', 'not an id'], camera: 'eye' },
         ]), 'C:\\presets\\mod');
 
         expect(found.problems).toEqual([]);
         expect(found.presets).toHaveLength(1);
         expect(found.presets[0]).toMatchObject({
-            id: 'momo', name: 'Momo', group: 'Girls', role: 'host', skeleton: 'mymod:humanoid', camera: 'eye', source: 'My Mod',
-            model: 'C:/presets/mod/models/momo.strutmodel', textures: ['C:/presets/mod/textures/momo.png'], compatible: ['mymod:other'],
+            id: 'ava', name: 'Ava', group: 'Characters', role: 'host', skeleton: 'mymod:humanoid', camera: 'eye', source: 'My Mod',
+            model: 'C:/presets/mod/models/ava.strutmodel', textures: ['C:/presets/mod/textures/ava.png'], compatible: ['mymod:other'],
         });
     });
 

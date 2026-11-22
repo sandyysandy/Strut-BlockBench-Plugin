@@ -14,10 +14,10 @@ const male: StageActor = { role: 'male', skeleton: 'mymod:human', roots: [{ bone
 
 function stage(): Stage {
     return {
-        ...newStage('doggy', 'mymod'),
+        ...newStage('tango', 'mymod'),
         actors: [host, male],
         animations: [{
-            name: 'animation.doggy.slow', duration: 1.5, loop: 'LOOP',
+            name: 'animation.tango.slow', duration: 1.5, loop: 'LOOP',
             tracks: {
                 host: { channels: [channel('hips', 'ROTATION', [key(0, [0, 0, 0]), key(1, [10, 0, 0])])], events: [{ time: 0.5, kind: 'sound', payload: 'mymod:thud', authority: 0 }] },
                 male: { channels: [channel('root', 'POSITION', [key(0, [0, 0, 0]), key(1, [0, 0, 4])]), channel('arm', 'ROTATION', [key(0, [5, 0, 0])])], events: [], shift: 0.25 },
@@ -126,16 +126,16 @@ describe('exporting a workspace', () => {
 
         expect(problems.filter(p => p.severity === 'error')).toEqual([]);
         expect(files.map(f => f.path)).toEqual([
-            'assets/mymod/strut/animations/scenes/doggy/host/skeletons/creature_a.strutanim',
-            'assets/mymod/strut/animations/scenes/doggy/male/skeletons/human.strutanim',
-            'assets/mymod/strut/scenes/doggy.strutscene',
+            'assets/mymod/strut/animations/scenes/tango/host/skeletons/creature_a.strutanim',
+            'assets/mymod/strut/animations/scenes/tango/male/skeletons/human.strutanim',
+            'assets/mymod/strut/scenes/tango.strutscene',
         ]);
 
         const hostFile = decodeAnimation(files[0].bytes!, 'host');
 
         expect(hostFile.skeletonId).toBe('mymod:creature_a');
         expect(hostFile.clips).toHaveLength(1);
-        expect(hostFile.clips[0]).toMatchObject({ name: 'animation.doggy.slow', duration: 1.5, loop: 'LOOP' });
+        expect(hostFile.clips[0]).toMatchObject({ name: 'animation.tango.slow', duration: 1.5, loop: 'LOOP' });
         expect(hostFile.clips[0].channels[0].target).toBe('hips');
         expect(hostFile.clips[0].events[0]).toMatchObject({ time: 0.5, payload: 'mymod:thud' });
     });
@@ -159,10 +159,10 @@ describe('exporting a workspace', () => {
 
         expect(layout).toEqual({
             roles: {
-                host: { clipSet: 'scenes/doggy/host', skeleton: 'mymod:creature_a', compatible: ['mymod:creature_b'] },
-                male: { clipSet: 'scenes/doggy/male', skeleton: 'mymod:human', required: false, camera: 'eye', lead: true },
+                host: { clipSet: 'scenes/tango/host', skeleton: 'mymod:creature_a', compatible: ['mymod:creature_b'] },
+                male: { clipSet: 'scenes/tango/male', skeleton: 'mymod:human', required: false, camera: 'eye', lead: true },
             },
-            clips: { 'animation.doggy.slow': { length: 30, loop: 'loop' } },
+            clips: { 'animation.tango.slow': { length: 30, loop: 'loop' } },
         });
     });
 
@@ -170,13 +170,13 @@ describe('exporting a workspace', () => {
         const tagged = stage();
         const layout = JSON.parse(exportStage({ ...tagged, animations: [{ ...tagged.animations[0], phase: 'slow', variant: 2, side: 'L' }] }).files.find(f => f.path.endsWith('.strutscene'))!.text!);
 
-        expect(layout.clips['animation.doggy.slow']).toEqual({ length: 30, loop: 'loop', phase: 'slow', variant: 2, side: 'L' });
+        expect(layout.clips['animation.tango.slow']).toEqual({ length: 30, loop: 'loop', phase: 'slow', variant: 2, side: 'L' });
     });
 
     test('a role exported for one model goes in that models character file', () => {
         const { files } = exportStage(stage(), { characters: { host: 'mymod:special' } });
 
-        expect(files[0].path).toBe('assets/mymod/strut/animations/scenes/doggy/host/characters/special.strutanim');
+        expect(files[0].path).toBe('assets/mymod/strut/animations/scenes/tango/host/characters/special.strutanim');
         // still made for its skeleton, which the file names
         expect(decodeAnimation(files[0].bytes!, 'host').skeletonId).toBe('mymod:creature_a');
     });

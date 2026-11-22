@@ -6,8 +6,8 @@
  * Presets live in folders. A folder has a {@code presets.json} that lists them, and the files it names, with paths relative to the folder:
  * <pre>
  * { "version": 1, "name": "My Mod",
- *   "presets": [ { "id": "momo", "name": "Momo", "group": "Girls", "role": "host", "skeleton": "mymod:humanoid",
- *                  "model": "models/momo.strutmodel", "textures": ["textures/momo.png"], "compatible": [], "camera": "" } ] }
+ *   "presets": [ { "id": "ava", "name": "Ava", "group": "Characters", "role": "host", "skeleton": "mymod:humanoid",
+ *                  "model": "models/ava.strutmodel", "textures": ["textures/ava.png"], "compatible": [], "camera": "" } ] }
  * </pre>
  * Which folders are looked in is kept in the browser storage of Blockbench ({@code strut_actor_preset_folders}, a JSON list of folder paths), so a tool that makes presets (a
  * pack editor) can register its folder by writing that one key, and a person can add a folder from the Actors panel
@@ -20,7 +20,7 @@ export interface ActorPreset {
     /** Unique inside its folder */
     readonly id: string;
     readonly name: string;
-    /** The heading it is listed under (`Girls`, `Male`) */
+    /** The heading it is listed under (`Characters`, `Male`) */
     readonly group: string;
     /** The role the actor is added as, which the person may change */
     readonly role: string;

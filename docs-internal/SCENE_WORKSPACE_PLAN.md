@@ -37,7 +37,7 @@ Only **export** separates the actors: each actor's tracks become that actor's cl
 
 ## 3. Skeleton ids
 
-A skeleton is **one string on the model**, its **skeleton id** (`pleasurehorizons:jenny`). Nothing else: no skeleton file, no bone matching.
+A skeleton is **one string on the model**, its **skeleton id** (`mymod:eve`). Nothing else: no skeleton file, no bone matching.
 
 - A model project has a **Skeleton ID** field in its properties, saved in the `.strutmodel` header.
 - An animation file is written with the skeleton id it was made for.
